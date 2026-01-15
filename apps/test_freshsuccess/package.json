@@ -1,0 +1,9 @@
+{
+  "name": "test-freshsuccess",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@fyle-ops/freshsuccess": "0.1.0"
+  }
+}
+

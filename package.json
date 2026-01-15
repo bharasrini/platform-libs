@@ -1,0 +1,6 @@
+{
+	  "name": "platform-libs",
+	  "private": true,
+	  "workspaces": ["packages/*", "apps/*"]
+}
+

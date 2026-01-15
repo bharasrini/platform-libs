@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug: test_freshsuccess app",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/test_freshsuccess/index.js",
+      "cwd": "${workspaceFolder}",
+
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+
+      "env": {
+        "AWS_REGION": "ap-south-1",
+        "FRESHSUCCESS_HOST": "api-eu.freshsuccess.com",
+        "FRESHSUCCESS_API_KEY": "lv7cekjokyfv7i1qmavb3fhfqxvabun5"
+      }
+    }
+  ]
+}
+
+

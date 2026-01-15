@@ -1,0 +1,62 @@
+const { withRetry } = require("@fyle-ops/common");
+
+class FreshsuccessClient {
+  constructor({ host, apiKey }) {
+    if (!host) throw new Error("host is required (e.g. api-us.freshsuccess.com)");
+    if (!apiKey) throw new Error("apiKey is required");
+    this.host = host;
+    this.apiKey = apiKey;
+  }
+
+  async #get(path, params = {}) {
+    const url = new URL(`https://${this.host}/api/v2/${path}`);
+    // Freshsuccess supports api_key query param
+    url.searchParams.set("api_key", this.apiKey);
+
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "") {
+        url.searchParams.set(k, String(v));
+      }
+    }
+
+    return withRetry(async () => {
+      const res = await fetch(url.toString(), { method: "GET" });
+      if (!res.ok) throw new Error(`Freshsuccess ${res.status}: ${await res.text()}`);
+      const json = await res.json();
+      if (json && json.status_is_ok === false) {
+        throw new Error(`Freshsuccess status_is_ok=false: ${JSON.stringify(json).slice(0, 300)}`);
+      }
+      return json;
+    });
+  }
+
+  // --- Accounts ---
+  async listAccounts({ page = 0, includeInactive = true, include = "" } = {}) {
+    return this.#get("accounts", {
+      page,
+      include_inactive: includeInactive,
+      include
+    });
+  }
+
+  async listAllAccounts({ includeInactive = true, include = "" } = {}) {
+    const all = [];
+    let page = 0;
+
+    while (true) {
+      const data = await this.listAccounts({ page, includeInactive, include });
+      const rows = data.results || [];
+      all.push(...rows);
+
+      const maxPageSize = data.max_page_size || 1000;
+      if (rows.length < maxPageSize) break;
+
+      page += 1;
+    }
+
+    return all;
+  }
+}
+
+module.exports = FreshsuccessClient;
+
