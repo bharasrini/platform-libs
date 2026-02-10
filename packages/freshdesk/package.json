@@ -1,5 +1,5 @@
 {
-    "name": "@fyle-ops/freshsuccess",
+    "name": "@fyle-ops/freshdesk",
     "version": "0.1.0",
     "main": "src/index.js",
     "type": "commonjs",
@@ -8,7 +8,7 @@
         "@fyle-ops/common": "0.1.0",
         "@fyle-ops/billing": "0.1.0",
         "@fyle-ops/account_mapping": "0.1.0",
-        "@fyle-ops/freshdesk": "0.1.0"
+        "@fyle-ops/freshsuccess": "0.1.0"
     }
 }
 

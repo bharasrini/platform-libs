@@ -1,12 +1,8 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 
-const { buildFSAccount } = require("./buildFSAccount");
-const { getUserMetrics } = require("./freshsuccessMetrics");
-const { fs_account } = require("./freshsuccess");
+const { fs_account } = require("./fs_account");
 
 module.exports = 
 {
-  fs_account,
-  buildFSAccount,
-  getUserMetrics
+    fs_account,
 };

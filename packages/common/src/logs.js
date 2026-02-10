@@ -6,6 +6,7 @@ Output: none
 */
 function statusMessage(calling_func, message) 
 {
+    // Prepare the final message
     var final_message = calling_func + ": " + message;
 
     // Log the message to the console
@@ -15,8 +16,9 @@ function statusMessage(calling_func, message)
 }
 
 
-
-module.exports = { 
+// Exporting the functions
+module.exports = 
+{ 
     statusMessage,
 };
 

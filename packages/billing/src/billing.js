@@ -1,8 +1,8 @@
 const { google } = require('googleapis');
-
 const common = require("@fyle-ops/common");
 const { account_mapping } = require("@fyle-ops/account_mapping");
 
+// Billing class to read and process billing data from the billing files
 class billing_data
 {
     constructor()
@@ -98,7 +98,8 @@ Output: List of billing links in billing.billing_links[]. Returns 0 on success, 
 */
 async function _getBillingLinks(billing)
 {
-    const auth = common.createSheetsAuth();
+    // Get authentication and sheets instance
+    const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
     // Billing Links file located at https://docs.google.com/spreadsheets/d/1SnZqQaON6j11a6MuQC0jEm5Lpeu4qqkWuBtMaRZ9i2M/
@@ -110,7 +111,8 @@ async function _getBillingLinks(billing)
     const sheet_name = process.env.BILLING_LINKS_SHEET_NAME;
 
     // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get({
+    const res = await sheets.spreadsheets.values.get
+    ({
         spreadsheetId: sheet_id,
         range: `${sheet_name}`,
     });
@@ -127,14 +129,16 @@ async function _getBillingLinks(billing)
     // Loop through the list of months and add them to the billing links structure and to the months array; skip the header
     for(var i = start_row; i < num_rows; i++)
     {
+        // Get the billing period and link for this row
         var period = res.data.values[i][billing_links_month_col-1];
         var link = res.data.values[i][billing_links_file_col-1];
 
+        // Basic checks to ensure we have valid values for period and link; if not, break out of the loop
         period = (period ?? "").toString().trim();
         link = (link   ?? "").toString().trim();
-
         if(!period || !link) break;
 
+        // Get the start and end date for this billing period based on the month value
         var thisPeriodObj = new Date(period);
         var thisPeriodMarkers = common.getMonthMarkers(thisPeriodObj);
         var startOfPeriodDate = thisPeriodMarkers["m_start"]["date"];
@@ -171,7 +175,7 @@ async function _getBillingLinks(billing)
 /* 
 Function: _getBillingData
 Purpose: Gets the billing entries based on the period selected
-Inputs: Billing instance, period (date)
+Inputs: Billing instance, period (date string)
 Output: Billing entries in billing.billing_links[].raw_billing_entries[], billing_by_org[], billing_by_account_list[]. Returns 0 on success, -1 on failure
 */
 async function _getBillingData(billing, period)
@@ -183,9 +187,11 @@ async function _getBillingData(billing, period)
     // Locate the correct billing entry for this period
     for(var i = 0; i < billing.num_billing_links; i++)
     {
+        // Get the billing period start and end time for this billing entry
         var billing_period_start_time = new Date(billing.billing_links[i].billing_period_start).getTime();
         var billing_period_end_time = new Date(billing.billing_links[i].billing_period_end).getTime();
 
+        // Check if the period passed in falls within this billing period
         if((period_time >= billing_period_start_time) && (period_time <= billing_period_end_time))
         {
             selected_billing_entry = i;
@@ -204,12 +210,13 @@ async function _getBillingData(billing, period)
     billing.selected_period = selected_billing_entry;
 
     common.statusMessage(arguments.callee.name, "Billing entry index corresponding to period: " + period + " = " + selected_billing_entry);
-    //common.statusMessage(arguments.callee.name, "Billing Period start: " + billing.billing_links[selected_billing_entry].billing_period_start);
-    //common.statusMessage(arguments.callee.name, "Billing Period end: " + billing.billing_links[selected_billing_entry].billing_period_end);
-    //common.statusMessage(arguments.callee.name, "Billing File Link: " + billing.billing_links[selected_billing_entry].billing_link);
-    //common.statusMessage(arguments.callee.name, "Billing File ID: " + billing.billing_links[selected_billing_entry].billing_file_id);
+    common.statusMessage(arguments.callee.name, "Billing Period start: " + billing.billing_links[selected_billing_entry].billing_period_start);
+    common.statusMessage(arguments.callee.name, "Billing Period end: " + billing.billing_links[selected_billing_entry].billing_period_end);
+    common.statusMessage(arguments.callee.name, "Billing File Link: " + billing.billing_links[selected_billing_entry].billing_link);
+    common.statusMessage(arguments.callee.name, "Billing File ID: " + billing.billing_links[selected_billing_entry].billing_file_id);
 
-    const auth = common.createSheetsAuth();
+    // Get authentication and sheets instance
+    const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
     // Billing file id
@@ -220,7 +227,8 @@ async function _getBillingData(billing, period)
     const sheet_name = process.env.BILLING_DATA_SHEET_NAME;
 
     // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get({
+    const res = await sheets.spreadsheets.values.get
+    ({
         spreadsheetId: sheet_id,
         range: `${sheet_name}`,
     });
@@ -229,7 +237,7 @@ async function _getBillingData(billing, period)
     const rows = res.data.values || [];
     for (const row of rows)
     {
-        row.push("");   // <-- this becomes the new last column
+        row.push(""); 
     }
 
     // Initialize variables to read the billing entries
@@ -284,9 +292,9 @@ async function _getBillingData(billing, period)
         var org_num_active_users = 0;
         var org_num_active_users_normalized = 0;
 
+        // Basic checks to ensure we have valid values for month and org_id; if not, break out of the loop
         month = (month ?? "").toString().trim();
         org_id = (org_id   ?? "").toString().trim();
-
         if(!month || !org_id) break;
 
         // If this row has been processed, skip
@@ -377,7 +385,6 @@ async function _getBillingData(billing, period)
             // Mark this row as processed
             res.data.values[j][num_cols-1] = "y";
 
-
             // Add this row to the raw billing entry list
             billing.raw_billing_entries.raw_billing_entry_list.push(raw_billing_data);
 
@@ -412,11 +419,10 @@ async function _getBillingData(billing, period)
         billing.billing_by_org.num_org_billing_entries++;
 
 
-        if((i % 200) == 0)
+        if((i % 1000) == 0)
         {
-            common.statusMessage(arguments.callee.name, "Processing billing entry: " + i + ", total entries: " + billing.raw_billing_entries.num_raw_billing_entries);
+            await common.statusMessage(arguments.callee.name, "Processing billing entry: " + i + ", total entries: " + billing.raw_billing_entries.num_raw_billing_entries);
         }
-
     }
 
 
@@ -511,6 +517,7 @@ function _getBillingDetailsForOrg(billing, org_id)
 {
     var billing_details = {"num_expenses": 0, "num_reports": 0, "active_users": 0}
 
+    // Sanity checks to ensure we have valid org_id and billing data structure
     if(org_id.toString().trim() == "")
     {
         common.statusMessage(arguments.callee.name, "Blank / invalid org id");
@@ -549,7 +556,8 @@ function _getBillingDetailsForOrg(billing, org_id)
 
 
 
-
-module.exports = { 
+// Export the billing_data class
+module.exports = 
+{ 
     billing_data,
 };

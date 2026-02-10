@@ -1,6 +1,8 @@
 const common = require("@fyle-ops/common");
 const { google } = require('googleapis');
 
+
+// Class to manage the account mapping information. This will read the account mapping information from the file and provide functions to retrieve the mapping information based on org_id
 class account_mapping
 {
     constructor()
@@ -80,7 +82,8 @@ function _initAccountMapping(account_mapping)
     account_mapping.num_maps = 0;
 
     // Initialize columns
-    account_mapping.cols = {
+    account_mapping.cols = 
+    {
         "org_id": -1,
         "customer": -1,
         "org": -1,
@@ -93,12 +96,6 @@ function _initAccountMapping(account_mapping)
         "au_model": -1,
         "enterprise_billing_org_id": -1,
     };
-
-    // Save file and sheet data
-    account_mapping.file = null;
-    account_mapping.sheet = null;
-    account_mapping.range = null;
-    account_mapping.data = [[]];
 
     // Nothing else to do, return success
     return 0;
@@ -123,7 +120,7 @@ async function _getAccountMappingData(account_map)
         return 0;
     }
 
-    const auth = common.createSheetsAuth();
+    const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
     // Account Mapping sheet located at: My Drive -> Tooling -> Account Mapping Sheet
@@ -136,7 +133,8 @@ async function _getAccountMappingData(account_map)
     const sheet_name = process.env.ACCOUNT_MAPPING_SHEET_NAME;
 
     // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get({
+    const res = await sheets.spreadsheets.values.get
+    ({
         spreadsheetId: sheet_id,
         range: `${sheet_name}`,
     });
@@ -162,6 +160,7 @@ async function _getAccountMappingData(account_map)
         else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("enterprise_billing_org_id").toString().trim().toLowerCase()) account_map.cols["enterprise_billing_org_id"] = i;
     }
 
+    // Check if we were able to locate all required columns
     for(key in account_map.cols)
     {
         if(account_map.cols[key] == -1)
@@ -170,7 +169,6 @@ async function _getAccountMappingData(account_map)
             return -1;
         }
     }
-
 
     // If we are here, then we have been able to get required columns. Read through the account mapping file
     for(i = start_row; i < num_rows; i++)
@@ -223,6 +221,7 @@ function _getCustomerAccountName(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the customer account name for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -254,6 +253,7 @@ function _getOrgName(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the org name for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -285,6 +285,7 @@ function _getHierarchyForOrg(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the hierarchy for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -316,6 +317,7 @@ function _getParentForOrg(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the parent org id for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -347,6 +349,7 @@ function _getOrgCountry(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the country for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -378,6 +381,7 @@ function _getOrgRegion(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the region for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -409,6 +413,7 @@ function _getOrgCurrency(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the currency for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -439,6 +444,7 @@ function _getAUModel(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the active user model for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -470,6 +476,7 @@ function _getEnterpriseBillingOrgId(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the enterprise billing org id for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -500,6 +507,7 @@ function _getOrgOffset(account_map, org_id)
         return ret;
     }
 
+    // Loop through the account mapping list and find the offset for the org_id passed in
     for(var i = 0; i < account_map.num_maps; i++)
     {
         if(account_map.map_list[i].org_id == org_id)
@@ -513,7 +521,8 @@ function _getOrgOffset(account_map, org_id)
 }
 
 
-
-module.exports = { 
+// Export the account_mapping class
+module.exports = 
+{ 
     account_mapping
 };

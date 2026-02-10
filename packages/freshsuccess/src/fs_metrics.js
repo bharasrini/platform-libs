@@ -1,18 +1,18 @@
 const { google } = require('googleapis');
 const { formatInTimeZone } = require("date-fns-tz");
-
 const common = require("@fyle-ops/common");
 
-
-const metric_sheet_mapping = [
-  {
-      metric_name: "product_db.num_invited_users",
-      sheet_name: "raw_data_metric_invited_users"
-  },
-  {
-      metric_name: "product_db.num_verified_users",
-      sheet_name: "raw_data_metric_verified_users"
-  },
+// Mapping of metric names to sheet names
+const metric_sheet_mapping = 
+[
+    {
+        metric_name: "product_db.num_invited_users",
+        sheet_name: "raw_data_metric_invited_users"
+    },
+    {
+        metric_name: "product_db.num_verified_users",
+        sheet_name: "raw_data_metric_verified_users"
+    },
 ];
 
 
@@ -43,7 +43,8 @@ async function readMetricsSheet(metric_name)
         return null;
     }
 
-    const auth = common.createSheetsAuth();
+    // Get authentication and sheets instance
+    const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
     // Read the metrics sheet file using the ID
@@ -53,7 +54,8 @@ async function readMetricsSheet(metric_name)
     const metrics_sheet_id = process.env.FRESHSUCCESS_METRICS_SHEET_ID;
 
     // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get({
+    const res = await sheets.spreadsheets.values.get
+    ({
         spreadsheetId: metrics_sheet_id,
         range: `${sheet_name}`,
     });
@@ -197,7 +199,8 @@ Output: true if it needs to be read in from the Freshsuccess Metrics Sheet, fals
 */
 async function getMetricsSource()
 {
-    const auth = common.createSheetsAuth();
+    // Get authentication and sheets instance
+    const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
 
     // ID of the Freshsuccess API sheet
@@ -324,10 +327,8 @@ async function getUserMetrics(account, metric_name)
 
 
 
-// EXPORTS
+// Exporting the functions
 module.exports = 
 {
-    readMetricsSheet,
-    getMetricsSource,
     getUserMetrics,
 };

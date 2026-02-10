@@ -1,28 +1,43 @@
 const { google } = require('googleapis');
 
-function createSheetsAuth() {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const projectId = process.env.GOOGLE_PROJECT_ID; // optional but nice
 
-  if (!clientEmail || !privateKey) {
-    throw new Error('Missing GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY env vars');
-  }
+/* 
+Function: createGoogleAuth
+Purpose: Creates and returns a Google Auth object using environment variables
+Inputs: none
+Output: Google Auth object
+*/
+function createGoogleAuth() 
+{
+    // Read credentials from environment variables
+    const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    const projectId = process.env.GOOGLE_PROJECT_ID; // optional but nice
 
-  // Build credentials object as if it came from the JSON file
-  const credentials = {
-    type: 'service_account',
-    client_email: clientEmail,
-    private_key: privateKey.replace(/\\n/g, '\n'), // handle \n in env
-    project_id: projectId,
-  };
+    // Validate presence of required env vars
+    if (!clientEmail || !privateKey) 
+    {
+        throw new Error('Missing GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY env vars');
+    }
 
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
+    // Build credentials object as if it came from the JSON file
+    const credentials = 
+    {
+        type: 'service_account',
+        client_email: clientEmail,
+        private_key: privateKey.replace(/\\n/g, '\n'), // handle \n in env
+        project_id: projectId,
+    };
 
-  return auth;
+    // Create and return the Google Auth object
+    const auth = new google.auth.GoogleAuth
+    ({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+    });
+
+    return auth;
 }
 
-module.exports = { createSheetsAuth };
+// Exporting the functions
+module.exports = { createGoogleAuth };

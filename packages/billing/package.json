@@ -1,10 +1,11 @@
 {
-  "name": "@fyle-ops/billing",
-  "version": "0.1.0",
-  "main": "src/index.js",
-  "type": "commonjs",
-  "dependencies": {
-    "@fyle-ops/common": "0.1.0"
-  }
+    "name": "@fyle-ops/billing",
+    "version": "0.1.0",
+    "main": "src/index.js",
+    "type": "commonjs",
+    "dependencies": 
+    {
+        "@fyle-ops/common": "0.1.0"
+    }
 }
 

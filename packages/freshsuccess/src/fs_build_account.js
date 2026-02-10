@@ -2,6 +2,12 @@ const common = require("@fyle-ops/common");
 const { formatInTimeZone } = require("date-fns-tz");
 
 
+/* 
+Function: buildFSAccount
+Purpose: Builds a FreshSuccess account object from raw account data
+Inputs: this_account - The raw account data object
+Output: Formatted FreshSuccess account object
+*/
 function buildFSAccount({this_account})
 {
     // Get period markers for the last 3 months
@@ -523,8 +529,9 @@ function buildFSAccount({this_account})
     return account_info;
 }
 
-// EXPORTS
+
+// Exporting the function
 module.exports = 
 {
-  buildFSAccount
+    buildFSAccount
 };

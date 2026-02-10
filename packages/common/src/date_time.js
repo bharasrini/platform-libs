@@ -9,14 +9,18 @@ Output: Structure with Date Markers in last 3 months denoted by "m_1_start", "m_
 */
 function returnPrevious3MonthsPeriodMarkers()
 {
+    // Get the current date
     var todayDateObj = new Date();
 
+    // Get the month and year of the current date
     var month = todayDateObj.getMonth();
     var year = todayDateObj.getFullYear();
 
+    // Set this as month and year for period 0 (current month)
     var m0_year = year;
     var m0_month = month;
 
+    // Using this, set the month and year for period 1, 2 and 3 (previous 3 months)
     var m1_year = (month == 0) ? year - 1: year;
     var m1_month = (month == 0) ? 11: month-1;
     var m1_date = 1;
@@ -35,6 +39,7 @@ function returnPrevious3MonthsPeriodMarkers()
     var m3DateObj_start = new Date(m3_year, m3_month, m3_date);
     var m3DateObj_end = new Date(m2_year, m2_month, 0, 23, 59, 59);
 
+    // Load these date objects into the structure
     var threeMonthPeriodMarkers = 
     {
         "m_1_start": 
@@ -87,7 +92,9 @@ function getMonthMarkers(period)
     var next_year = (month == 11) ? year + 1: year;
     var next_month = (month == 11) ? 0: month + 1;
 
+    // First day of the month at 00:00:00 and last day of the month at 23:59:59
     var mDateObj_start = new Date(year, month, 1);
+    // Day 0 is last day of previous month
     var mDateObj_end = new Date(next_year, next_month, 0, 23, 59, 59);
 
     var monthMarkers = 
@@ -212,11 +219,43 @@ function convertTimeMinutesToString(time_mins)
 
 
 
+/*
+Function: isValidDate
+Purpose: Checks if the date is valid
+Inputs: Date in string format
+Output: true if valid, false otherwise
+*/
+function isValidDate(dateString) 
+{
+    var timestamp = Date.parse(dateString);
+    return isNaN(timestamp) == false;
+}
 
-module.exports = { 
+
+
+/* 
+Function: getSinceString
+Purpose: Returns a string that denotes a time value 'interval' hours less than present time
+Inputs: interval (hours)
+Output: String
+*/
+function getSinceString(interval)
+{
+    var now = new Date();
+    var since = new Date(now.getTime() - (interval * 60 * 60 * 1000));
+    var since_str = formatInTimeZone(since, "GMT", "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    return since_str;
+}
+
+
+// Exporting the functions
+module.exports = 
+{ 
     returnPrevious3MonthsPeriodMarkers,
     getMonthMarkers,
     getEndOfMonth,
     isNewTimestampCloser,
-    convertTimeMinutesToString
+    convertTimeMinutesToString,
+    isValidDate,
+    getSinceString,
 };

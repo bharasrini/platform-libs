@@ -1,0 +1,466 @@
+const { formatInTimeZone } = require("date-fns-tz");
+const common = require("@fyle-ops/common");
+const { fetchFreshdeskData } = require("./fd_common");
+
+class fd_ticket_fields
+{
+    constructor()
+    {
+        _initTicketFields(this);
+    }
+
+    getTicketFields()
+    {
+        return _getTicketFields(this);
+    }
+
+    getTicketStatusCode(label)
+    {
+        return _getTicketStatusCode(this, label);
+    }
+
+    getTicketStatusVal(code)
+    {
+        return _getTicketStatusVal(this, code);
+    }
+
+    getTicketSourceCode(label)
+    {
+        return _getTicketSourceCode(this, label);
+    }
+
+    getTicketSourceVal(code)
+    {
+        return _getTicketSourceVal(this, code);
+    }
+
+    getTicketPriorityCode(label)
+    {
+        return _getTicketPriorityCode(this, label);
+    }
+
+    getTicketPriorityVal(code)
+    {
+        return _getTicketPriorityVal(this, code);
+    }
+}
+
+
+
+/* 
+Function: _initTicketFields
+Purpose: Initializes the Freshdesk 'ticket fields' functionality
+Inputs: Freshdesk ticket fields instance
+Output: 0 on success, -1 on failure
+*/
+function _initTicketFields(ticket_fields)
+{
+    // Initialize an array to store the ticket fields list
+    ticket_fields.ticket_fields_list = [];
+
+    // Initialize number of ticket fields
+    ticket_fields.num_ticket_fields = 0;
+
+    // Nothing else to do, return success
+    return 0;
+}
+
+
+/* 
+Function: _getTicketFields
+Purpose: Gets the list of all ticket fields from Freshdesk
+Inputs: ticket_fields instance
+Output: Returns 0 on success, -1 on failure
+*/
+async function _getTicketFields(ticket_fields)
+{
+    // URL path for the API endpoint to get the list of ticket fields
+    var path = "admin/ticket_fields";
+
+    // Fetch data for the current page
+    try
+    {
+        const {headers,data} = await fetchFreshdeskData
+        ({
+            path: path
+        });
+
+        // Initialize loop counters 
+        var i = 0;  
+
+        for(i = 0; i < data.length; i++)
+        {
+            ticket_fields.ticket_fields_list.push(data[i]);
+            ticket_fields.num_ticket_fields++;
+        }
+
+        // set a sleep here for 100 ms so that we don't exceed the throttle
+        common.sleep(100);
+
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to get list of Ticket Fields. Error:" + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully fetched ticket fields. Number of ticket fields = "+ ticket_fields.num_ticket_fields);
+    
+    return 0;
+}
+
+
+
+/* 
+Function: getTicketFieldData
+Purpose: Gets the data for a specific ticket field from Freshdesk
+Inputs: ticket_fields - instance of the ticket fields class
+        field_name - name of the ticket field to retrieve data for
+        field_data - array to be populated with the ticket field data
+Output: Returns 0 on success, -1 on failure
+*/
+async function getTicketFieldData(ticket_fields, field_name, field_data)
+{
+    var i = 0;
+
+    // If we don't have the ticket fields list built, build it first
+    if(ticket_fields.ticket_fields_list.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Ticket Fields List is empty, let's build this");
+        await _getTicketFields(ticket_fields);
+    }
+
+    // Locate the field that we are interested in
+    var field_id = -1;
+
+    // Check if we have a field that matches the field_name sent in
+    for(i = 0; i < ticket_fields.ticket_fields_list.length; i++)
+    {
+        if(ticket_fields.ticket_fields_list[i].name == field_name)
+        {
+            field_id = ticket_fields.ticket_fields_list[i].id;
+            break;
+        }
+    }
+
+    // If we don't have a matching field, return an error
+    if(field_id < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to get the id for ticket field: " + field_name);
+        return -1;
+    }
+
+    // Now read the data for the field using the field id and populate the field_data array
+    var path = "admin/ticket_fields/" + field_id;
+
+    // Initialize loop counters 
+    var i = 0;  
+
+    // Initialize the page and record count
+    // Fetch data for the current page
+    try
+    {
+        const {headers,data} = await fetchFreshdeskData
+        ({
+            path: path
+        });
+
+        field_data.push(data);
+        
+        // set a sleep here for 100 ms so that we don't exceed the throttle
+        common.sleep(100);
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to get ticket fields for: " + field_name + ". Error:" + e.message);
+        return -1;
+    }
+    
+    common.statusMessage(arguments.callee.name, "Successfully retrieved field data for " + field_name);
+    
+    return 0;
+}
+
+
+
+/* 
+Function: getTicketFieldOptions
+Purpose: Gets the options for a specific ticket field from Freshdesk. This is relevant for dropdown type fields where we have to map the option id to the option name
+Inputs: ticket_fields - instance of the ticket fields class
+        field_name - name of the ticket field to retrieve options for
+        options - array to be populated with the options for the ticket field. This will be an array of objects with id and name as keys
+Output: Returns 0 on success, -1 on failure
+*/
+async function getTicketFieldOptions(ticket_fields, field_name, options)
+{
+    var i = 0;
+    var field_data = [];
+
+    // Get the field data for the field that we are interested in
+    if(await getTicketFieldData(ticket_fields, field_name, field_data) < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to get ticket field data for: " + field_name);
+        return -1;
+    }
+
+    // Check that there are choices available in the field data
+    var this_field_data = field_data[0];
+    if(!this_field_data.choices)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate choices in field data for: " + field_name);
+        return -1;
+    }
+
+    for(i = 0; i < this_field_data.choices.length; i++)
+    {
+        options.push(this_field_data.choices[i]);
+    }
+
+    return 0;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Array to hold the options for the status field. We will populate this when we read the status field data from Freshdesk and then use this to map status codes to status values and vice versa
+var ticket_status_options = [];
+
+/* 
+Function: getStatusOptions
+Purpose: Returns the options for the status field in Freshdesk
+Inputs: Ticket fields instance
+Output: None (populates the global ticket_status_options array)
+*/
+async function getStatusOptions(ticket_fields)
+{
+    // Get the options for the status field and populate the ticket_status_options array
+    await getTicketFieldOptions(ticket_fields, "status", ticket_status_options);
+    return;
+}
+
+/* 
+Function: _getTicketStatusVal
+Purpose: Returns the ticket status value associated with the status id/code passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        status code (number)
+Output: status value (string)
+*/
+async function _getTicketStatusVal(ticket_fields, code)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_status_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Status Options List is empty, let's build this");
+        await getStatusOptions(ticket_fields);
+    }
+
+    // Loop through the options list and return the value for the code sent in
+    for(i = 0; i < ticket_status_options.length; i++)
+    {
+        if(ticket_status_options[i].value == code) return ticket_status_options[i].label;
+    }
+
+    // If we don't find a match, return the value for the default status which is "Open"
+    return "Open";
+}
+
+
+/* 
+Function: _getTicketStatusCode
+Purpose: Returns the ticket status code associated with the status value passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        label - status value (string)
+Output: status code (number)
+*/
+async function _getTicketStatusCode(ticket_fields, label)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_status_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Status Options List is empty, let's build this");
+        await getStatusOptions(ticket_fields);
+    }
+
+    // Loop through the options list and return the value for the label sent in
+    for(i = 0; i < ticket_status_options.length; i++)
+    {
+        if(ticket_status_options[i].label == label) return ticket_status_options[i].value;
+    }
+
+    // If we don't find a match, return the code for the default status which is "Open"
+    return 2; // "Open"
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Array to hold the options for the source field. We will populate this when we read the source field data from Freshdesk and then use this to map source codes to source values and vice versa
+var ticket_source_options = [];
+
+/* 
+Function: getSourceOptions
+Purpose: Returns the options for the source field in Freshdesk
+Inputs: Ticket fields instance
+Output: None (populates the global ticket_source_options array)
+*/
+async function getSourceOptions(ticket_fields)
+{
+    await getTicketFieldOptions(ticket_fields, "source", ticket_source_options);
+    return;
+}
+
+
+/* 
+Function: getTicketSourceVal
+Purpose: Returns the ticket source value associated with the source code passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        source code (number)
+Output: source value (string)
+*/
+async function _getTicketSourceVal(ticket_fields, code)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_source_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Source Options List is empty, let's build this");
+        await getSourceOptions(ticket_fields);
+    }
+
+    // Loop through the options list and return the value for the code sent in
+    for(i = 0; i < ticket_source_options.length; i++)
+    {
+        if(ticket_source_options[i].value == code) return ticket_source_options[i].label;
+    }
+
+    // If we don't find a match, return the value for the default source which is "Email"
+    return "Email";
+}
+
+
+/* 
+Function: _getTicketSourceCode
+Purpose: Returns the ticket source code associated with the source value passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        source value (string)
+Output: source code (number)
+*/
+async function _getTicketSourceCode(ticket_fields, label)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_source_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Source Options List is empty, let's build this");
+        await getSourceOptions();
+    }
+
+    // Loop through the options list and return the code for the label sent in
+    for(i = 0; i < ticket_source_options.length; i++)
+    {
+        if(ticket_source_options[i].label == label) return ticket_source_options[i].value;
+    }
+
+    return 1; // "Email"
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Array to hold the options for the priority field. We will populate this when we read the priority field data from Freshdesk and then use this to map priority codes to priority values and vice versa
+var ticket_priority_options = [];
+
+
+/* 
+Function: getPriorityOptions
+Purpose: Returns the options for the priority field in Freshdesk
+Inputs: Ticket fields instance
+Output: None (populates the global ticket_priority_options array)
+*/
+async function getPriorityOptions(ticket_fields)
+{
+    await getTicketFieldOptions(ticket_fields, "priority", ticket_priority_options);
+    return;
+}
+
+
+/* 
+Function: getTicketPriorityVal
+Purpose: Returns the ticket priority value associated with the code passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        code (number)
+Output: value (string)
+*/
+async function _getTicketPriorityVal(ticket_fields, code)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_priority_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Priority Options List is empty, let's build this");
+        await getPriorityOptions(ticket_fields);
+    }
+
+    // Loop through the options list and return the value for the code sent in
+    for(i = 0; i < ticket_priority_options.length; i++)
+    {
+        if(ticket_priority_options[i].value == code) return ticket_priority_options[i].label;
+    }
+
+    return "Low";
+}
+
+
+
+/* 
+Function: _getTicketPriorityCode
+Purpose: Returns the ticket priority code associated with the label passed in
+Inputs: ticket_fields - instance of the ticket fields class
+        label (string)
+Output: code (number)
+*/
+async function _getTicketPriorityCode(ticket_fields, label)
+{
+    var i = 0;
+
+    // If we don't have the options list built, build it first
+    if(ticket_priority_options.length == 0)
+    {
+        common.statusMessage(arguments.callee.name, "Priority Options List is empty, let's build this");
+        await getPriorityOptions(ticket_fields);
+    }
+
+    // Loop through the options list and return the code for the label sent in
+    for(i = 0; i < ticket_priority_options.length; i++)
+    {
+        if(ticket_priority_options[i].label == label) return ticket_priority_options[i].value;
+    }
+
+    return 0; // "Low"
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Exporting the class and other functions
+module.exports = 
+{
+    fd_ticket_fields,
+};
+
