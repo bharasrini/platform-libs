@@ -1,0 +1,314 @@
+[
+  {
+    "script_field": "id",
+    "fd_field": "id",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "yes",
+    "default_value": ""
+  },
+  {
+    "script_field": "subject",
+    "fd_field": "subject",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "yes",
+    "default_value": ""
+  },
+  {
+    "script_field": "description",
+    "fd_field": "description_text",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "yes",
+    "default_value": ""
+  },
+  {
+    "script_field": "type",
+    "fd_field": "type",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "group_id",
+    "fd_field": "group_id",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "source",
+    "fd_field": "source",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "association_type",
+    "fd_field": "association_type",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "associated_tickets_count",
+    "fd_field": "associated_tickets_count",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "associated_tickets_list",
+    "fd_field": "associated_tickets_list",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "status",
+    "fd_field": "status",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "yes",
+    "default_value": 2
+  },
+  {
+    "script_field": "previous_status",
+    "fd_field": "cf_previous_status",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "fr_escalated",
+    "fd_field": "fr_escalated",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "priority",
+    "fd_field": "priority",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "yes",
+    "default_value": 3
+  },
+  {
+    "script_field": "module",
+    "fd_field": "cf_expeses",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "sub_module",
+    "fd_field": "cf_regular_expense",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "platform",
+    "fd_field": "cf_platform",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "yes",
+    "default_value": "Not Applicable"
+  },
+  {
+    "script_field": "merged",
+    "fd_field": "cf_merged",
+    "hierarchy": "custom_fields",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "clickup_link",
+    "fd_field": "cf_clickup_link",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "no",
+    "default_value": ""
+  },
+  {
+    "script_field": "slack_link",
+    "fd_field": "cf_slack_reference_link",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "company_id",
+    "fd_field": "company_id",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "region",
+    "fd_field": "cf_region",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "requester_id",
+    "fd_field": "id",
+    "hierarchy": "requester",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "requester_name",
+    "fd_field": "name",
+    "hierarchy": "requester",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "requester_email",
+    "fd_field": "email",
+    "hierarchy": "requester",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "issue_raised_by",
+    "fd_field": "cf_raised_by",
+    "hierarchy": "custom_fields",
+    "settable": "yes",
+    "mandatory": "yes",
+    "default_value": ""
+  },
+  {
+    "script_field": "responder_id",
+    "fd_field": "responder_id",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "created_at",
+    "fd_field": "created_at",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "updated_at",
+    "fd_field": "updated_at",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "fr_due_by",
+    "fd_field": "fr_due_by",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "due_by",
+    "fd_field": "due_by",
+    "hierarchy": "",
+    "settable": "yes",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "nr_due_by",
+    "fd_field": "nr_due_by",
+    "hierarchy": "",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "agent_responded_at",
+    "fd_field": "agent_responded_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "requester_responded_at",
+    "fd_field": "requester_responded_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "first_responded_at",
+    "fd_field": "first_responded_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "status_updated_at",
+    "fd_field": "status_updated_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "reopened_at",
+    "fd_field": "reopened_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "resolved_at",
+    "fd_field": "resolved_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "closed_at",
+    "fd_field": "closed_at",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  },
+  {
+    "script_field": "pending_since",
+    "fd_field": "pending_since",
+    "hierarchy": "stats",
+    "settable": "no",
+    "mandatory": "",
+    "default_value": ""
+  }
+]

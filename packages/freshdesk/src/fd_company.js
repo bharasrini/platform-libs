@@ -56,6 +56,36 @@ class fd_company
         return _updateAccountName(this, org_id, account_name);
     }
 
+    updateCSM(org_id, new_csm)
+    {
+        return _updateCSM(this, org_id, new_csm);
+    }
+
+    updateAccountTier(org_id, account_tier)
+    {
+        return _updateAccountTier(this, org_id, account_tier);
+    }
+
+    updateAccountDomains(org_id, account_domains)
+    {
+        return _updateAccountDomains(this, org_id, account_domains);
+    }
+
+    updateARR(org_id, new_arr)
+    {
+        return _updateARR(this, org_id, new_arr);
+    }
+
+    updateSource(org_id, new_source)
+    {
+        return _updateSource(this, org_id, new_source);
+    }
+
+    updatePartner(org_id, new_partner)
+    {
+        return _updatePartner(this, org_id, new_partner);
+    }
+
 }
 
 
@@ -400,6 +430,9 @@ function _getFDPartner(company, comp_id)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /* 
 Function: _updateAccountName
@@ -459,6 +492,392 @@ async function _updateAccountName(company, org_id, account_name)
     return 0;
 }
 
+
+
+
+/* 
+Function: _updateCSM
+Purpose: Updates the  CSM for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: company instance, company org ID (string), CSM (string)
+Output: 0 on success, -1 on failure
+*/
+async function _updateCSM(company, org_id, new_csm)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "custom_fields":
+        {
+            "csm": new_csm
+        }
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the CSM is updated
+        if(data.custom_fields.csm != new_csm)
+        {
+            common.statusMessage(arguments.callee.name, "New CSM: " + data.custom_fields.csm + " does not match " + new_csm + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new CSM: " + new_csm + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new CSM: " + new_csm + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
+
+
+
+
+/* 
+Function: _updateAccountTier
+Purpose: Updates the  Account Tier for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: company instance, company org ID (string), account_tier (string)
+Output: 0 on success, -1 on failure
+*/
+async function _updateAccountTier(company, org_id, account_tier)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "account_tier": common.escapeHtml(account_tier)
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the account tier is updated
+        if(data.account_tier != account_tier)
+        {
+            common.statusMessage(arguments.callee.name, "New account tier: " + data.account_tier + " does not match " + account_tier + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new account tier: " + account_tier + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new account tier: " + account_tier + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
+
+
+
+/* 
+Function: _updateAccountDomains
+Purpose: Updates the  Account Domains for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: Freshdesk company instance, org ID (string), domain list (array of string)
+Output: 0 on success, -1 on failure
+*/
+async function _updateAccountDomains(company, org_id, account_domains)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "domains": account_domains
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the account domain is updated
+        if(data.domains.length != account_domains.length)
+        {
+            common.statusMessage(arguments.callee.name, "New account domain length: " + data.domains.length + " does not match account_domains length: " + account_domains.length + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+
+        var i = 0;
+        for(i = 0; i < data.domains.length; i++)
+        {
+            if(data.domains[i] != account_domains[i])
+            {
+                common.statusMessage(arguments.callee.name, "[" + i + "] New account domain: " + data.domains[i] + " does not match " + account_domains[i] + " for company org ID: " + org_id + ".");
+                return -1;
+            }
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new account domains: " + account_domains + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new account domains: " + account_domains + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
+
+
+
+
+/* 
+Function: _updateARR
+Purpose: Updates the  ARR details for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: company instance, company org ID (string), ARR (number)
+Output: 0 on success, -1 on failure
+*/
+async function _updateARR(company, org_id, new_arr)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "custom_fields":
+        {
+            "arrrevenue": Number(new_arr)
+        }
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the ARR is updated
+        if(data.custom_fields.arrrevenue != Number(new_arr))
+        {
+            common.statusMessage(arguments.callee.name, "New ARR: " + data.custom_fields.arrrevenue + " does not match " + new_arr + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new ARR: " + new_arr + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new ARR: " + new_arr + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
+
+
+
+
+/* 
+Function: _updateSource
+Purpose: Updates the Source details for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: company instance, company org ID (string), Source (string)
+Output: 0 on success, -1 on failure
+*/
+async function _updateSource(company, org_id, new_source)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "custom_fields":
+        {
+            "source": new_source
+        }
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the Source is updated
+        if(data.custom_fields.source != new_source)
+        {
+            common.statusMessage(arguments.callee.name, "New Source: " + data.custom_fields.source + " does not match " + new_source + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new Source: " + new_source + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new Source: " + new_source + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
+
+
+
+
+/* 
+Function: _updatePartner
+Purpose: Updates the Partner details for the provided company on Freshdesk with the provided inputs. Pre-requisite: getCompanies() to be run prior
+Inputs: company instance, company org ID (string), Partner (string)
+Output: 0 on success, -1 on failure
+*/
+async function _updatePartner(company, org_id, new_partner)
+{
+    // Sanity check
+    if(company.num_companies == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        return -1;
+    }
+
+    // First get the FD company ID for the org ID passed in
+    const fd_company_id = company.getFDCompanyID(org_id);
+    if(fd_company_id == "")
+    {
+        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        return -1;
+    }
+
+    // Path to set company data
+    const path = "companies/" + fd_company_id;
+
+    // company data to be modified
+    var data_load = 
+    {
+        "custom_fields":
+        {
+            "partner": new_partner
+        }
+    };
+
+    try
+    {
+        const {headers,data} =  await putFreshdeskData
+        ({
+            path, 
+            data_load
+        });
+
+        // check if the Partner is updated
+        if(data.custom_fields.partner != new_partner)
+        {
+            common.statusMessage(arguments.callee.name, "New Partner: " + data.custom_fields.partner + " does not match " + new_partner + " for company org ID: " + org_id + ".");
+            return -1;
+        }
+    }
+    catch(e)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to update new Partner: " + new_partner + " for company org ID: " + org_id + "." + e.message);
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully updated new Partner: " + new_partner + " for company org ID: " + org_id + ".");
+
+    return 0;
+}
 
 
 

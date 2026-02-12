@@ -6,7 +6,7 @@ const { test_billing } = require ("./test_billing");
 const { test_account_mapping } = require("./test_account_mapping");
 const { test_fd } = require("./test_fd");
 const { test_common } = require("./test_common");
-
+const { test_fyle_api } = require("./test_fyle");
 
 (async () => 
 {
@@ -15,4 +15,5 @@ const { test_common } = require("./test_common");
     if (process.env.RUN_ACCOUNT_MAPPING_TEST === "true") await test_account_mapping();
     if (process.env.RUN_FD_TEST === "true") await test_fd();
     if (process.env.RUN_COMMON_TEST === "true") await test_common();
+    if (process.env.RUN_FYLE_API_TEST === "true") await test_fyle_api();
 })();

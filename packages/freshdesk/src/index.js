@@ -6,6 +6,9 @@ const { fd_agent } = require("./fd_agent");
 const { fd_business_hours } = require("./fd_business_hours");
 const { fd_ticket_fields } = require("./fd_ticket_fields");
 const { fd_tickets } = require("./fd_tickets");
+const { setTicketField } = require("./fd_set_ticket_data");
+const { fd_contacts, addContact, updateContact } = require("./fd_contact");
+const { fd_ratings } = require("./fd_ratings");
 
 module.exports = 
 {
@@ -15,4 +18,7 @@ module.exports =
     fd_business_hours,
     fd_ticket_fields,
     fd_tickets,
+    setTicketField,
+    fd_contacts, addContact, updateContact,
+    fd_ratings
 };
