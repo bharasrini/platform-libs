@@ -1,6 +1,6 @@
 const { billing_data } = require("@fyle-ops/billing");
 
-async function test_getBillingData()
+async function test_bl_getBillingData()
 {
     const billing = new billing_data();
     await billing.getBillingLinks();
@@ -11,7 +11,7 @@ async function test_getBillingData()
 
 async function test_billing()
 {
-    if(process.env.RUN_TEST_BILLING_DATA === "true") await test_getBillingData();
+    if(process.env.RUN_TEST_BL_GET_BILLING_DATA === "true") await test_bl_getBillingData();
 }
 
 

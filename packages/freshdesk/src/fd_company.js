@@ -11,9 +11,9 @@ class fd_company
       _initCompany(this);
     }
 
-    getCompanies()
+    async getCompanies()
     {
-        return _getCompanies(this);
+        return await _getCompanies(this);
     }
 
     getCompanyName(comp_id)
@@ -51,39 +51,39 @@ class fd_company
         return _getFDPartner(this, comp_id);
     }
 
-    updateAccountName(org_id, account_name)
+    async updateAccountName(org_id, account_name)
     {
-        return _updateAccountName(this, org_id, account_name);
+        return await _updateAccountName(this, org_id, account_name);
     }
 
-    updateCSM(org_id, new_csm)
+    async updateCSM(org_id, new_csm)
     {
-        return _updateCSM(this, org_id, new_csm);
+        return await _updateCSM(this, org_id, new_csm);
     }
 
-    updateAccountTier(org_id, account_tier)
+    async updateAccountTier(org_id, account_tier)
     {
-        return _updateAccountTier(this, org_id, account_tier);
+        return await _updateAccountTier(this, org_id, account_tier);
     }
 
-    updateAccountDomains(org_id, account_domains)
+    async updateAccountDomains(org_id, account_domains)
     {
-        return _updateAccountDomains(this, org_id, account_domains);
+        return await _updateAccountDomains(this, org_id, account_domains);
     }
 
-    updateARR(org_id, new_arr)
+    async updateARR(org_id, new_arr)
     {
-        return _updateARR(this, org_id, new_arr);
+        return await _updateARR(this, org_id, new_arr);
     }
 
-    updateSource(org_id, new_source)
+    async updateSource(org_id, new_source)
     {
-        return _updateSource(this, org_id, new_source);
+        return await _updateSource(this, org_id, new_source);
     }
 
-    updatePartner(org_id, new_partner)
+    async updatePartner(org_id, new_partner)
     {
-        return _updatePartner(this, org_id, new_partner);
+        return await _updatePartner(this, org_id, new_partner);
     }
 
 }
@@ -118,7 +118,7 @@ Output: List of companies stored in company.company_list[]. Returns 0 on success
 async function _getCompanies(company)
 {
     // URL path for fetching companies
-    var path = "companies";
+    var url_path = "companies";
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -132,7 +132,7 @@ async function _getCompanies(company)
             // Fetch data for the current page
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });
@@ -458,7 +458,7 @@ async function _updateAccountName(company, org_id, account_name)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -470,7 +470,7 @@ async function _updateAccountName(company, org_id, account_name)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path,
             data_load
         });
 
@@ -519,7 +519,7 @@ async function _updateCSM(company, org_id, new_csm)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -534,7 +534,7 @@ async function _updateCSM(company, org_id, new_csm)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -583,7 +583,7 @@ async function _updateAccountTier(company, org_id, account_tier)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -595,7 +595,7 @@ async function _updateAccountTier(company, org_id, account_tier)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -643,7 +643,7 @@ async function _updateAccountDomains(company, org_id, account_domains)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -655,7 +655,7 @@ async function _updateAccountDomains(company, org_id, account_domains)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -714,7 +714,7 @@ async function _updateARR(company, org_id, new_arr)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -729,7 +729,7 @@ async function _updateARR(company, org_id, new_arr)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -778,7 +778,7 @@ async function _updateSource(company, org_id, new_source)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -793,7 +793,7 @@ async function _updateSource(company, org_id, new_source)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -842,7 +842,7 @@ async function _updatePartner(company, org_id, new_partner)
     }
 
     // Path to set company data
-    const path = "companies/" + fd_company_id;
+    const url_path = "companies/" + fd_company_id;
 
     // company data to be modified
     var data_load = 
@@ -857,7 +857,7 @@ async function _updatePartner(company, org_id, new_partner)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 
@@ -894,7 +894,7 @@ Output: 0 on success, -1 on failure; also company_details.id is updated with the
 */
 async function createNewCompanyonFD(company_details)
 {
-    const path = "companies";
+    const url_path = "companies";
 
     const data_load = 
     {
@@ -915,7 +915,7 @@ async function createNewCompanyonFD(company_details)
     {
         const {headers,data} =  await postFreshdeskData
         ({
-            path, 
+            url_path,
             data_load
         });
 

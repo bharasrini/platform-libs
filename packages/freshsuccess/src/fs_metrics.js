@@ -162,7 +162,7 @@ async function readMetricsSheet(metric_name)
         {
             // Ok, we have a close match here, save it
             this_metric.metric_arr[j]["m_1_end"]["matched_timestamp"] = this_timestamp;
-            this_metric.metric_arr[j]["m_1_end"]["matched_metric"] = this_metric_val;
+            this_metric.metric_arr[j]["m_1_end"]["matched_metric"] = Number(this_metric_val);
         }
 
         // Check against m-2 next
@@ -170,7 +170,7 @@ async function readMetricsSheet(metric_name)
         {
             // Ok, we have a close match here, save it
             this_metric.metric_arr[j]["m_2_end"]["matched_timestamp"] = this_timestamp;
-            this_metric.metric_arr[j]["m_2_end"]["matched_metric"] = this_metric_val;
+            this_metric.metric_arr[j]["m_2_end"]["matched_metric"] = Number(this_metric_val);
         }
 
         // Check against m-3 next
@@ -178,7 +178,7 @@ async function readMetricsSheet(metric_name)
         {
             // Ok, we have a close match here, save it
             this_metric.metric_arr[j]["m_3_end"]["matched_timestamp"] = this_timestamp;
-            this_metric.metric_arr[j]["m_3_end"]["matched_metric"] = this_metric_val;
+            this_metric.metric_arr[j]["m_3_end"]["matched_metric"] = Number(this_metric_val);
         }
 
     }
@@ -237,10 +237,10 @@ async function getMetricsSource()
 /* 
 Function: getUserMetrics
 Purpose: Gets the list of metric values for the metric name passed in. Pre-requisite: getAccounts() to be invoked prior
-Inputs: account instance, metric name (e.g. "product_db.num_invited_users" or "product_db.num_verified_users")
+Inputs: account instance, metric name (e.g. "product_db.num_invited_users" or "product_db.num_verified_users"), corresponding metric names for m-3, m-2 and m-1 e.g. m3_verified_users, m2_verified_users, m1_verified_users
 Output: List of metrics for metric_name. Returns 0 on success, -1 on failure
 */
-async function getUserMetrics(account, metric_name)
+async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_name, m_1_metric_name)
 {
     var i = 0, j = 0, k = 0;
     var metric_offset = -1;
@@ -278,7 +278,7 @@ async function getUserMetrics(account, metric_name)
         else common.statusMessage(arguments.callee.name, "Successfully read metrics from Freshsuccess for metric: " + metric_name);
         */
         common.statusMessage(arguments.callee.name, "Reading metrics from Freshsuccess API is currently not implemented, going to read from sheet instead for metric: " + metric_name);
-        var this_metric = readMetricsSheet(metric_name);
+        var this_metric = await readMetricsSheet(metric_name);
     }
 
     // Locate the metric in the account structure
@@ -311,10 +311,10 @@ async function getUserMetrics(account, metric_name)
         {
             if(account.account_list[j]["id"]["org_id"] == this_org_id)
             {
-                // Found a match, update the verified user metrics
-                account.account_list[j].metrics["m_3"]["m3_invited_users"] = this_metric.metric_arr[i]["m_3_end"]["matched_metric"];
-                account.account_list[j].metrics["m_2"]["m2_invited_users"] = this_metric.metric_arr[i]["m_2_end"]["matched_metric"];
-                account.account_list[j].metrics["m_1"]["m1_invited_users"] = this_metric.metric_arr[i]["m_1_end"]["matched_metric"];
+                // Found a match, update the metrics
+                account.account_list[j].metrics["m_3"][m_3_metric_name] = Number(this_metric.metric_arr[i]["m_3_end"]["matched_metric"]);
+                account.account_list[j].metrics["m_2"][m_2_metric_name] = Number(this_metric.metric_arr[i]["m_2_end"]["matched_metric"]);
+                account.account_list[j].metrics["m_1"][m_1_metric_name] = Number(this_metric.metric_arr[i]["m_1_end"]["matched_metric"]);
                 break;
             }
         }

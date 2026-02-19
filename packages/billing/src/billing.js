@@ -10,14 +10,14 @@ class billing_data
       _initBilling(this);
     }
 
-    getBillingLinks()
+    async getBillingLinks()
     {
-        return _getBillingLinks(this);
+        return await _getBillingLinks(this);
     }
 
-    getBillingData(period)
+    async getBillingData(period)
     {
-        return _getBillingData(this, period);
+        return await _getBillingData(this, period);
     }
 
     getBillingDetailsForOrg(org_id)
@@ -515,6 +515,9 @@ Output: Billing details for org (0 for the values if not found)
 */
 function _getBillingDetailsForOrg(billing, org_id)
 {
+    // Initialize the billing details to be returned
+    var i = 0;
+
     var billing_details = {"num_expenses": 0, "num_reports": 0, "active_users": 0}
 
     // Sanity checks to ensure we have valid org_id and billing data structure
@@ -538,7 +541,7 @@ function _getBillingDetailsForOrg(billing, org_id)
     }
 
     // Loop through the billing array and locate the org passed in
-    for(var i = 0; i < billing.billing_by_org.num_org_billing_entries; i++)
+    for(i = 0; i < billing.billing_by_org.num_org_billing_entries; i++)
     {
         var this_org_id = billing.billing_by_org.billing_by_org_list[i].org_id;
         if(this_org_id == org_id)
@@ -546,7 +549,6 @@ function _getBillingDetailsForOrg(billing, org_id)
             billing_details.num_expenses = billing.billing_by_org.billing_by_org_list[i].num_expenses;
             billing_details.num_reports = billing.billing_by_org.billing_by_org_list[i].num_reports;
             billing_details.active_users = billing.billing_by_org.billing_by_org_list[i].active_users;
-
             break;
         }
     }

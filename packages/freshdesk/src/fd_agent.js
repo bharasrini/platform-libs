@@ -11,9 +11,9 @@ class fd_agent
       _initAgent(this);
     }
 
-    getAgents()
+    async getAgents()
     {
-        return _getAgents(this);
+        return await _getAgents(this);
     }
 
     getAgentName(agent_id)
@@ -63,7 +63,7 @@ Output: List of agents stored in agent.agent_list[]. Returns 0 on success, -1 on
 async function _getAgents(agent)
 {
     // URL path for fetching agents
-    var path = "agents";
+    var url_path = "agents";
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -77,7 +77,7 @@ async function _getAgents(agent)
         {
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });

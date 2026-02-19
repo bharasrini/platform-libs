@@ -9,7 +9,7 @@ Inputs: url - API endpoint URL,
         per_page - Number of records per page for pagination
         updated_since - Fetch records updated since this timestamp,
         include - Additional data to include in the response
-Output: Parsed JSON response from the API
+Output: Parsed JSON response from the API or binary data in case of file download
 */
 async function fetchFyleData
 ({
@@ -24,7 +24,15 @@ async function fetchFyleData
 
     if(offset) urlObj.searchParams.append("offset", String(offset));
     if(limit) urlObj.searchParams.append("limit", String(limit));
-    if(include) urlObj.searchParams.append("include", include);
+    if(include) 
+    {
+        include.forEach(obj => 
+        {
+            const key = Object.keys(obj)[0];     // get the key
+            const value = obj[key];              // get the value
+            urlObj.searchParams.append(key, value);
+        });
+    }
 
     console.log("Fyle URL =", urlObj.toString());
 
@@ -54,12 +62,23 @@ async function fetchFyleData
             throw new Error(`Fyle ${res.status}: ${body}`);
         }
 
-        const json = await res.json();
-        return {headers: res.headers, data: json}; // parsed JSON body
+        const contentType = res.headers.get("content-type") || "";
+
+        let data;
+
+        if (contentType.includes("application/json"))
+        {
+            data = await res.json();
+        }
+        else
+        {
+            const arrayBuffer = await res.arrayBuffer();
+            data = Buffer.from(arrayBuffer);  // binary data
+        }
+
+        return {headers: res.headers, data: data}; // parsed JSON body
     });
 }
-
-
 
 
 /* 

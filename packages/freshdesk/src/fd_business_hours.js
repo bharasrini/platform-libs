@@ -43,9 +43,9 @@ class fd_business_hours
       _initBusinessHours(this);
     }
 
-    getBusinessHours()
+    async getBusinessHours()
     {
-        return _getBusinessHours(this);
+        return await _getBusinessHours(this);
     }
 
     checkIfWithinBusinessHours(support_group, time_instance)
@@ -85,7 +85,7 @@ Output: List of business hours in business_hours.business_hours_list[]. Returns 
 async function _getBusinessHours(business_hours)
 {
     // URL path for fetching business hours
-    var path = "business_hours";
+    var url_path = "business_hours";
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -99,7 +99,7 @@ async function _getBusinessHours(business_hours)
         {
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });

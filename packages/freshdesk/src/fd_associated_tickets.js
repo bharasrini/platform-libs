@@ -11,7 +11,7 @@ Output: List of associated tickets in list[]. Returns 0 on success, -1 on failur
 async function getAssociatedTicketsList(id, list)
 {
     // URL path for fetching associated tickets for the given ticket id
-    var path = "tickets/"+id;
+    var url_path = "tickets/"+id;
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 0;
@@ -24,7 +24,7 @@ async function getAssociatedTicketsList(id, list)
         {
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });

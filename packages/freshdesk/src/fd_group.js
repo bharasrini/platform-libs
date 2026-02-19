@@ -11,9 +11,9 @@ class fd_group
       _initGroups(this);
     }
 
-    getGroups()
+    async getGroups()
     {
-        return _getGroups(this);
+        return await _getGroups(this);
     }
 
     getGroupName(group_id)
@@ -58,7 +58,7 @@ Output: List of groups stored in group.group_list[]. Returns 0 on success, -1 on
 async function _getGroups(group)
 {
     // URL path for fetching groups from Freshdesk API
-    var path = "groups";
+    var url_path = "groups";
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -72,7 +72,7 @@ async function _getGroups(group)
             // Fetch data for the current page
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });

@@ -1,3 +1,4 @@
+const { subMonths } = require("date-fns");
 const { formatInTimeZone } = require("date-fns-tz");
 const util = require("util");
 
@@ -248,6 +249,19 @@ function getSinceString(interval)
 }
 
 
+/* 
+Function: getOneMonthAgo
+Purpose: Returns a date that is 'n' months less than the date passed in
+Inputs: date, n (number of months)
+Output: date that is 'n' months less than the date passed in
+*/
+function getNMonthsAgo(date,n)
+{
+    var n_month_ago = subMonths(date, n);
+    return n_month_ago;
+}
+
+
 // Exporting the functions
 module.exports = 
 { 
@@ -258,4 +272,5 @@ module.exports =
     convertTimeMinutesToString,
     isValidDate,
     getSinceString,
+    getNMonthsAgo,
 };

@@ -10,9 +10,9 @@ class fd_ratings
       _initRatings(this);
     }
 
-    getRatings(created_since)
+    async getRatings(created_since)
     {
-        return _getRatings(this, created_since);
+        return await _getRatings(this, created_since);
     }
 
 }
@@ -98,7 +98,7 @@ Output: List of ratings stored in ratings.ratings_list[]. Returns 0 on success, 
 async function _getRatings(ratings, created_since)
 {
     // URL path for fetching ratings
-    var path = "surveys/satisfaction_ratings?created_since="+created_since;
+    var url_path = "surveys/satisfaction_ratings?created_since="+created_since;
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -112,7 +112,7 @@ async function _getRatings(ratings, created_since)
             // Fetch data for the current page
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });

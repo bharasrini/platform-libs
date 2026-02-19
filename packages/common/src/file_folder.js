@@ -1,59 +1,73 @@
-const { google } = require('googleapis');
-const { createGoogleAuth } = require("./google_auth");
+const fs = require("fs/promises");
+const path = require("path");
 const { statusMessage } = require("./logs");
 
 /* 
-Function: checkAndCreateFolder
-Purpose: Checks and creates a child folder with the provided name in the parent folder (provided the child folder does not exist)
-Inputs: parent folder ID, child folder name
-Output: child folder id on success, "" otherwise
+Function: hasExtension
+Purpose: Checks if the provided file name has the expected extension
+Inputs: file name, expected extension
+Output: true if the file has the expected extension, false otherwise
 */
-async function checkAndCreateFolder(parent_folder_id, child_folder_name) 
+function hasExtension(fileName, expectedExt)
 {
-    // Get authentication and sheets instance
-    const auth = createGoogleAuth();
-    const drive = google.drive({ version: 'v3', auth });
+    const actualExt = path.extname(fileName).toLowerCase();
+    return actualExt === expectedExt.toLowerCase();
+}
 
-    // Check for existing folder with the given name under the parent folder
-    const listRes = await drive.files.list
-    ({
-        q: [
-        `'${parent_folder_id}' in parents`,
-        `name = '${child_folder_name.replace(/'/g, "\\'")}'`,
-        `mimeType = 'application/vnd.google-apps.folder'`,
-        'trashed = false',
-        ].join(' and '),
-        fields: 'files(id)',
-        pageSize: 1,
-    });
 
-    // Check if we were able to find the folder
-    if (listRes.data.files && listRes.data.files.length > 0) 
+/* 
+Function: createFolder
+Purpose: Creates a folder at the specified path
+Inputs: full folder path
+Output: 0 if the folder is created successfully, error message otherwise
+*/
+async function createFolder(full_folder_path)
+{
+    const output_dir = full_folder_path;
+    
+    try
     {
-        statusMessage('checkAndCreateFolder', `Found existing folder "${child_folder_name}" under ${parent_folder_id}`);
-        return listRes.data.files[0].id; // folderId
+        await fs.mkdir(output_dir, { recursive: true });        
+    }
+    catch (e)
+    {
+        statusMessage(arguments.callee.name, "Failed to create folder: " + output_dir + ". Error: " + e.message);
     }
 
-    // If we were unable to find the folder, create it
-    statusMessage('checkAndCreateFolder', `Creating folder "${child_folder_name}" under ${parent_folder_id}`);
-    const createRes = await drive.files.create
-    ({
-        requestBody: 
-        {
-            name: child_folder_name,
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [parent_folder_id],
-        },
-        fields: 'id',
-    });
-
-    // Return the created folder ID
-    return createRes.data.id;
+    return 0;
 }
+
+
+/* 
+Function: createFile
+Purpose: Creates a file at the specified path
+Inputs: output directory, file name, file extension, file content
+Output: 0 if the file is created successfully, error message otherwise
+*/
+async function createFile(output_dir, file_name, file_ext, file_content)
+{
+    const has_ext = hasExtension(file_name, "." + file_ext);
+    const file_name_with_ext = (has_ext == false) ? file_name + "." + file_ext : file_name;
+    const full_file_name = path.join(output_dir, file_name_with_ext);
+    
+    try
+    {
+        await fs.writeFile(full_file_name, file_content);
+    }
+    catch (e)
+    {
+        statusMessage(arguments.callee.name, "Failed to write file: " + full_file_name + ". Error: " + e.message);
+    }
+
+    return 0;
+}
+
 
 
 // Exporting the functions
 module.exports = 
 { 
-    checkAndCreateFolder,
+    hasExtension,
+    createFolder,
+    createFile,
 };

@@ -348,6 +348,23 @@ function flattenStructure(structure, flattened, prefix, new_data_array, row)
 }
 
 
+/*
+Function: sameStringSet
+Purpose: Checks if 2 arrays have the same set of strings (order doesn't matter)
+Inputs: String arrays a and b
+Output: boolean indicating if the arrays have the same set of strings
+Source: ChatGPT
+*/
+function sameStringSet(a = [], b = [])
+{
+    if (a.length !== b.length) return false;
+    
+    const sa = new Set(a);
+    if (sa.size !== b.length) return false;
+    
+    return b.every(x => sa.has(x));
+}
+
 
 //
 // Levenshtein Distance Function for Google Sheets
@@ -432,6 +449,7 @@ module.exports =
     matchWithinXPercent,
     checkType,
     flattenStructure,
+    sameStringSet,
     LevDis,
 };
 

@@ -9,39 +9,39 @@ class fd_ticket_fields
         _initTicketFields(this);
     }
 
-    getTicketFields()
+    async getTicketFields()
     {
-        return _getTicketFields(this);
+        return await _getTicketFields(this);
     }
 
-    getTicketStatusCode(label)
+    async getTicketStatusCode(label)
     {
-        return _getTicketStatusCode(this, label);
+        return await _getTicketStatusCode(this, label);
     }
 
-    getTicketStatusVal(code)
+    async getTicketStatusVal(code)
     {
-        return _getTicketStatusVal(this, code);
+        return await _getTicketStatusVal(this, code);
     }
 
-    getTicketSourceCode(label)
+    async getTicketSourceCode(label)
     {
-        return _getTicketSourceCode(this, label);
+        return await _getTicketSourceCode(this, label);
     }
 
-    getTicketSourceVal(code)
+    async getTicketSourceVal(code)
     {
-        return _getTicketSourceVal(this, code);
+        return await _getTicketSourceVal(this, code);
     }
 
-    getTicketPriorityCode(label)
+    async getTicketPriorityCode(label)
     {
-        return _getTicketPriorityCode(this, label);
+        return await _getTicketPriorityCode(this, label);
     }
 
-    getTicketPriorityVal(code)
+    async getTicketPriorityVal(code)
     {
-        return _getTicketPriorityVal(this, code);
+        return await _getTicketPriorityVal(this, code);
     }
 }
 
@@ -75,14 +75,14 @@ Output: Returns 0 on success, -1 on failure
 async function _getTicketFields(ticket_fields)
 {
     // URL path for the API endpoint to get the list of ticket fields
-    var path = "admin/ticket_fields";
+    var url_path = "admin/ticket_fields";
 
     // Fetch data for the current page
     try
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            path: path
+            url_path: url_path
         });
 
         // Initialize loop counters 
@@ -151,7 +151,7 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     }
 
     // Now read the data for the field using the field id and populate the field_data array
-    var path = "admin/ticket_fields/" + field_id;
+    var url_path = "admin/ticket_fields/" + field_id;
 
     // Initialize loop counters 
     var i = 0;  
@@ -162,7 +162,7 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            path: path
+            url_path: url_path
         });
 
         field_data.push(data);

@@ -11,9 +11,9 @@ class fd_contacts
       _initContacts(this);
     }
 
-    getContacts()
+    async getContacts()
     {
-        return _getContacts(this);
+        return await _getContacts(this);
     }
 
     getContactForEmail(email)
@@ -58,7 +58,7 @@ Output: List of contacts stored in contact.contact_list[]. Returns 0 on success,
 async function _getContacts(contact)
 {
     // URL path for fetching contacts
-    var path = "contacts";
+    var url_path = "contacts";
 
     // Initialize the page and record count
     var page = process.env.FRESHDESK_START_PAGE || 1;
@@ -72,7 +72,7 @@ async function _getContacts(contact)
             // Fetch data for the current page
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page
             });
@@ -230,7 +230,7 @@ async function addContact(name, email, role)
     }
 
     // Path to set contact data
-    var path = "contacts";
+    var url_path = "contacts";
 
     // contact data to be added
     var data_load = 
@@ -249,7 +249,7 @@ async function addContact(name, email, role)
         // Add the contact information 
         const {headers,data} =  await postFreshdeskData
         ({
-            path, 
+            url_path,
             data_load
         });
 
@@ -284,20 +284,27 @@ async function addContact(name, email, role)
 }
 
 
+
+/* 
+Function: getContactIDFromEmail
+Purpose: Gets the contact ID for the email passed in 
+Inputs: email
+Output: Returns contact ID on success, "" on failure
+*/
 async function getContactIDFromEmail(email)
 {
     // Return value from the function
     var id = "";
 
     // First get the ID for the email sent in
-    var path = "search/contacts?query=\"email:'" + email + "'\"";
+    var url_path = "search/contacts?query=\"email:'" + email + "'\"";
 
     try
     {
         // Fetch data for the current page
         const {headers,data} = await fetchFreshdeskData
         ({
-            path: path,
+            url_path: url_path,
         });
 
         // data.results[0] should have the contact information for the email sent in
@@ -341,7 +348,7 @@ async function updateContact(old_email, new_name, new_email, new_role)
     }
 
     // Path to set contact data
-    var path = "contacts/" + id;
+    var url_path = "contacts/" + id;
 
     // contact data to be modified
     var data_load = 
@@ -359,7 +366,7 @@ async function updateContact(old_email, new_name, new_email, new_role)
         // Update the contact information for the contact ID passed in
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path, 
             data_load
         });
 

@@ -15,14 +15,14 @@ Output: 0 on success, -1 on failure
 async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load)
 {
     // URL path for the API endpoint to get the list of ticket fields
-    var path = "tickets/" + ticket_id.toString();
+    var url_path = "tickets/" + ticket_id.toString();
 
     // First get the ticket data from Freshdesk for the provided ticket_id to check which mandatory fields are blank and need to be set in the data_load {}
     try
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            path: path
+            url_path: url_path
         });
 
         // Initialize loop counters
@@ -158,7 +158,7 @@ Output: 0 on success, -1 on failure
 async function setTicketField(ticket_id, field_name, field_value, ret)
 {
     // URL path for the API endpoint to set the ticket fields
-    var path = "tickets/" + ticket_id.toString();
+    var url_path = "tickets/" + ticket_id.toString();
 
     // There are some mandatory fields that need to be set in Freshdesk without which the provided field setting will not go through. We'll need to check this
     var data_load = {};
@@ -172,7 +172,7 @@ async function setTicketField(ticket_id, field_name, field_value, ret)
     {
         const {headers,data} =  await putFreshdeskData
         ({
-            path, 
+            url_path,
             data_load
         });
 

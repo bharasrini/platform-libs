@@ -48,7 +48,7 @@ function getIanaMap()
 }
 
 
-// Example function to convert a time string in Freshdesk timezone to UTC
+// Convert a time string in Freshdesk timezone to UTC
 function convertTimeToUTC(timeStr, fdLabel, dateStr) 
 {
     const tz = FRESHDESK_TO_IANA_TZ[fdLabel];

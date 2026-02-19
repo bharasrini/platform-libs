@@ -17,9 +17,9 @@ class fd_tickets
       _initTickets(this);
     }
 
-    getTickets(updated_since)
+    async getTickets(updated_since)
     {
-        return _getTickets(this, updated_since);
+        return await _getTickets(this, updated_since);
     }
 
 }
@@ -55,7 +55,7 @@ Output: List of tickets in ticket.ticket_list[]. Returns 0 on success, -1 on fai
 async function _getTickets(ticket, updated_since)
 {
     // URL path for fetching tickets
-    const path = "tickets";
+    const url_path = "tickets";
 
     // Include parameter to fetch additional details about the ticket such as requester and stats
     const include = "requester,stats";
@@ -92,7 +92,7 @@ async function _getTickets(ticket, updated_since)
         {
             const {headers,data} = await fetchFreshdeskData
             ({
-                path: path,
+                url_path: url_path,
                 current_page: page,
                 per_page: per_page,
                 updated_since: updated_since,

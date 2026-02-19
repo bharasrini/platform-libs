@@ -4,7 +4,7 @@ const common = require("@fyle-ops/common");
 /* 
 Function: fetchFreshdeskData
 Purpose: Fetches data from the Freshdesk API
-Inputs: path - API endpoint path,
+Inputs: url_path - API endpoint path,
         current_page - Page number for pagination,
         per_page - Number of records per page for pagination
         updated_since - Fetch records updated since this timestamp,
@@ -13,7 +13,7 @@ Output: Parsed JSON response from the API
 */
 async function fetchFreshdeskData
 ({
-  path,
+  url_path,
   current_page,
   per_page,
   updated_since,
@@ -24,7 +24,7 @@ async function fetchFreshdeskData
     var api_key_orig = process.env.FRESHDESK_API_KEY;
     var this_host = process.env.FRESHDESK_HOST;
 
-    const url = new URL(`https://${this_host}/api/v2/${path}`);
+    const url = new URL(`https://${this_host}/api/v2/${url_path}`);
     const api_key_base64 = Buffer.from(`${api_key_orig}:X`).toString("base64");
 
     if(current_page) url.searchParams.append("page", String(current_page));
@@ -62,14 +62,14 @@ async function fetchFreshdeskData
 /* 
 Function: sendFreshdeskData
 Purpose: Sends data via the Freshdesk API
-Inputs: path - API endpoint path,
+Inputs: url_path - API endpoint path,
         method - HTTP method (e.g., "POST", "PUT")
         data_load - The data to be sent
 Output: Parsed JSON response from the API
 */
 async function sendFreshdeskData
 ({
-  path,
+  url_path,
   method,
   data_load
 }) 
@@ -78,7 +78,7 @@ async function sendFreshdeskData
     var api_key_orig = process.env.FRESHDESK_API_KEY;
     var this_host = process.env.FRESHDESK_HOST;
 
-    const url = new URL(`https://${this_host}/api/v2/${path}`);
+    const url = new URL(`https://${this_host}/api/v2/${url_path}`);
     const api_key_base64 = Buffer.from(`${api_key_orig}:X`).toString("base64");
 
     console.log("Freshdesk URL =", url.toString());
@@ -122,11 +122,11 @@ Output: Parsed JSON response from the API
 */
 async function postFreshdeskData
 ({
-  path,
+  url_path,
   data_load
 }) 
 {
-    return await sendFreshdeskData({path, method: "POST", data_load});
+    return await sendFreshdeskData({url_path, method: "POST", data_load});
 }
 
 
@@ -134,17 +134,17 @@ async function postFreshdeskData
 /* 
 Function: putFreshdeskData
 Purpose: Updates data to the Freshdesk API
-Inputs: path - API endpoint path,
+Inputs: url_path - API endpoint path,
         data_load - The data to be put
 Output: Parsed JSON response from the API
 */
 async function putFreshdeskData
 ({
-  path,
+  url_path,
   data_load
 }) 
 {
-    return await sendFreshdeskData({path, method: "PUT", data_load});
+    return await sendFreshdeskData({url_path, method: "PUT", data_load});
 }
 
 

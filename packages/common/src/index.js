@@ -4,10 +4,11 @@ module.exports =
 {
     ...require("./retry"),
     ...require("./date_time"),
-    ...require("./file_folder"),
-    ...require("./spreadsheet"),
     ...require("./google_auth"),
+    ...require("./google_drive"),
     ...require("./misc"),
     ...require("./logs"),
+    ...require("./spreadsheet"),
+    ...require("./file_folder"),
 };
 

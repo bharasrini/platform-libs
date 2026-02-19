@@ -1,6 +1,8 @@
-const common = require("@fyle-ops/common");
 const { google } = require('googleapis');
-
+const common = require("@fyle-ops/common");
+const { convertFSUserDefToAccountMap, convertAccountMapUserDefToFS } = require("./user_def");
+const { readAccountMapDataFromFile, flushAccountMapDataToFile } = require("./account_map_file");
+const { initializeAccountMapCols, getOrgOffset, getFieldValueFromAccountMap, updateAccountMap } = require("./account_map_data");
 
 // Class to manage the account mapping information. This will read the account mapping information from the file and provide functions to retrieve the mapping information based on org_id
 class account_mapping
@@ -10,12 +12,17 @@ class account_mapping
       _initAccountMapping(this);
     }
 
-    getAccountMappingData()
+    async getAccountMappingData()
     {
-        return _getAccountMappingData(this);
+        return await _getAccountMappingData(this);
     }
 
-        getCustomerAccountName(org_id)
+    getOrgOffset(org_id)
+    {
+        return _getOrgOffset(this, org_id);
+    }
+
+    getCustomerAccountName(org_id)
     {
         return _getCustomerAccountName(this, org_id);
     }
@@ -60,9 +67,59 @@ class account_mapping
         return _getEnterpriseBillingOrgId(this, org_id);
     }
 
-    getOrgOffset(org_id)
+    async appendNewAccounts(new_accounts)
     {
-        return _getOrgOffset(this, org_id);
+        return await _appendNewAccounts(this, new_accounts);
+    }
+
+    async editExistingAccounts(existing_accounts)
+    {
+        return await _editExistingAccounts(this, existing_accounts);
+    }
+
+    async changeAccountNames(account_names)
+    {
+        return await _changeAccountNames(this, account_names);
+    }
+
+    async changeOrgNames(org_names)
+    {
+        return await _changeOrgNames(this, org_names);
+    }
+
+    async changeHierarchies(hierarchies)
+    {
+        return await _changeHierarchies(this, hierarchies);
+    }
+
+    async changeParentOrgIDs(parent_org_ids)
+    {
+        return await _changeParentOrgIDs(this, parent_org_ids);
+    }
+
+    async changeCountries(countries)
+    {
+        return await _changeCountries(this, countries);
+    }
+
+    async changeRegions(regions)
+    {
+        return await _changeRegions(this, regions);
+    }
+
+    async changeCurrencies(currencies)
+    {
+        return await _changeCurrencies(this, currencies);
+    }
+
+    async changeAUModels(au_models)
+    {
+        return await _changeAUModels(this, au_models);
+    }
+
+    async changeEnterpriseBillingOrgIDs(enterprise_billing_org_ids)
+    {
+        return await _changeEnterpriseBillingOrgIDs(this, enterprise_billing_org_ids)
     }
 }
 
@@ -97,6 +154,12 @@ function _initAccountMapping(account_mapping)
         "enterprise_billing_org_id": -1,
     };
 
+    // Initialize number of rows and columns in the account mapping sheet
+    account_mapping.num_rows = 0;
+    account_mapping.num_cols = 0;
+
+    account_mapping.data = [];
+
     // Nothing else to do, return success
     return 0;
 }
@@ -120,72 +183,45 @@ async function _getAccountMappingData(account_map)
         return 0;
     }
 
-    const auth = common.createGoogleAuth();
-    const sheets = google.sheets({ version: "v4", auth });
+    // Read the account mapping data from file and populate account_map.data []
+    if(await readAccountMapDataFromFile(account_map) < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to read account mapping data from file");
+        return -1;
+    }
 
-    // Account Mapping sheet located at: My Drive -> Tooling -> Account Mapping Sheet
-    // URL: https://docs.google.com/spreadsheets/d/18LzUzM0qVzQ6vQ8wz05ihmGBE0J704w5eWG5m8I8cI8/edit?usp=sharing
-    //const sheet_id = "18LzUzM0qVzQ6vQ8wz05ihmGBE0J704w5eWG5m8I8cI8"; 
-    const sheet_id = process.env.ACCOUNT_MAPPING_SHEET_ID;
+    // Initialize number of rows and columns in the account mapping sheet
+    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(account_map.data);
+    account_map.num_rows = num_rows;
+    account_map.num_cols = num_cols;
 
-    // Sheet in Account Mapping file that has the account mapping information
-    //const sheet_name = "Account Mapping";
-    const sheet_name = process.env.ACCOUNT_MAPPING_SHEET_NAME;
+    // Initialize the columns in the account mapping sheet that we are interested in and store the column sequence in account_map.cols {}
+    if(initializeAccountMapCols(account_map) < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to initialize account map columns");
+        return -1;
+    }
 
-    // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get
-    ({
-        spreadsheetId: sheet_id,
-        range: `${sheet_name}`,
-    });
-
+    // If we are here, then we have been able to get required columns. Read through the account mapping sheet
     // Initialize variables to read the account mapping sheet
     const start_row = 1;
     const start_col = 1;    
-    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data);
 
-    // Locate the columns that we are interested in
-    for(i = 0; i < num_cols; i++)
-    {
-        if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Org ID").toString().trim().toLowerCase()) account_map.cols["org_id"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Customer").toString().trim().toLowerCase()) account_map.cols["customer"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Entity").toString().trim().toLowerCase()) account_map.cols["org"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Primary Org (Parent) / Secondary Org (Child)").toString().trim().toLowerCase()) account_map.cols["hierarchy"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Parent Entity ID").toString().trim().toLowerCase()) account_map.cols["parent_org_id"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Country").toString().trim().toLowerCase()) account_map.cols["country"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Region").toString().trim().toLowerCase()) account_map.cols["region"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("Currency").toString().trim().toLowerCase()) account_map.cols["currency"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("ou_org_id").toString().trim().toLowerCase()) account_map.cols["ou_org_id"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("active_user_definition").toString().trim().toLowerCase()) account_map.cols["au_model"] = i;
-        else if((res.data.values[0][i]).toString().trim().toLowerCase() == ("enterprise_billing_org_id").toString().trim().toLowerCase()) account_map.cols["enterprise_billing_org_id"] = i;
-    }
-
-    // Check if we were able to locate all required columns
-    for(key in account_map.cols)
-    {
-        if(account_map.cols[key] == -1)
-        {
-            common.statusMessage(arguments.callee.name, "Failed to locate column for key: " + account_map.cols[key]);
-            return -1;
-        }
-    }
-
-    // If we are here, then we have been able to get required columns. Read through the account mapping file
-    for(i = start_row; i < num_rows; i++)
+    for(i = start_row; i < account_map.num_rows; i++)
     {
         var account_mapping_info = 
         {
-            "org_id": res.data.values[i][account_map.cols["org_id"]],
-            "customer": res.data.values[i][account_map.cols["customer"]],
-            "org": res.data.values[i][account_map.cols["org"]],
-            "hierarchy": res.data.values[i][account_map.cols["hierarchy"]],
-            "parent_org_id": res.data.values[i][account_map.cols["parent_org_id"]] != "" ? res.data.values[i][account_map.cols["parent_org_id"]] : res.data.values[i][account_map.cols["org_id"]],
-            "country": res.data.values[i][account_map.cols["country"]],
-            "region": res.data.values[i][account_map.cols["region"]],
-            "currency": res.data.values[i][account_map.cols["currency"]],
-            "ou_org_id": res.data.values[i][account_map.cols["ou_org_id"]],
-            "au_model": res.data.values[i][account_map.cols["au_model"]],
-            "enterprise_billing_org_id": res.data.values[i][account_map.cols["enterprise_billing_org_id"]],
+            "org_id": account_map.data[i][account_map.cols["org_id"]],
+            "customer": account_map.data[i][account_map.cols["customer"]],
+            "org": account_map.data[i][account_map.cols["org"]],
+            "hierarchy": account_map.data[i][account_map.cols["hierarchy"]],
+            "parent_org_id": account_map.data[i][account_map.cols["parent_org_id"]] != "" ? account_map.data[i][account_map.cols["parent_org_id"]] : account_map.data[i][account_map.cols["org_id"]],
+            "country": account_map.data[i][account_map.cols["country"]],
+            "region": account_map.data[i][account_map.cols["region"]],
+            "currency": account_map.data[i][account_map.cols["currency"]],
+            "ou_org_id": account_map.data[i][account_map.cols["ou_org_id"]],
+            "au_model": account_map.data[i][account_map.cols["au_model"]],
+            "enterprise_billing_org_id": account_map.data[i][account_map.cols["enterprise_billing_org_id"]],
         };
 
         // Add this to the account map list
@@ -193,7 +229,6 @@ async function _getAccountMappingData(account_map)
 
         // Increment the number of account maps
         account_map.num_maps++;
-
     }
 
     common.statusMessage(arguments.callee.name, "Processed " + account_map.num_maps + " account mapping entries from file");
@@ -205,6 +240,18 @@ async function _getAccountMappingData(account_map)
 
 
 /* 
+Function: _getOrgOffset
+Purpose: Gets the offset in the Account Mapping Sheet for the org_id passed in. getAccountMappingData() needs to be called prior
+Inputs: Account Mapping instance, Org ID
+Output: Offset (number). -1 returned if not found
+*/
+function _getOrgOffset(account_map, org_id)
+{
+    return getOrgOffset(account_map, org_id);
+}
+
+
+/* 
 Function: _getCustomerAccountName
 Purpose: Retrieves the Customer / Account name for the org_id passed in. getAccountMappingData() needs to be called prior
 Inputs: Account Mapping instance, Org ID
@@ -212,26 +259,7 @@ Output: Customer Account (string), "" is returned as the default if a match is n
 */
 function _getCustomerAccountName(account_map, org_id)
 {
-    var ret = "";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the customer account name for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].customer;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "customer");
 }
 
 
@@ -244,26 +272,7 @@ Output: Org Name (string), "" is returned as the default if a match is not found
 */
 function _getOrgName(account_map, org_id)
 {
-    var ret = "";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the org name for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].org;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "org");
 }
 
 
@@ -276,26 +285,7 @@ Output: Hierarchy is returned as the default if a match is not found
 */
 function _getHierarchyForOrg(account_map, org_id)
 {
-    var ret = "Primary";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the hierarchy for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].hierarchy;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "hierarchy");
 }
 
 
@@ -308,26 +298,7 @@ Output: Parent Org ID (string), org_id (same ID) is returned as the default if a
 */
 function _getParentForOrg(account_map, org_id)
 {
-    var ret = org_id;
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the parent org id for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].parent_org_id;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "parent_org_id");
 }
 
 
@@ -340,26 +311,7 @@ Output: Country Name (string), "" is returned as the default if a match is not f
 */
 function _getOrgCountry(account_map, org_id)
 {
-    var ret = "";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the country for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].country;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "country");
 }
 
 
@@ -372,26 +324,7 @@ Output: Region Name (string), "" is returned as the default if a match is not fo
 */
 function _getOrgRegion(account_map, org_id)
 {
-    var ret = "";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the region for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].region;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "region");
 }
 
 
@@ -404,26 +337,7 @@ Output: Currency (string), "" is returned as the default if a match is not found
 */
 function _getOrgCurrency(account_map, org_id)
 {
-    var ret = "";
-
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the currency for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].currency;
-            break;
-        }
-    }
-
-    return ret;
+    return getFieldValueFromAccountMap(account_map, org_id, "currency");
 }
 
 
@@ -435,26 +349,8 @@ Output: AU Model (string), "report_0" is the default if nothing found
 */
 function _getAUModel(account_map, org_id)
 {
-    var ret = "expense_1";
+    return getFieldValueFromAccountMap(account_map, org_id, "au_model");
 
-    // Sanity check
-    if(account_map.num_maps == 0)
-    {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the active user model for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
-        {
-            ret = account_map.map_list[i].au_model;
-            break;
-        }
-    }
-
-    return ret;
 }
 
 
@@ -467,58 +363,388 @@ Output: Enterprise Billing Org ID (string), org_id is the default if nothing fou
 */
 function _getEnterpriseBillingOrgId(account_map, org_id)
 {
-    var ret = org_id;
+    return getFieldValueFromAccountMap(account_map, org_id, "enterprise_billing_org_id");
+
+}
+
+
+
+/* 
+Function: _appendNewAccounts
+Purpose: Appends new accounts to the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Account Mapping instance, Account Mapping Info array with the following structure:
+account data = [{
+  "org_id": "",
+  "customer": "",
+  "org": "",
+  "hierarchy": "",
+  "parent_org_id": "",
+  "country": "",
+  "region": "",
+  "currency": "",
+  "ou_org_id": "",
+  "au_model": "",
+  "enterprise_billing_org_id": "",
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _appendNewAccounts(account_map, new_accounts)
+{
+    // Initialize variables
+    var i = 0, j = 0;
+
+    // Number of accounts to be appended
+    var num_accounts_appended = 0;
 
     // Sanity check
     if(account_map.num_maps == 0)
     {
         common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
+        return 0;
     }
 
-    // Loop through the account mapping list and find the enterprise billing org id for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
+    // Loop through the new accounts and add them to appended_account_data []
+    for(i = 0; i < new_accounts.length; i++)
     {
-        if(account_map.map_list[i].org_id == org_id)
+        var org_id = new_accounts[i]["org_id"];
+        var this_org_name = "";
+        
+        // Check if the org exists, skip if it does
+        if((this_org_name = account_map.getOrgName(org_id)) != "")
         {
-            ret = account_map.map_list[i].enterprise_billing_org_id;
-            break;
+            common.statusMessage(arguments.callee.name, "Org already exists, ID: " + org_id + ", org_name: "  + this_org_name + ", will not be appending");
+            continue;
         }
+
+        // User definition (from FS) needs to be converted to the Account Mapping format
+        var au_model = convertFSUserDefToAccountMap(new_accounts[i]["au_model"]);
+        new_accounts[i]["au_model"] = au_model;
+
+        // Array to store each row to be appended to the account mapping sheet. This will be constructed based on the columns in the account mapping sheet
+        var account_cols = [];
+
+        // Load all fields into the account_cols [] based on the column sequence in the account mapping sheet
+        for(j = 0; j < account_map.num_cols; j++)
+        {
+            for(var key in account_map.cols)
+            {
+                if(account_map.cols[key] == j)
+                {
+                    account_cols.push(new_accounts[i][key])
+                }
+            }
+        }
+
+        // Add this account to account_map.map_list
+        account_map.map_list.push(new_accounts[i]);
+
+        // Add this account to account_map.data
+        account_map.data.push(account_cols);
+
+        // Increment the number of account maps and rows in account_map
+        account_map.num_maps++;
+        account_map.num_rows++;
+
+        num_accounts_appended++;
+
+        common.statusMessage(arguments.callee.name, "Including new account with org_id: " + org_id + " to be appended to the account mapping sheet");
     }
 
-    return ret;
+    // Flush all changes in account_map.data back to the sheet in one go. 
+    if(await flushAccountMapDataToFile(account_map) < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to flush account map data to the account mapping sheet");
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully appended " + num_accounts_appended + " new accounts to the account mapping sheet");
+
+    return 0;
+}
+
+
+
+/* 
+Function: _editExistingAccounts
+Purpose: Edits existing accounts information in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Account Mapping instance, Account array with the following structure:
+account data = [{
+  "org_id": "",
+  "customer": "",
+  "org": "",
+  "hierarchy": "",
+  "parent_org_id": "",
+  "country": "",
+  "region": "",
+  "currency": "",
+  "ou_org_id": "",
+  "au_model": "",
+  "enterprise_billing_org_id": "",
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _editExistingAccounts(account_map, existing_accounts)
+{
+    // Initialize variables
+    var i = 0, j = 0;
+
+    // Number of accounts that we will be editing in the account mapping sheet
+    var num_accounts_to_edit = 0;
+
+    // Sanity check
+    if(account_map.num_maps == 0)
+    {
+        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
+        return 0;
+    }
+
+    // Loop through the existing accounts and queue them in for editing in the account mapping sheet
+    for(i = 0; i < existing_accounts.length; i++)
+    {
+        var org_id = existing_accounts[i]["org_id"];
+
+        // Sanity check
+        if(org_id.toString().trim() == "")
+        {
+            common.statusMessage(arguments.callee.name, "Invalid org ID");
+            continue;
+        }
+
+        var offset = -1;
+        // Check if the org exists. If it doesn't skip the account
+        if((offset = account_map.getOrgOffset(org_id)) < 0)
+        {
+            common.statusMessage(arguments.callee.name, "Failed to locate org with ID: " + org_id);
+            continue;
+        }
+
+        // FS AU model may need to be converted to the Account Mapping AU model
+        var au_model = convertFSUserDefToAccountMap(existing_accounts[i]["au_model"]);
+        existing_accounts[i]["au_model"] = au_model;
+
+        // Array to store the account mapping columns
+        var account_cols = [];
+
+        // Load all fields into the account_cols []
+        for(j = 0; j < account_map.num_cols; j++)
+        {
+            for(var key in account_map.cols)
+            {
+                if(account_map.cols[key] == j)
+                {
+                    account_cols.push(existing_accounts[i][key])
+                }
+            }
+        }
+
+        // Update the values in account_map.data for this org_id. Use offset + 1 because account_map.data also has the header row at the top
+        account_map.data[offset+1] = account_cols;
+
+        // Update account_map.map_list []
+        for(var key in existing_accounts[i])
+        {
+            account_map.map_list[offset][key] = existing_accounts[i][key];
+        }
+
+        common.statusMessage(arguments.callee.name, "Queuing account with org_id: " + org_id + " at row: " + (offset + 2) + " to be edited in the account mapping sheet");
+
+        // Increment the number of accounts to be edited
+        num_accounts_to_edit++;
+    }
+
+    // Flush all changes in account_map.data back to the sheet in one go. 
+    if(await flushAccountMapDataToFile(account_map) < 0)
+    {
+        common.statusMessage(arguments.callee.name, "Failed to flush account map data to the account mapping sheet");
+        return -1;
+    }
+
+    common.statusMessage(arguments.callee.name, "Successfully edited " + num_accounts_to_edit + " accounts in the account mapping sheet");
+
+    return 0;
 }
 
 
 /* 
-Function: _getOrgOffset
-Purpose: Gets the offset in the Account Mapping Sheet for the org_id passed in. getAccountMappingData() needs to be called prior
-Inputs: Account Mapping instance, Org ID
-Output: Offset (number). -1 returned if not found
+Function: changeAccountField
+Purpose: Updates the account_map.map_list [] and account_map.data [] with the new values for the account fields. 
+Flushes the changes back to the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: account_map, Array of following structures
+[{
+  org_id,
+  key_to_update (for example, customer for account names change),
+},]
+Key to update is the field that needs to be updated for the accounts in the account mapping sheet. For example, if we are changing account names, then this will be "customer"
+Output: 0 on success, -1 on failure
 */
-function _getOrgOffset(account_map, org_id)
+async function changeAccountField(account_map, account_data, key_to_update)
 {
-    var ret = -1;
+    var num_accounts_to_edit = updateAccountMap(account_map, account_data, key_to_update);
 
-    // Sanity check
-    if(account_map.num_maps == 0)
+    if(num_accounts_to_edit > 0)
     {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
-        return ret;
-    }
-
-    // Loop through the account mapping list and find the offset for the org_id passed in
-    for(var i = 0; i < account_map.num_maps; i++)
-    {
-        if(account_map.map_list[i].org_id == org_id)
+        // Write all changes in account_map.data back to the sheet in one go. 
+        if(await flushAccountMapDataToFile(account_map) < 0)
         {
-            ret = i;
-            break;
+            common.statusMessage(arguments.callee.name, "Failed to write edited account data back to the account mapping sheet");
+            return -1;
         }
-    }
 
-    return ret;
+        common.statusMessage(arguments.callee.name, "Successfully edited " + num_accounts_to_edit + " accounts in the account mapping sheet");
+    }
+    else
+    {
+        common.statusMessage(arguments.callee.name, "No accounts to edit");
+    }
+    
+    return 0;
 }
+
+
+/* 
+Function: _changeAccountNames
+Purpose: Changes the Account Names in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  customer
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeAccountNames(account_map, account_names)
+{
+    return await changeAccountField(account_map, account_names, "customer");
+}
+
+
+
+/* 
+Function: _changeOrgNames
+Purpose: Changes the Org Names in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  org
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeOrgNames(account_map, org_names)
+{
+    return await changeAccountField(account_map, org_names, "org");
+}
+
+
+/* 
+Function: _changeHierarchies
+Purpose: Changes the Org Hierarchies in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  hierarchy
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeHierarchies(account_map, hierarchies)
+{
+    return await changeAccountField(account_map, hierarchies, "hierarchy");
+}
+
+
+/* 
+Function: _changeParentOrgIDs
+Purpose: Changes the Parent Org IDs in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  parent_org_id
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeParentOrgIDs(account_map, parent_org_ids)
+{
+    return await changeAccountField(account_map, parent_org_ids, "parent_org_id");
+}
+
+
+/* 
+Function: _changeCountries
+Purpose: Changes the Org Countries in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  country
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeCountries(account_map, countries)
+{
+    return await changeAccountField(account_map, countries, "country");
+}
+
+
+/* 
+Function: _changeRegions
+Purpose: Changes the Org Regions in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  region
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeRegions(account_map, regions)
+{
+    return await changeAccountField(account_map, regions, "region");
+}
+
+
+/* 
+Function: _changeCurrencies
+Purpose: Changes the Org Currencies in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  currency
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeCurrencies(account_map, currencies)
+{
+    return await changeAccountField(account_map, currencies, "currency");
+}
+
+
+/* 
+Function: _changeAUModels
+Purpose: Changes the AU Models in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  au_model
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeAUModels(account_map, au_models)
+{
+    return await changeAccountField(account_map, au_models, "au_model");
+}
+
+
+/* 
+Function: _changeEnterpriseBillingOrgIDs
+Purpose: Changes the Enterprise Billing Org IDs in the Account Mapping sheet. getAccountMappingData() needs to be called prior
+Inputs: Array of following structures
+[{
+  org_id,
+  enterprise_billing_org_id
+},]
+Output: 0 on success, -1 on failure
+*/
+async function _changeEnterpriseBillingOrgIDs(account_map, enterprise_billing_org_ids)
+{
+    return await changeAccountField(account_map, enterprise_billing_org_ids, "enterprise_billing_org_id");
+}
+
 
 
 // Export the account_mapping class

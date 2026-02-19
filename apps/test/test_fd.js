@@ -10,7 +10,7 @@ const { setTicketField } = require("@fyle-ops/freshdesk");
 const { fd_contacts, updateContact, addContact } = require("@fyle-ops/freshdesk");
 const { fd_ratings } = require("@fyle-ops/freshdesk");
 
-async function test_fd_tickets()
+async function test_fd_get_tickets()
 {
     const tickets = new fd_tickets();
     await tickets.getTickets(null, null, null, "2025-09-01T00:00:00Z");
@@ -18,7 +18,7 @@ async function test_fd_tickets()
     console.log("Total tickets read: ", tickets.num_tickets);
 }
 
-async function test_fd_ticket_fields()
+async function test_fd_get_ticket_fields()
 {
     const ticket_fields = new fd_ticket_fields();
     await ticket_fields.getTicketFields();
@@ -31,35 +31,35 @@ async function test_fd_ticket_fields()
     console.log("Ticket fields read successfully !!!");
 }
 
-async function test_fd_business_hours()
-{
-    const business_hours = new fd_business_hours();
-    await business_hours.getBusinessHours();
-    console.log("Business hours read successfully !!!");
-}
-
-async function test_fd_agent()
+async function test_fd_get_agents()
 {
     const agent = new fd_agent();
     await agent.getAgents();
     console.log("Agents read successfully !!!");
 }
 
-async function test_fd_group()
+async function test_fd_get_business_hours()
+{
+    const business_hours = new fd_business_hours();
+    await business_hours.getBusinessHours();
+    console.log("Business hours read successfully !!!");
+}
+
+async function test_fd_get_groups()
 {
     const group = new fd_group();
     await group.getGroups();
     console.log("Groups read successfully !!!");
 }
 
-async function test_fd_company()
+async function test_fd_get_companies()
 {
     const company = new fd_company();
     await company.getCompanies();
     console.log("Companies read successfully !!!");
 }
 
-async function test_createNewCompanyonFD()
+async function test_fd_createNewCompany()
 {
     var company_details = 
     {
@@ -152,7 +152,7 @@ async function test_fd_set_ticket_data()
     console.log("Ticket fields updated successfully !!!");
 }
 
-async function test_fd_contact()
+async function test_fd_get_contacts()
 {
     const contact = new fd_contacts();
     await contact.getContacts();
@@ -179,7 +179,7 @@ async function test_fd_update_contact()
 }
  
 
-async function test_fd_ratings()
+async function test_fd_get_ratings()
 {
     const ratings = new fd_ratings();
     var created_since_date = new Date(2025, 0, 1);
@@ -191,25 +191,25 @@ async function test_fd_ratings()
 
 async function test_fd()
 {
-    if(process.env.RUN_TEST_FD_TICKETS === "true") await test_fd_tickets();
-    if(process.env.RUN_TEST_FD_TICKET_FIELDS === "true") await test_fd_ticket_fields();
-    if(process.env.RUN_TEST_FD_BUSINESS_HOURS === "true") await test_fd_business_hours();
-    if(process.env.RUN_TEST_FD_AGENT === "true") await test_fd_agent();
-    if(process.env.RUN_TEST_FD_GROUP === "true") await test_fd_group();
-    if(process.env.RUN_TEST_FD_COMPANY === "true") await test_fd_company();
-    if(process.env.RUN_TEST_CREATE_NEW_COMPANY_ON_FD === "true") await test_createNewCompanyonFD();
-    if(process.env.RUN_TEST_UPDATE_COMPANY_NAME_ON_FD === "true") await test_fd_updateCompanyName();
-    if(process.env.RUN_TEST_UPDATE_CSM_ON_FD === "true") await test_fd_updateCSM();
-    if(process.env.RUN_TEST_UPDATE_ACCOUNT_TIER_ON_FD === "true") await test_fd_updateAccountTier();
-    if(process.env.RUN_TEST_UPDATE_ACCOUNT_DOMAINS_ON_FD === "true") await test_fd_updateAccountDomains();
-    if(process.env.RUN_TEST_UPDATE_ACCOUNT_ARR_ON_FD === "true") await test_fd_updateAccountARR();
-    if(process.env.RUN_TEST_UPDATE_ACCOUNT_SOURCE_ON_FD === "true") await test_fd_updateAccountSource();
-    if(process.env.RUN_TEST_UPDATE_ACCOUNT_PARTNER_ON_FD === "true") await test_fd_updateAccountPartner();
-    if(process.env.RUN_TEST_SET_TICKET_DATA_ON_FD === "true") await test_fd_set_ticket_data();
-    if(process.env.RUN_TEST_FD_CONTACT === "true") await test_fd_contact();
-    if(process.env.RUN_TEST_ADD_CONTACT_ON_FD === "true") await test_fd_add_contact();
-    if(process.env.RUN_TEST_UPDATE_CONTACT_ON_FD === "true") await test_fd_update_contact();
-    if(process.env.RUN_TEST_FD_RATINGS === "true") await test_fd_ratings();
+    if(process.env.RUN_TEST_FD_GET_TICKETS === "true") await test_fd_get_tickets();
+    if(process.env.RUN_TEST_FD_GET_TICKET_FIELDS === "true") await test_fd_get_ticket_fields();
+    if(process.env.RUN_TEST_FD_GET_AGENTS === "true") await test_fd_get_agents();
+    if(process.env.RUN_TEST_FD_GET_BUSINESS_HOURS === "true") await test_fd_get_business_hours();
+    if(process.env.RUN_TEST_FD_GET_GROUPS === "true") await test_fd_get_groups();
+    if(process.env.RUN_TEST_FD_GET_COMPANIES === "true") await test_fd_get_companies();
+    if(process.env.RUN_TEST_FD_CREATE_NEW_COMPANY === "true") await test_fd_createNewCompany();
+    if(process.env.RUN_TEST_FD_UPDATE_COMPANY_NAME === "true") await test_fd_updateCompanyName();
+    if(process.env.RUN_TEST_FD_UPDATE_CSM === "true") await test_fd_updateCSM();
+    if(process.env.RUN_TEST_FD_UPDATE_ACCOUNT_TIER === "true") await test_fd_updateAccountTier();
+    if(process.env.RUN_TEST_FD_UPDATE_ACCOUNT_DOMAINS === "true") await test_fd_updateAccountDomains();
+    if(process.env.RUN_TEST_FD_UPDATE_ACCOUNT_ARR === "true") await test_fd_updateAccountARR();
+    if(process.env.RUN_TEST_FD_UPDATE_ACCOUNT_SOURCE === "true") await test_fd_updateAccountSource();
+    if(process.env.RUN_TEST_FD_UPDATE_ACCOUNT_PARTNER === "true") await test_fd_updateAccountPartner();
+    if(process.env.RUN_TEST_FD_SET_TICKET_DATA === "true") await test_fd_set_ticket_data();
+    if(process.env.RUN_TEST_FD_GET_CONTACTS === "true") await test_fd_get_contacts();
+    if(process.env.RUN_TEST_FD_ADD_CONTACT === "true") await test_fd_add_contact();
+    if(process.env.RUN_TEST_FD_UPDATE_CONTACT === "true") await test_fd_update_contact();
+    if(process.env.RUN_TEST_FD_GET_RATINGS === "true") await test_fd_get_ratings();
 }
 
 
