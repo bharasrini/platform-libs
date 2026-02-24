@@ -47,6 +47,8 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleReceipt(fyle_receipt, fyle_acc)
 {
+    const fn = _initFyleReceipt.name;
+
     // Save a reference to the fyle_account instance in fyle_receipt so that we can access it in the fyle_receipt functions
     fyle_receipt.fyle_acc = fyle_acc;
 
@@ -70,6 +72,8 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptList(fyle_receipt)
 {
+    const fn = _getReceiptList.name;
+    
     // Loop variables
     var i = 0, j = 0;
 
@@ -78,7 +82,7 @@ async function _getReceiptList(fyle_receipt)
 
     if(fyle_acc.expenses.num_expenses == 0)
     {
-        common.statusMessage(arguments.callee.name, "No expenses found in fyle_acc instance. Invoking getExpenses() for all expenses created in the last 1 month.");
+        common.statusMessage(fn, "No expenses found in fyle_acc instance. Invoking getExpenses() for all expenses created in the last 1 month.");
         var users = null; // all users
         var states = null; // all states
         var event = "created_at";
@@ -132,10 +136,10 @@ async function _getReceiptList(fyle_receipt)
         
     }
 
-    common.statusMessage(arguments.callee.name, "Finished retrieving receipt list for all expenses. Total receipts found : " + fyle_acc.receipts.num_receipts);
+    common.statusMessage(fn, "Finished retrieving receipt list for all expenses. Total receipts found : " + fyle_acc.receipts.num_receipts);
 
      // As a test, export the receipts to an Excel file in the downloads folder
-    await common.exportExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipts.xlsx", "Receipts");
+    await common.exportToExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipts.xlsx", "Receipts");
 
     return 0;
 }
@@ -152,6 +156,8 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptLinks(fyle_receipt)
 {
+    const fn = _getReceiptLinks.name;
+
     var fyle_acc = fyle_receipt.fyle_acc;
 
     var i = 0, j = 0;
@@ -161,7 +167,7 @@ async function _getReceiptLinks(fyle_receipt)
     // Sanity check
     if(fyle_acc.receipts.num_receipts == 0)
     {
-        common.statusMessage(arguments.callee.name, "No receipts found. Invoking getReceiptList first.");
+        common.statusMessage(fn, "No receipts found. Invoking getReceiptList first.");
         await fyle_receipt.getReceiptList();
     }
 
@@ -226,20 +232,20 @@ async function _getReceiptLinks(fyle_receipt)
 
             // Increment the number of receipts processed
             processed += num_receipts_this_time;
-            common.statusMessage(arguments.callee.name, "Retrieved links for " + processed + " receipts so far");
+            common.statusMessage(fn, "Retrieved links for " + processed + " receipts so far");
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Error while retrieving receipt links for receipts from " + processed + " to " + (processed + num_receipts_this_time) + ". Error: " + e.message);
+            common.statusMessage(fn, "Error while retrieving receipt links for receipts from " + processed + " to " + (processed + num_receipts_this_time) + ". Error: " + e.message);
             return -1;
         }
 
     }while(processed < total_count);
 
-    common.statusMessage(arguments.callee.name, "Finished retrieving links for all receipts. Total receipt links : " + total_count);
+    common.statusMessage(fn, "Finished retrieving links for all receipts. Total receipt links : " + total_count);
 
     // As a test, export the receipts to an Excel file in the downloads folder
-    await common.exportExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipts.xlsx", "Receipts");
+    await common.exportToExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipt links.xlsx", "Receipt Links");
 
     return 0;
 }
@@ -255,6 +261,8 @@ Output: receipt object on success, null on failure
 */
 function _getReceiptObject(fyle_receipt, receipt_id)
 {
+    const fn = _getReceiptObject.name;
+
     var i = 0;
     var fyle_acc = fyle_receipt.fyle_acc;
 
@@ -278,6 +286,8 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptFile(fyle_receipt, receipt_id)
 {
+    const fn = _getReceiptFile.name;
+    
     // Loop variables
     var i = 0;
 
@@ -287,14 +297,14 @@ async function _getReceiptFile(fyle_receipt, receipt_id)
     var receipt_obj = fyle_receipt.getReceiptObject(receipt_id);
     if(receipt_obj == null)
     {
-        common.statusMessage(arguments.callee.name, "Receipt not found for receipt_id: " + receipt_id);
+        common.statusMessage(fn, "Receipt not found for receipt_id: " + receipt_id);
         return -1;
     }
 
     // Path to dowload the receipt file
     const url_path = "/platform/v1/admin/files/download";
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     // Build the 'include' parameter for the API call based on the input parameters
     var include = [{"id": receipt_id}];
@@ -316,7 +326,7 @@ async function _getReceiptFile(fyle_receipt, receipt_id)
         if (contentType.includes("application/json"))
         {
             // It's a JSON response, just ignore it as we are expecting a blob for the receipt
-            common.statusMessage(arguments.callee.name, "This is a JSON response:", data);
+            common.statusMessage(fn, "This is a JSON response: " + data);
         }
         else
         {
@@ -335,11 +345,11 @@ async function _getReceiptFile(fyle_receipt, receipt_id)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get receipt for receipt_id: " + receipt_id + ". Error:" + e.message);
+        common.statusMessage(fn, "Failed to get receipt for receipt_id: " + receipt_id + ". Error:" + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully retrieved receipt for receipt_id: " + receipt_id);
+    common.statusMessage(fn, "Successfully retrieved receipt for receipt_id: " + receipt_id);
 
     return 0;
     

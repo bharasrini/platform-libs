@@ -9,6 +9,8 @@ Output: 0 if successful, -1 if any required column is not found
 */
 function initializeAccountMapCols(account_map)
 {
+    const fn = initializeAccountMapCols.name;
+
     // Initialize variables
     var i = 0, j = 0;
 
@@ -42,11 +44,11 @@ function initializeAccountMapCols(account_map)
     }
 
     // Check if we were able to locate all required columns
-    for(key in account_map.cols)
+    for(let key in account_map.cols)
     {
         if(account_map.cols[key] == -1)
         {
-            common.statusMessage(arguments.callee.name, "Failed to locate column for key: " + key);
+            common.statusMessage(fn, "Failed to locate column for key: " + key);
             return -1;
         }
     }
@@ -65,12 +67,14 @@ Output: Offset (number). -1 returned if not found
 */
 function getOrgOffset(account_map, org_id)
 {
+    const fn = getOrgOffset.name;
     var ret = -1;
 
     // Sanity check
+
     if(account_map.num_maps == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
+        common.statusMessage(fn, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
         return ret;
     }
 
@@ -98,12 +102,13 @@ Output: Field value (string), "" is returned as the default if a match is not fo
 */
 function getFieldValueFromAccountMap(account_map, org_id, field_name)
 {
+    const fn = getFieldValueFromAccountMap.name;
     var ret = "";
 
     // Sanity check
     if(account_map.num_maps == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
+        common.statusMessage(fn, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
         return ret;
     }
 
@@ -135,6 +140,8 @@ Output: 0 on success, -1 on failure
 */
 function updateAccountMap(account_map, account_data, key_to_update)
 {
+    const fn = updateAccountMap.name;
+
     // Initialize variables
     var i = 0; 
 
@@ -144,7 +151,7 @@ function updateAccountMap(account_map, account_data, key_to_update)
     // Sanity check
     if(account_map.num_maps == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
+        common.statusMessage(fn, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
         return 0;
     }
 
@@ -155,14 +162,14 @@ function updateAccountMap(account_map, account_data, key_to_update)
         // Sanity check
         if(org_id.toString().trim() == "")
         {
-            common.statusMessage(arguments.callee.name, "Invalid org ID");
+            common.statusMessage(fn, "Invalid org ID");
             continue;
         }
 
         var val_to_update = account_data[i][key_to_update];
         if(val_to_update.toString().trim() == "")
         {
-            common.statusMessage(arguments.callee.name, "Invalid value for " + key_to_update);
+            common.statusMessage(fn, "Invalid value for " + key_to_update);
             continue;
         }
 
@@ -171,11 +178,11 @@ function updateAccountMap(account_map, account_data, key_to_update)
         // Check if the org exists
         if((offset = account_map.getOrgOffset(org_id)) < 0)
         {
-            common.statusMessage(arguments.callee.name, "Failed to locate org with ID: " + org_id + ", will not be changing account name");
+            common.statusMessage(fn, "Failed to locate org with ID: " + org_id + ", will not be changing account name");
             continue;
         }
 
-        common.statusMessage(arguments.callee.name, "[" + (i+1) + "]. Updating value: " + val_to_update + " for org ID: " + org_id + " at row: " + (offset + 2));
+        common.statusMessage(fn, "[" + (i+1) + "]. Updating value: " + val_to_update + " for org ID: " + org_id + " at row: " + (offset + 2));
         
         // Load the required field into the data []
         // Add 1 to the offset to factor in the header row

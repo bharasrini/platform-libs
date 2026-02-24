@@ -55,6 +55,8 @@ Output: 0 on success, -1 on failure
 */
 function _initTicketFields(ticket_fields)
 {
+    const fn = _initTicketFields.name;
+
     // Initialize an array to store the ticket fields list
     ticket_fields.ticket_fields_list = [];
 
@@ -74,6 +76,8 @@ Output: Returns 0 on success, -1 on failure
 */
 async function _getTicketFields(ticket_fields)
 {
+    const fn = _getTicketFields.name;
+
     // URL path for the API endpoint to get the list of ticket fields
     var url_path = "admin/ticket_fields";
 
@@ -82,7 +86,11 @@ async function _getTicketFields(ticket_fields)
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            url_path: url_path
+            url_path: url_path,
+            current_page: null,
+            per_page: null,
+            updated_since: null,
+            include: null
         });
 
         // Initialize loop counters 
@@ -100,11 +108,11 @@ async function _getTicketFields(ticket_fields)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get list of Ticket Fields. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get list of Ticket Fields. Error:" + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched ticket fields. Number of ticket fields = "+ ticket_fields.num_ticket_fields);
+    common.statusMessage(fn, "Successfully fetched ticket fields. Number of ticket fields = " + ticket_fields.num_ticket_fields);
     
     return 0;
 }
@@ -121,12 +129,14 @@ Output: Returns 0 on success, -1 on failure
 */
 async function getTicketFieldData(ticket_fields, field_name, field_data)
 {
+    const fn = getTicketFieldData.name;
+    
     var i = 0;
 
     // If we don't have the ticket fields list built, build it first
     if(ticket_fields.ticket_fields_list.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Ticket Fields List is empty, let's build this");
+        common.statusMessage(fn, "Ticket Fields List is empty, let's build this");
         await _getTicketFields(ticket_fields);
     }
 
@@ -146,7 +156,7 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     // If we don't have a matching field, return an error
     if(field_id < 0)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get the id for ticket field: " + field_name);
+        common.statusMessage(fn, "Failed to get the id for ticket field: " + field_name);
         return -1;
     }
 
@@ -162,7 +172,11 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            url_path: url_path
+            url_path: url_path,
+            current_page: null,
+            per_page: null,
+            updated_since: null,
+            include: null
         });
 
         field_data.push(data);
@@ -172,11 +186,11 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get ticket fields for: " + field_name + ". Error:" + e.message);
+        common.statusMessage(fn, "Failed to get ticket fields for: " + field_name + ". Error:" + e.message);
         return -1;
     }
     
-    common.statusMessage(arguments.callee.name, "Successfully retrieved field data for " + field_name);
+    common.statusMessage(fn, "Successfully retrieved field data for " + field_name);
     
     return 0;
 }
@@ -193,13 +207,15 @@ Output: Returns 0 on success, -1 on failure
 */
 async function getTicketFieldOptions(ticket_fields, field_name, options)
 {
+    const fn = getTicketFieldOptions.name;
+    
     var i = 0;
     var field_data = [];
 
     // Get the field data for the field that we are interested in
     if(await getTicketFieldData(ticket_fields, field_name, field_data) < 0)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get ticket field data for: " + field_name);
+        common.statusMessage(fn, "Failed to get ticket field data for: " + field_name);
         return -1;
     }
 
@@ -207,7 +223,7 @@ async function getTicketFieldOptions(ticket_fields, field_name, options)
     var this_field_data = field_data[0];
     if(!this_field_data.choices)
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate choices in field data for: " + field_name);
+        common.statusMessage(fn, "Failed to locate choices in field data for: " + field_name);
         return -1;
     }
 
@@ -236,6 +252,8 @@ Output: None (populates the global ticket_status_options array)
 */
 async function getStatusOptions(ticket_fields)
 {
+    const fn = getStatusOptions.name;
+
     // Get the options for the status field and populate the ticket_status_options array
     await getTicketFieldOptions(ticket_fields, "status", ticket_status_options);
     return;
@@ -250,12 +268,14 @@ Output: status value (string)
 */
 async function _getTicketStatusVal(ticket_fields, code)
 {
+    const fn = _getTicketStatusVal.name;
+    
     var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_status_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Status Options List is empty, let's build this");
+        common.statusMessage(fn, "Status Options List is empty, let's build this");
         await getStatusOptions(ticket_fields);
     }
 
@@ -279,12 +299,14 @@ Output: status code (number)
 */
 async function _getTicketStatusCode(ticket_fields, label)
 {
+    const fn = _getTicketStatusCode.name;
+    
     var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_status_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Status Options List is empty, let's build this");
+        common.statusMessage(fn, "Status Options List is empty, let's build this");
         await getStatusOptions(ticket_fields);
     }
 
@@ -314,6 +336,7 @@ Output: None (populates the global ticket_source_options array)
 */
 async function getSourceOptions(ticket_fields)
 {
+    const fn = getSourceOptions.name;
     await getTicketFieldOptions(ticket_fields, "source", ticket_source_options);
     return;
 }
@@ -328,12 +351,13 @@ Output: source value (string)
 */
 async function _getTicketSourceVal(ticket_fields, code)
 {
+    const fn = _getTicketSourceVal.name;
     var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_source_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Source Options List is empty, let's build this");
+        common.statusMessage(fn, "Source Options List is empty, let's build this");
         await getSourceOptions(ticket_fields);
     }
 
@@ -359,10 +383,12 @@ async function _getTicketSourceCode(ticket_fields, label)
 {
     var i = 0;
 
+    const fn = _getTicketSourceCode.name;
+
     // If we don't have the options list built, build it first
     if(ticket_source_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Source Options List is empty, let's build this");
+        common.statusMessage(fn, "Source Options List is empty, let's build this");
         await getSourceOptions();
     }
 
@@ -392,6 +418,7 @@ Output: None (populates the global ticket_priority_options array)
 */
 async function getPriorityOptions(ticket_fields)
 {
+    const fn = getPriorityOptions.name;
     await getTicketFieldOptions(ticket_fields, "priority", ticket_priority_options);
     return;
 }
@@ -406,12 +433,13 @@ Output: value (string)
 */
 async function _getTicketPriorityVal(ticket_fields, code)
 {
+    const fn = _getTicketPriorityVal.name;
     var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_priority_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Priority Options List is empty, let's build this");
+        common.statusMessage(fn, "Priority Options List is empty, let's build this");
         await getPriorityOptions(ticket_fields);
     }
 
@@ -435,12 +463,14 @@ Output: code (number)
 */
 async function _getTicketPriorityCode(ticket_fields, label)
 {
+    const fn = _getTicketPriorityCode.name;
+    
     var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_priority_options.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "Priority Options List is empty, let's build this");
+        common.statusMessage(fn, "Priority Options List is empty, let's build this");
         await getPriorityOptions(ticket_fields);
     }
 

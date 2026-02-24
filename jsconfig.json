@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "checkJs": true,         // optional, but improves intelligence
+    "module": "commonjs",
+    "target": "es2019",
+    "moduleResolution": "node",
+    "baseUrl": "."
+  },
+  "include": [
+    "packages/**/*",
+    "apps/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules"
+  ]
+}

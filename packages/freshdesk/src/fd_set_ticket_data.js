@@ -14,6 +14,8 @@ Output: 0 on success, -1 on failure
 */
 async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load)
 {
+    const fn = checkAndSetDataLoad.name;
+
     // URL path for the API endpoint to get the list of ticket fields
     var url_path = "tickets/" + ticket_id.toString();
 
@@ -22,7 +24,11 @@ async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load
     {
         const {headers,data} = await fetchFreshdeskData
         ({
-            url_path: url_path
+            url_path: url_path,
+            current_page: null,
+            per_page: null,
+            updated_since: null,
+            include: null
         });
 
         // Initialize loop counters
@@ -54,7 +60,7 @@ async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load
                     }
                     data_load[this_hierarchy][this_field_name] = this_field_val;                
                 }
-                common.statusMessage(arguments.callee.name, "Successfully set value: " +  this_field_val + " for field_name: " + this_field_name + " in data_load for ticket: " + ticket_id);
+                common.statusMessage(fn, "Successfully set value: " +  this_field_val + " for field_name: " + this_field_name + " in data_load for ticket: " + ticket_id);
                 continue;
             }
 
@@ -86,7 +92,7 @@ async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load
                     }
                 }
 
-                common.statusMessage(arguments.callee.name, "Successfully set value: " +  this_field_val + " for field_name: " + this_field_name + " in data_load for ticket: " + ticket_id);
+                common.statusMessage(fn, "Successfully set value: " +  this_field_val + " for field_name: " + this_field_name + " in data_load for ticket: " + ticket_id);
             }
         }
 
@@ -96,7 +102,7 @@ async function checkAndSetDataLoad(ticket_id, field_name, field_value, data_load
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get data for ticket ID " + ticket_id + ". Error:" + e.message);
+        common.statusMessage(fn, "Failed to get data for ticket ID " + ticket_id + ". Error:" + e.message);
         return -1;
     }
 
@@ -114,6 +120,8 @@ Output: 0 on success, -1 on failure
 */
 function verifyValueSet(data, field_name, field_value)
 {
+    const fn = verifyValueSet.name;
+
     var i = 0;
     var ret = false;
 
@@ -157,6 +165,8 @@ Output: 0 on success, -1 on failure
 */
 async function setTicketField(ticket_id, field_name, field_value, ret)
 {
+    const fn = setTicketField.name;
+
     // URL path for the API endpoint to set the ticket fields
     var url_path = "tickets/" + ticket_id.toString();
 
@@ -164,7 +174,7 @@ async function setTicketField(ticket_id, field_name, field_value, ret)
     var data_load = {};
     if(await checkAndSetDataLoad(ticket_id, field_name, field_value, data_load) < 0)
     {
-        common.statusMessage(arguments.callee.name, "Failed to set data load for field_name: " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
+        common.statusMessage(fn, "Failed to set data load for field_name: " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
         return -1;
     }
 
@@ -179,7 +189,7 @@ async function setTicketField(ticket_id, field_name, field_value, ret)
         // Check if the value was set as expected
         if(verifyValueSet(data, field_name, field_value) != true)
         {
-            common.statusMessage(arguments.callee.name, "Failed to set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
+            common.statusMessage(fn, "Failed to set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
             return -1;
         }
 
@@ -191,11 +201,11 @@ async function setTicketField(ticket_id, field_name, field_value, ret)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + "." + e.message);
+        common.statusMessage(fn, "Failed to set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
+    common.statusMessage(fn, "Successfully set ticket field : " + field_name + " value: " + field_value + " for ticket ID: " + ticket_id + ".");
 
     return 0;
 }

@@ -36,6 +36,8 @@ Output: 0 on success, -1 on failure
 */
 function _initContacts(contact)
 {
+    const fn = _initContacts.name;
+
     // Initialize an array to store the contact list
     contact.contact_list = [];
 
@@ -57,12 +59,14 @@ Output: List of contacts stored in contact.contact_list[]. Returns 0 on success,
 */
 async function _getContacts(contact)
 {
+    const fn = _getContacts.name;
+
     // URL path for fetching contacts
     var url_path = "contacts";
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    const per_page = process.env.FRESHDESK_MAX_CONTACTS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    const per_page = Number(process.env.FRESHDESK_MAX_CONTACTS_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -74,7 +78,9 @@ async function _getContacts(contact)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -108,7 +114,7 @@ async function _getContacts(contact)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(arguments.callee.name, "Processing page: " + page + ", contacts processed: " + contact.num_contacts);
+                common.statusMessage(fn, "Processing page: " + page + ", contacts processed: " + contact.num_contacts);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -116,13 +122,13 @@ async function _getContacts(contact)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of contacts. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of contacts. Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched contacts. Number of contacts = "+ contact.num_contacts);
+    common.statusMessage(fn, "Successfully fetched contacts. Number of contacts = "+ contact.num_contacts);
 
     return 0;
 }
@@ -138,17 +144,19 @@ Output: Contact offset in contact.contact_list[] on success, -1 on failure
 */
 function _getContactForEmail(contact, email)
 {
+    const fn = _getContactForEmail.name;
+    
     // Sanity check
     if(email == "")
     {
-        common.statusMessage(arguments.callee.name, "Invalid email ID passed in ..");
+        common.statusMessage(fn, "Invalid email ID passed in ..");
         return -1;
     }
 
     // Check if there are contacts in the contact list
     if(contact.contact_list.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "No contacts, getContacts() to be run prior ..");
+        common.statusMessage(fn, "No contacts, getContacts() to be run prior ..");
         return -1;
     }
 
@@ -178,17 +186,19 @@ Output: Contact offset in contact.contact_list[] on success, -1 on failure
 */
 function _getContactForID(contact, id)
 {
+    const fn = _getContactForID.name;
+    
     // Sanity check
     if(id == "")
     {
-        common.statusMessage(arguments.callee.name, "Invalid ID passed in ..");
+        common.statusMessage(fn, "Invalid ID passed in ..");
         return -1;
     }
 
     // Check if there are contacts in the contact list
     if(contact.contact_list.length == 0)
     {
-        common.statusMessage(arguments.callee.name, "No contacts, getContacts() to be run prior ..");
+        common.statusMessage(fn, "No contacts, getContacts() to be run prior ..");
         return -1;
     }
 
@@ -222,10 +232,12 @@ Output: Returns offset to the added contact on success, -1 on failure
 */
 async function addContact(name, email, role)
 {
+    const fn = addContact.name;
+    
     // Sanity check
     if(email == "")
     {
-        common.statusMessage(arguments.callee.name, "Invalid email passed in ..");
+        common.statusMessage(fn, "Invalid email passed in ..");
         return -1;
     }
 
@@ -256,29 +268,29 @@ async function addContact(name, email, role)
         // check if the contact name, email and role are updated
         if(data.name != name)
         {
-            common.statusMessage(arguments.callee.name, "Added name: " + data.name + " does not match name: " + name + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Added name: " + data.name + " does not match name: " + name);
             return -1;
         }
 
         if(data.email != email)
         {
-            common.statusMessage(arguments.callee.name, "Added email: " + data.email + " does not match email: " + email + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Added email: " + data.email + " does not match email: " + email);
             return -1;
         }
 
         if(data.custom_fields && data.custom_fields["role"] != role)
         {
-            common.statusMessage(arguments.callee.name, "Added role: " + (data.custom_fields ? data.custom_fields["role"] : "") + " does not match role: " + role + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Added role: " + (data.custom_fields ? data.custom_fields["role"] : "") + " does not match role: " + role);
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to add new contact: " + name + ", email: " + email + ", role: " + role + "." + e.message);
+        common.statusMessage(fn, "Failed to add new contact: " + name + ", email: " + email + ", role: " + role + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully added new contact: " + name + ", email: " + email + ", role: " + role + ".");
+    common.statusMessage(fn, "Successfully added new contact: " + name + ", email: " + email + ", role: " + role + ".");
 
     return 0;
 }
@@ -293,6 +305,8 @@ Output: Returns contact ID on success, "" on failure
 */
 async function getContactIDFromEmail(email)
 {
+    const fn = getContactIDFromEmail.name;
+
     // Return value from the function
     var id = "";
 
@@ -305,6 +319,10 @@ async function getContactIDFromEmail(email)
         const {headers,data} = await fetchFreshdeskData
         ({
             url_path: url_path,
+            current_page: null,
+            per_page: null,
+            updated_since: null,
+            include: null
         });
 
         // data.results[0] should have the contact information for the email sent in
@@ -315,11 +333,11 @@ async function getContactIDFromEmail(email)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get list of contacts. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get list of contacts. Error:" + e.message);
         return id;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched id: " + id + " for contact email: " + email);
+    common.statusMessage(fn, "Successfully fetched id: " + id + " for contact email: " + email);
 
     return id;
 }
@@ -333,9 +351,11 @@ Output: Updated contact offset in contact.contact_list[] on success, -1 on failu
 */
 async function updateContact(old_email, new_name, new_email, new_role)
 {
+    const fn = updateContact.name;
+
     if(old_email == "")
     {
-        common.statusMessage(arguments.callee.name, "Invalid email passed in ..");
+        common.statusMessage(fn, "Invalid email passed in ..");
         return -1;
     }
 
@@ -343,7 +363,7 @@ async function updateContact(old_email, new_name, new_email, new_role)
     var id = await getContactIDFromEmail(old_email);
     if(id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to get contact ID for email: " + old_email);
+        common.statusMessage(fn, "Failed to get contact ID for email: " + old_email);
         return -1;
     }
 
@@ -373,29 +393,29 @@ async function updateContact(old_email, new_name, new_email, new_role)
         // check if the contact name, email and role are updated
         if(data.name != new_name)
         {
-            common.statusMessage(arguments.callee.name, "Updated name: " + data.name + " does not match name: " + new_name + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Updated name: " + data.name + " does not match name: " + new_name + " for contact ID: " + id + ".");
             return -1;
         }
 
         if(data.email != new_email)
         {
-            common.statusMessage(arguments.callee.name, "Updated email: " + data.email + " does not match email: " + new_email + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Updated email: " + data.email + " does not match email: " + new_email + " for contact ID: " + id + ".");
             return -1;
         }
 
         if(data.custom_fields && data.custom_fields["role"] != new_role)
         {
-            common.statusMessage(arguments.callee.name, "Updated role: " + (data.custom_fields ? data.custom_fields["role"] : "") + " does not match role: " + new_role + " for contact ID: " + id + ".");
+            common.statusMessage(fn, "Updated role: " + (data.custom_fields ? data.custom_fields["role"] : "") + " does not match role: " + new_role + " for contact ID: " + id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new contact info: " + new_name + ", email: " + new_email + ", role: " + new_role + " for contact ID: " + id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new contact info: " + new_name + ", email: " + new_email + ", role: " + new_role + " for contact ID: " + id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new contact info: " + new_name + ", email: " + new_email + ", role: " + new_role + " for contact ID: " + id + ".");
+    common.statusMessage(fn, "Successfully updated new contact info: " + new_name + ", email: " + new_email + ", role: " + new_role + " for contact ID: " + id + ".");
 
     return 0;
 

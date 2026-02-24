@@ -37,6 +37,8 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleEmployee(fyle_employee, fyle_acc)
 {
+    const fn = _initFyleEmployee.name;
+
     // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
     fyle_employee.fyle_acc = fyle_acc;
 
@@ -59,12 +61,14 @@ Output: 0 on success, -1 on failure
 */
 async function _getEmployees(fyle_employee)
 {
+    const fn = _getEmployees.name;
+    
     var fyle_acc = fyle_employee.fyle_acc;
 
     const url_path = "/platform/v1/admin/employees";
 
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -100,7 +104,7 @@ async function _getEmployees(fyle_employee)
                 fyle_acc.employees.num_employees++;
             }
 
-            common.statusMessage(arguments.callee.name, "Finished processing " + this_count + " employees on page " + page + ", total employees processed = " + fyle_acc.employees.num_employees);
+            common.statusMessage(fn, "Finished processing " + this_count + " employees on page " + page + ", total employees processed = " + fyle_acc.employees.num_employees);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -111,13 +115,13 @@ async function _getEmployees(fyle_employee)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get employees. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get employees. Error:" + e.message);
             return -1;
         }
 
     } while(fyle_acc.employees.num_employees < total_count);
 
-    common.statusMessage(arguments.callee.name, "Successfully retrieved employees. Total employees retrieved = " + fyle_acc.employees.num_employees);
+    common.statusMessage(fn, "Successfully retrieved employees. Total employees retrieved = " + fyle_acc.employees.num_employees);
 
     return 0;
     
@@ -134,6 +138,8 @@ Output: user name on success, blank otherwise
 */
 function _getEmployeeName(fyle_acc, user_id)
 {
+    const fn = _getEmployeeName.name;
+
     var i;
 
     for(i = 0; i < fyle_acc.employees.num_employees; i++)
@@ -160,6 +166,8 @@ Output: user email on success, blank otherwise
 */
 function _getEmployeeEmail(fyle_acc, user_id)
 {
+    const fn = _getEmployeeEmail.name;
+    
     var i;
 
     for(i = 0; i < fyle_acc.employees.num_employees; i++)

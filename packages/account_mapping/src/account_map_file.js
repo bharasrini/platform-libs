@@ -11,6 +11,8 @@ Output: 0 on success, -1 on failure
 */
 async function readAccountMapDataFromFile(account_map)
 {
+    const fn = readAccountMapDataFromFile.name;
+    
     // Read the Account Mapping sheet
     try
     {        
@@ -39,7 +41,7 @@ async function readAccountMapDataFromFile(account_map)
     }
     catch (e)
     {
-        common.statusMessage(arguments.callee.name, "Error getting account mapping data: " + e.message);
+        common.statusMessage(fn, "Error getting account mapping data: " + e.message);
         return -1;
     }
 
@@ -55,6 +57,8 @@ Output: 0 on success, -1 on failure
 */
 async function flushAccountMapDataToFile(account_map)
 {
+    const fn = flushAccountMapDataToFile.name;
+    
     try
     {
         // Authenticate with Google Sheets API
@@ -83,7 +87,7 @@ async function flushAccountMapDataToFile(account_map)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Error flushing account map data to the account mapping sheet: " + e.message);
+        common.statusMessage(fn, "Error flushing account map data to the account mapping sheet: " + e.message);
         return -1;
     }
 

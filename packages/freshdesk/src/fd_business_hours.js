@@ -64,6 +64,8 @@ Output: 0 on success, -1 on failure
 */
 function _initBusinessHours(business_hours)
 {
+    const fn = _initBusinessHours.name;
+
     // Initialize an array to store the business hours list
     business_hours.business_hours_list = [];
 
@@ -84,12 +86,14 @@ Output: List of business hours in business_hours.business_hours_list[]. Returns 
 */
 async function _getBusinessHours(business_hours)
 {
+    const fn = _getBusinessHours.name;
+
     // URL path for fetching business hours
     var url_path = "business_hours";
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    var per_page = process.env.FRESHDESK_MAX_BUSINESS_HOURS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    var per_page = Number(process.env.FRESHDESK_MAX_BUSINESS_HOURS_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -101,7 +105,9 @@ async function _getBusinessHours(business_hours)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -173,7 +179,7 @@ async function _getBusinessHours(business_hours)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(arguments.callee.name, "Processing page: " + page + ", business hours processed: " + business_hours.num_business_hours);
+                common.statusMessage(fn, "Processing page: " + page + ", business hours processed: " + business_hours.num_business_hours);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -182,13 +188,13 @@ async function _getBusinessHours(business_hours)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of business hours. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of business hours. Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched business hours. Number of business hours = "+ business_hours.num_business_hours);
+    common.statusMessage(fn, "Successfully fetched business hours. Number of business hours = "+ business_hours.num_business_hours);
 
     return 0;
 }
@@ -204,6 +210,8 @@ Output: 0 on success, -1 on failure
 */
 function _checkIfWithinBusinessHours(business_hours, support_group, time_instance)
 {
+    const fn = _checkIfWithinBusinessHours.name;
+    
     var i = 0;
     var ret = false;
     var is_holiday = false;
@@ -234,7 +242,7 @@ function _checkIfWithinBusinessHours(business_hours, support_group, time_instanc
     // Check if we got a holiday
     if(is_holiday)
     {
-        //common.statusMessage(arguments.callee.name, "Provided date: " + time_instance + " falls on a holiday");
+        //common.statusMessage(fn, "Provided date: " + time_instance + " falls on a holiday");
         ret = false;
         return ret;
     }
@@ -267,7 +275,7 @@ function _checkIfWithinBusinessHours(business_hours, support_group, time_instanc
             if(start_time == "" || end_time == "")
             {
                 // This is a weekend ticket
-                //common.statusMessage(arguments.callee.name, "Provided date: " + time_instance + " is a weekend ticket");
+                //common.statusMessage(fn, "Provided date: " + time_instance + " is a weekend ticket");
                 ret = false;
                 break;
             }

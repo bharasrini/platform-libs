@@ -3,71 +3,54 @@ const ExcelJS = require("exceljs");
 const fs = require("fs/promises");
 const path = require("path");
 const { statusMessage } = require("./logs");
-const { flattenStructure } = require("./misc");
+const { convertNestedDatato2DArray } = require("./misc");
 
-
-/* 
-Function: getLastRowAndCol
-Purpose: Returns the last row and column indices of a Google Sheet data object
-Inputs: sheet_data - The data object returned by Google Sheets API, 
-Output: Object with lastRow and lastColumn properties
-*/
-function getLastRowAndCol(sheet_data) 
-{
-    // Locate the last row
-    const rows = sheet_data || [];
-    const lastRow = rows.length;
-
-    // find the maximum non-empty columns among all rows
-    let lastColumn = 0;
-    for (const row of rows) 
-    {
-        if (row.length > lastColumn) lastColumn = row.length;
-    }
-
-    return { lastRow, lastColumn };
-}
 
 
 /* 
-Function: exportExcelFile
+Function: exportToExcelFile
 Purpose: Exports data to an Excel file
 Inputs: data_array - Array of data to be exported, dir_name - Directory name to save the file, file_name - Name of the Excel file, sheet_name - Name of the sheet
 Output: 0 on success, -1 on failure
 */
-async function exportExcelFile(data_array, dir_name, file_name, sheet_name)
+async function exportToExcelFile(data_array, dir_name, file_name, sheet_name)
 {
+    const fn = exportToExcelFile.name;
+    
+    var i = 0;
 
     // Sanity check - if data_array is empty, return without creating the file
     if (!data_array || data_array.length === 0)
     {
-        statusMessage(arguments.callee.name, "No data to export");
+        statusMessage(fn, "No data to export");
         return 0;
     }
 
-    // Flatten the data array if it is an array of objects with nested objects/arrays
-    var flattenedHeaders = {};
-    var new_data_array = [];
-    for(i = 0; i < data_array.length; i++)
-    {
-        flattenStructure(data_array[i], flattenedHeaders, '', new_data_array, i);
-    }
-    var headers = Object.keys(flattenedHeaders);
+    // Flatten the data and convert to 2D array format for Excel export
+    const [headers, ...rows] = convertNestedDatato2DArray(data_array);
 
     try
     {
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Sheet1");
+        const worksheet = workbook.addWorksheet(sheet_name || "Sheet1");
 
         // Write out the header row
-        worksheet.columns = Object.keys(new_data_array[0]).map(key => 
-        ({
-            header: key,
-            key: key,
-            width: 20
-        }));
+        const columns = [];
+        for (i = 0; i < headers.length; i++)
+        {
+            const key = headers[i];
+            columns.push
+            ({
+                header: key,
+                key: key,
+                width: 20
+            });
+        }
+        worksheet.columns = columns;
+        
 
-        new_data_array.forEach(e => worksheet.addRow(e));    
+        // Write out the data rows
+        rows.forEach(row => worksheet.addRow(row));
 
         // Ensure output folder exists
         const base_path = process.cwd();
@@ -77,11 +60,11 @@ async function exportExcelFile(data_array, dir_name, file_name, sheet_name)
         const fullPath = path.join(output_dir, file_name);
         await workbook.xlsx.writeFile(fullPath);
 
-        statusMessage(arguments.callee.name, "Excel file saved at:", fullPath);
+        statusMessage(fn, "Excel file saved at: " + fullPath);
     }
     catch(e)
     {
-        statusMessage(arguments.callee.name, "Error exporting Excel file:", e);
+        statusMessage(fn, "Error exporting Excel file: " + e);
         return -1;
     }
 
@@ -92,6 +75,5 @@ async function exportExcelFile(data_array, dir_name, file_name, sheet_name)
 // Exporting the functions
 module.exports = 
 { 
-    getLastRowAndCol,
-    exportExcelFile
+    exportToExcelFile
 };

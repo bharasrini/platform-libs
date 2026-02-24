@@ -35,6 +35,8 @@ Output: 0 on success, -1 on failure
 */
 function _initBilling(billing)
 {
+    const fn = _initBilling.name;
+
     // Initialize array to store the billing links and associated data
     billing.billing_links = [];
 
@@ -98,6 +100,8 @@ Output: List of billing links in billing.billing_links[]. Returns 0 on success, 
 */
 async function _getBillingLinks(billing)
 {
+    const fn = _getBillingLinks.name;
+    
     // Get authentication and sheets instance
     const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
@@ -121,7 +125,7 @@ async function _getBillingLinks(billing)
     // Initialize variables to read the billing links sheet
     const start_row = 1;
     const start_col = 1;
-    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data);
+    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data.values);
 
     const billing_links_month_col = 1;
     const billing_links_file_col = 2;
@@ -166,7 +170,7 @@ async function _getBillingLinks(billing)
         billing.num_billing_links++;
     }
 
-    console.log(arguments.callee.name, "Finished processing billing links sheet: " + billing.num_billing_links + " billing entries processed.");
+    common.statusMessage(fn, "Finished processing billing links sheet: " + billing.num_billing_links + " billing entries processed.");
 
     return 0;
 }
@@ -180,6 +184,8 @@ Output: Billing entries in billing.billing_links[].raw_billing_entries[], billin
 */
 async function _getBillingData(billing, period)
 {
+    const fn = _getBillingData.name;
+    
     var i = 0, j = 0;
     var period_time = new Date(period).getTime();
     var selected_billing_entry = -1;
@@ -202,18 +208,18 @@ async function _getBillingData(billing, period)
     // Check if we were able to get the billing entry
     if(selected_billing_entry < 0)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get the correct billing entry corresponding to period: " + period);
+        common.statusMessage(fn, "Failed to get the correct billing entry corresponding to period: " + period);
         return -1;
     }
 
     // Store the index of the billing period
     billing.selected_period = selected_billing_entry;
 
-    common.statusMessage(arguments.callee.name, "Billing entry index corresponding to period: " + period + " = " + selected_billing_entry);
-    common.statusMessage(arguments.callee.name, "Billing Period start: " + billing.billing_links[selected_billing_entry].billing_period_start);
-    common.statusMessage(arguments.callee.name, "Billing Period end: " + billing.billing_links[selected_billing_entry].billing_period_end);
-    common.statusMessage(arguments.callee.name, "Billing File Link: " + billing.billing_links[selected_billing_entry].billing_link);
-    common.statusMessage(arguments.callee.name, "Billing File ID: " + billing.billing_links[selected_billing_entry].billing_file_id);
+    common.statusMessage(fn, "Billing entry index corresponding to period: " + period + " = " + selected_billing_entry);
+    common.statusMessage(fn, "Billing Period start: " + billing.billing_links[selected_billing_entry].billing_period_start);
+    common.statusMessage(fn, "Billing Period end: " + billing.billing_links[selected_billing_entry].billing_period_end);
+    common.statusMessage(fn, "Billing File Link: " + billing.billing_links[selected_billing_entry].billing_link);
+    common.statusMessage(fn, "Billing File ID: " + billing.billing_links[selected_billing_entry].billing_file_id);
 
     // Get authentication and sheets instance
     const auth = common.createGoogleAuth();
@@ -243,7 +249,7 @@ async function _getBillingData(billing, period)
     // Initialize variables to read the billing entries
     const start_row = 1;
     const start_col = 1;
-    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data);
+    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data.values);
 
     // Locate the columns in the billing sheet that we are interested in
     var billing_usage_cols = 
@@ -273,7 +279,7 @@ async function _getBillingData(billing, period)
         // "org_name" is the only optional key
         if((billing_usage_cols[key] == -1) && (key != "org_name"))
         {
-            common.statusMessage(arguments.callee.name, "Failed to locate column for key: " + key);
+            common.statusMessage(fn, "Failed to locate column for key: " + key);
             return -1;
         }
     }
@@ -421,7 +427,7 @@ async function _getBillingData(billing, period)
 
         if((i % 1000) == 0)
         {
-            await common.statusMessage(arguments.callee.name, "Processing billing entry: " + i + ", total entries: " + billing.raw_billing_entries.num_raw_billing_entries);
+            common.statusMessage(fn, "Processing billing entry: " + i + ", total entries: " + billing.raw_billing_entries.num_raw_billing_entries);
         }
     }
 
@@ -431,18 +437,18 @@ async function _getBillingData(billing, period)
 
     for(i = 0; i < num_org_billing_entries; i++)
     {
-        var month = billing.billing_by_org.billing_by_org_list[i].month;
-        var org_id = billing.billing_by_org.billing_by_org_list[i].org_id;
-        var customer_name = billing.billing_by_org.billing_by_org_list[i].customer_name;
-        var parent_org_id = billing.billing_by_org.billing_by_org_list[i].parent_org_id;
-        var au_model = billing.billing_by_org.billing_by_org_list[i].au_model;
+        const month = billing.billing_by_org.billing_by_org_list[i].month;
+        const org_id = billing.billing_by_org.billing_by_org_list[i].org_id;
+        const customer_name = billing.billing_by_org.billing_by_org_list[i].customer_name;
+        const parent_org_id = billing.billing_by_org.billing_by_org_list[i].parent_org_id;
+        const au_model = billing.billing_by_org.billing_by_org_list[i].au_model;
 
         var account_num_expenses = 0;
         var account_num_reports = 0;
         var account_num_active_users = 0;
         var account_num_normalized_active_users = 0;
 
-        var processed = false;
+        var this_processed = false;
 
         // Check if this has been processed yet
         for(j = 0; j < billing.billing_by_account.num_account_billing_entries; j++)
@@ -450,13 +456,13 @@ async function _getBillingData(billing, period)
             if(parent_org_id == billing.billing_by_account.billing_by_account_list[j].parent_org_id)
             {
                 // We have already processed this entry
-                processed = true;
+                this_processed = true;
                 break;
             }
         }
 
         // If we've processed this, skip this
-        if(processed == true) continue;
+        if(this_processed == true) continue;
 
         // Loop through adding all lines that correspond to this parent ID
         for(j = i; j < num_org_billing_entries; j++)
@@ -497,9 +503,9 @@ async function _getBillingData(billing, period)
     }
 
 
-    common.statusMessage(arguments.callee.name, "Processed " + billing.raw_billing_entries.num_raw_billing_entries + " raw billing entries from usage file");
-    common.statusMessage(arguments.callee.name, "Processed " + billing.billing_by_org.num_org_billing_entries + " org billing entries from usage file");
-    common.statusMessage(arguments.callee.name, "Processed " + billing.billing_by_account.num_account_billing_entries + " account billing entries from usage file");
+    common.statusMessage(fn, "Processed " + billing.raw_billing_entries.num_raw_billing_entries + " raw billing entries from usage file");
+    common.statusMessage(fn, "Processed " + billing.billing_by_org.num_org_billing_entries + " org billing entries from usage file");
+    common.statusMessage(fn, "Processed " + billing.billing_by_account.num_account_billing_entries + " account billing entries from usage file");
 
     return 0;
 
@@ -515,6 +521,8 @@ Output: Billing details for org (0 for the values if not found)
 */
 function _getBillingDetailsForOrg(billing, org_id)
 {
+    const fn = _getBillingDetailsForOrg.name;
+    
     // Initialize the billing details to be returned
     var i = 0;
 
@@ -523,20 +531,20 @@ function _getBillingDetailsForOrg(billing, org_id)
     // Sanity checks to ensure we have valid org_id and billing data structure
     if(org_id.toString().trim() == "")
     {
-        common.statusMessage(arguments.callee.name, "Blank / invalid org id");
+        common.statusMessage(fn, "Blank / invalid org id");
         return billing_details;
     }
 
     if(!billing || !billing.billing_by_org || !billing.billing_by_org.billing_by_org_list || !billing.billing_by_org.num_org_billing_entries)
     {
-        common.statusMessage(arguments.callee.name, "Invalid billing structure");
+        common.statusMessage(fn, "Invalid billing structure");
         return billing_details;
     }
 
     // For this to run, we should have invoked getBillingData() for a specific period
     if(billing.billing_by_org.num_org_billing_entries <= 0)
     {
-        common.statusMessage(arguments.callee.name, "No billing data, check if getBillingData() has been run prior to this");
+        common.statusMessage(fn, "No billing data, check if getBillingData() has been run prior to this");
         return billing_details;
     }
 

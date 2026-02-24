@@ -33,6 +33,8 @@ Output: 0 on success, -1 on failure
 */
 function _initTickets(ticket)
 {
+    const fn = _initTickets.name;
+
     // Initialize an array to store the ticket list
     ticket.ticket_list = [];
 
@@ -54,6 +56,8 @@ Output: List of tickets in ticket.ticket_list[]. Returns 0 on success, -1 on fai
 */
 async function _getTickets(ticket, updated_since)
 {
+    const fn = _getTickets.name;
+
     // URL path for fetching tickets
     const url_path = "tickets";
 
@@ -61,8 +65,8 @@ async function _getTickets(ticket, updated_since)
     const include = "requester,stats";
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    const per_page = process.env.FRESHDESK_MAX_TICKETS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    const per_page = Number(process.env.FRESHDESK_MAX_TICKETS_PER_PAGE) || 100;
     var link = "";
 
     // Get the list of all business hours
@@ -128,7 +132,7 @@ async function _getTickets(ticket, updated_since)
     /*
             if((page % 5) == 0)
             {
-                CommonUtilities.statusMessage(arguments.callee.name, "Processing page: " + page + ", tickets processed: " + ticket.num_tickets, false, -1);
+                common.statusMessage(fn, "Processing page: " + page + ", tickets processed: " + ticket.num_tickets, false, -1);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -137,7 +141,7 @@ async function _getTickets(ticket, updated_since)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of tickets. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of tickets. Error:" + e.message);
             return -1;
         }        
         

@@ -28,6 +28,8 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleDepartment(fyle_department, fyle_acc)
 {
+    const fn = _initFyleDepartment.name;
+
     // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
     fyle_department.fyle_acc = fyle_acc;
 
@@ -50,12 +52,14 @@ Output: 0 on success, -1 on failure
 */
 async function _getDepartments(fyle_department)
 {
+    const fn = _getDepartments.name;
+    
     var fyle_acc = fyle_department.fyle_acc;
 
     const url_path = "/platform/v1/admin/departments";
 
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -91,7 +95,7 @@ async function _getDepartments(fyle_department)
                 fyle_acc.departments.num_departments++;
             }
 
-            common.statusMessage(arguments.callee.name, "Finished processing " + this_count + " departments on page " + page + ", total departments processed = " + fyle_acc.departments.num_departments);
+            common.statusMessage(fn, "Finished processing " + this_count + " departments on page " + page + ", total departments processed = " + fyle_acc.departments.num_departments);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -102,13 +106,13 @@ async function _getDepartments(fyle_department)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get departments. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get departments. Error:" + e.message);
             return -1;
         }
 
     } while(fyle_acc.departments.num_departments < total_count);
 
-    common.statusMessage(arguments.callee.name, "Successfully retrieved departments. Total departments retrieved = " + fyle_acc.departments.num_departments);
+    common.statusMessage(fn, "Successfully retrieved departments. Total departments retrieved = " + fyle_acc.departments.num_departments);
 
     return 0;
     

@@ -6,7 +6,7 @@
             "name": "Debug: test app",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/apps/test/index.js",
+            "program": "${workspaceFolder}/apps/test/src/index.js",
             "cwd": "${workspaceFolder}",
 
             "console": "integratedTerminal",

@@ -1,3 +1,4 @@
+const { statusMessage } = require("./logs");
 
 
 /* 
@@ -7,8 +8,9 @@ Inputs: milliseconds
 Output: Promise that resolves after ms milliseconds
 */
 function sleep(ms) 
-{ 
-  return new Promise(r => setTimeout(r, ms)); 
+{
+    const fn = sleep.name;
+    return new Promise(r => setTimeout(r, ms)); 
 }
 
 
@@ -21,6 +23,8 @@ Source: ChatGPT
 */
 function getIdFromUrl(url) 
 {
+    const fn = getIdFromUrl.name;
+    
     var id = "";
     var match = /[-\w]{25,}/.exec(url);
     if (match) {
@@ -68,6 +72,8 @@ const entityMap =
 
 function escapeHtml (string) 
 {
+    const fn = escapeHtml.name;
+
     return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s)
     {
         return entityMap[s];
@@ -83,6 +89,7 @@ Output: true if the address is valid, false otherwise
 */
 function validateEmailAddress(email_address)
 {
+    const fn = validateEmailAddress.name;
 
     //var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     var validRegex = /\S+@\S+\.\S+/;
@@ -103,6 +110,8 @@ Output: none
 */
 function parseEmail(this_email, this_email_arr)
 {
+    const fn = parseEmail.name;
+
     var split_str = [];
 
     // First replace all the '[', ']', '{', '}', ' ' & '"' by ""
@@ -145,12 +154,14 @@ Output: none
 */
 function getNameFromEmail(email)
 {
+    const fn = getNameFromEmail.name;
+    
     var final = ""
 
     // Sanity check
     if(email.toString().trim() == "")
     {
-        statusMessage(arguments.callee.name, "Blank email", true, -1);
+        statusMessage(fn, "Blank email");
         return "";
     }
 
@@ -158,14 +169,14 @@ function getNameFromEmail(email)
     var offset = email.lastIndexOf("@");
     if(offset < 0)
     {
-        statusMessage(arguments.callee.name, "Invalid email: " + email, true, -1);
+        statusMessage(fn, "Invalid email: " + email);
         return "";
     }
 
     var name = email.substring(0, offset);
     if(name.toString().trim() == "")
     {
-        statusMessage(arguments.callee.name, "Failed to extract name from email: " + email, true, -1);
+        statusMessage(fn, "Failed to extract name from email: " + email);
         return "";
     }
 
@@ -195,6 +206,8 @@ Output: final string in which all special characters are replaced
 */
 function replaceSpecialChars(string_to_replace, special_chars_list, char_to_replace_with)
 {
+    const fn = replaceSpecialChars.name;
+
     for(var i = 0; i < special_chars_list.length; i++)
     {
         string_to_replace = string_to_replace.replaceAll(special_chars_list[i], char_to_replace_with);
@@ -228,6 +241,7 @@ Output: final string in which all special characters are replaced
 */
 function replaceKnownSpecialCharsWithUnderscore(string_to_replace)
 {
+    const fn = replaceKnownSpecialCharsWithUnderscore.name;
     const special_chars_list = [' ', ',', ':', ';', '.', '(', ')', '{', '}', '/', '\\', '"', '<', '>', '?', '&', '-'];
     const char_to_replace_with = '_';
     return replaceSpecialChars(string_to_replace, special_chars_list, char_to_replace_with);
@@ -243,6 +257,8 @@ Output: true if they are percentage distance, false otherwise
 */
 function matchWithinXPercent(num_a, num_b, perc)
 {
+    const fn = matchWithinXPercent.name;
+
     var num_a_plus_perc = num_a * (1 + perc);
     var num_a_minus_perc = num_a * (1 - perc);
     var num_b_plus_perc = num_b * (1 + perc);
@@ -266,6 +282,8 @@ Output: type of element (array, date, object, string, number)
 */
 function checkType(element) 
 {
+    const fn = checkType.name;
+
     if (Array.isArray(element)) return "array";
     else if (element instanceof Date) return "date";
     else if (typeof element === 'object') 
@@ -280,7 +298,6 @@ function checkType(element)
 }
 
 
-
 /*
 Function: flattenStructure
 Purpose: Flattens out the structure passed in to show all members of constituent arrays or structures. It's invoked recursively
@@ -288,64 +305,156 @@ Inputs: structure, flattended output, prefix for the field (if any), new data ar
 Output: flattended structured in flattened {}, also copy of the flattened structure in new_data_array[row]
 Source: ChatGPT
 */
-function flattenStructure(structure, flattened, prefix, new_data_array, row) 
+function flattenStructure(structure, parentKey = '', result = {})
 {
-    for (var key in structure) 
+    const fn = flattenStructure.name;
+
+    var i = 0;
+
+    for (const [key, value] of Object.entries(structure))
     {
-        if (structure.hasOwnProperty(key)) 
+        const newKey = parentKey ? `${parentKey}.${key}` : key;
+
+        // If the value is null or undefined, set it to an empty string
+        if(value == null || value === undefined)
         {
-            var value = structure[key];
-            var newKey = prefix ? prefix + '.' + key : key;
-            var type = checkType(value);
-
-            if(type == "array")
+            result[newKey] = "";
+        }
+        // If it's an array of objects, we want to flatten each object in the array with an index
+        else if(Array.isArray(value))
+        {
+            for(i = 0; i < value.length; i++)
             {
-                if (value.length > 0 && typeof value[0] === 'object') 
-                {
-                    for(var i = 0; i < value.length; i++)
-                    {
-                        flattenStructure(value[i], flattened, newKey + '[' + i + ']', new_data_array, row);
-                    }
-                } 
-                else 
-                {
-                    flattened[newKey] = value.join(', ');
+                const arrayItem = value[i];
+                const arrayItemKey = `${newKey}[${i}]`;
 
-                    if(new_data_array[row])
-                    {
-                        new_data_array[row][newKey] = value.join(', ');
-                    }
-                    else
-                    {
-                        var this_field = {newKey: value.join(', ')};
-                        new_data_array.push(this_field);
-                    }
-                }                
-            }
-            else if (type == "object") 
-            {
-                flattenStructure(value, flattened, newKey, new_data_array, row);
-            } 
-            else 
-            {
-                flattened[newKey] = value;
-
-                if(new_data_array[row])
-                {
-                    new_data_array[row][newKey] = value;
+                // Nested object inside array
+                if(typeof arrayItem === 'object')
+                {                    
+                    flattenStructure(arrayItem, arrayItemKey, result);
                 }
+                // Primitive value inside array
                 else
                 {
-                    var this_field = {};
-                    new_data_array.push(this_field);
-                    new_data_array[row][newKey] = value;
+                    result[arrayItemKey] = arrayItem;
                 }
+            }
+        }
+        // If it's an object, we want to flatten its properties
+        else if(typeof value === 'object')
+        {            
+            flattenStructure(value, newKey, result);
+        }
+        // Primitive value
+        else
+        {
+            result[newKey] = value;
+        }
+    }
+
+    return result;
+}
+
+
+/*
+Function: convertNestedDatato2DArray
+Purpose: Converts an array of objects with potentially nested objects/arrays into a 2D array with flattened headers. 
+The first row of the output is the header row with flattened keys, and the subsequent rows are the corresponding values.
+Inputs: data_array - array of objects to be converted
+Output: 2D array with flattened headers and corresponding values
+*/
+function convertNestedDatato2DArray(data_array)
+{
+    const fn = convertNestedDatato2DArray.name;
+    
+    // Initialize variables
+    var i = 0, j = 0;
+
+    // Sanity check
+    if(!data_array || data_array.length === 0)
+    {
+        return [];
+    }
+ 
+    // Flatten the data array if it is an array of objects with nested objects/arrays
+    const flattened = [];    
+    for(i = 0; i < data_array.length; i++)
+    {
+        const obj = data_array[i];
+        const flattenedObj = flattenStructure(obj, '', {});
+        flattened.push(flattenedObj);
+    }
+
+    // Get all unique keys to form the header row
+    var headers = [];
+    for (i = 0; i < flattened.length; i++)
+    {
+        const row = flattened[i];
+        for (const key in row)
+        {
+            // Add header only if not present already
+            var exists = false;
+            for (j = 0; j < headers.length; j++)
+            {
+                if (headers[j] === key)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists)
+            {
+                headers.push(key);
             }
         }
     }
 
-    return;
+    // Build out the rows based on the headers
+    var rows = [];
+    for (i = 0; i < flattened.length; i++)
+    {
+        const row = flattened[i];
+        let rowArray = [];
+
+        for (let j = 0; j < headers.length; j++)
+        {
+            const header = headers[j];
+            rowArray.push(row[header] !== undefined ? row[header] : "");
+        }
+        rows.push(rowArray);
+    }
+
+    const values = [headers, ...rows];
+
+    return values;
 }
+
+
+/* 
+Function: getLastRowAndCol
+Purpose: Returns the last row and column indices of a 2 dimensional array (array of arrays) which represents the data in a spreadsheet. 
+The last row and column are determined based on the presence of non-empty values.
+Inputs: 2 dimensional array representing the data in a spreadsheet
+Output: Object with lastRow and lastColumn properties
+*/
+function getLastRowAndCol(sheet_data) 
+{
+    const fn = getLastRowAndCol.name;
+
+    // Locate the last row
+    const rows = sheet_data || [];
+    const lastRow = rows.length;
+
+    // find the maximum non-empty columns among all rows
+    let lastColumn = 0;
+    for (const row of rows) 
+    {
+        if (row.length > lastColumn) lastColumn = row.length;
+    }
+
+    return { lastRow, lastColumn };
+}
+
 
 
 /*
@@ -357,6 +466,8 @@ Source: ChatGPT
 */
 function sameStringSet(a = [], b = [])
 {
+    const fn = sameStringSet.name;
+
     if (a.length !== b.length) return false;
     
     const sa = new Set(a);
@@ -384,6 +495,8 @@ function sameStringSet(a = [], b = [])
  
 function LevDis(s,t)
 {
+    const fn = LevDis.name;
+    
     // Workaround on Google Sheets rate-limit for external functions 
     //var sleep = Math.floor((Math.random() * 3000) + 1);
     //Utilities.sleep(3000+sleep);
@@ -449,6 +562,8 @@ module.exports =
     matchWithinXPercent,
     checkType,
     flattenStructure,
+    convertNestedDatato2DArray,
+    getLastRowAndCol,
     sameStringSet,
     LevDis,
 };

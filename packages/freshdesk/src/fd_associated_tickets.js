@@ -10,12 +10,14 @@ Output: List of associated tickets in list[]. Returns 0 on success, -1 on failur
 */
 async function getAssociatedTicketsList(id, list)
 {
+    const fn = getAssociatedTicketsList.name;
+
     // URL path for fetching associated tickets for the given ticket id
     var url_path = "tickets/"+id;
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 0;
-    var per_page = process.env.FRESHDESK_MAX_TICKETS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 0;
+    var per_page = Number(process.env.FRESHDESK_MAX_TICKETS_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -26,7 +28,9 @@ async function getAssociatedTicketsList(id, list)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -56,13 +60,13 @@ async function getAssociatedTicketsList(id, list)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get ticket list for ID: " + id + ". Error:" + e.message);
+            common.statusMessage(fn, "Failed to get ticket list for ID: " + id + ". Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched associated tickets for ID: " + id + ". Total associated tickets: " + list.length);
+    common.statusMessage(fn, "Successfully fetched associated tickets for ID: " + id + ". Total associated tickets: " + list.length);
 
     return 0;
 }
@@ -76,6 +80,8 @@ Output: association type value (string)
 */
 function getAssociationType(association_type)
 {
+    const fn = getAssociationType.name;
+    
     var ret = "";
 
     switch(association_type)

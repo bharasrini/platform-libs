@@ -56,25 +56,26 @@ Output: 0 on success, -1 on failure
 */
 function _initAccounts(account) 
 {
+    const fn = _initAccounts.name;
 
-  // Initialize an array to store the account list
-  account.account_list = [];
+    // Initialize an array to store the account list
+    account.account_list = [];
 
-  // Initialize number of accounts
-  account.num_accounts = 0;
+    // Initialize number of accounts
+    account.num_accounts = 0;
 
-  // Initialize array for metrics
-  account.metrics = [];
-  account.num_metrics = 0;
+    // Initialize array for metrics
+    account.metrics = [];
+    account.num_metrics = 0;
 
-  // Initialize array for contacts
-  account.contact_list = [];
+    // Initialize array for contacts
+    account.contact_list = [];
 
-  // Initialize number of contacts
-  account.num_contacts = 0;
+    // Initialize number of contacts
+    account.num_contacts = 0;
 
-  // Nothing else to do, return success
-  return 0;
+    // Nothing else to do, return success
+    return 0;
 }
 
 
@@ -86,6 +87,8 @@ Output: List of accounts stored in account.account_list[]. Returns 0 on success,
 */
 async function _getAccounts(account)
 {
+    const fn = _getAccounts.name;
+
     // API endpoint and query params
     var url_path = "accounts";
 
@@ -100,8 +103,8 @@ async function _getAccounts(account)
     var i = 0, j = 0;  
 
     // Initialize the page and record count
-    var max_page_size = process.env.FRESHSUCCESS_MAX_ACCOUNTS_PER_PAGE || 1000;
-    var current_page = process.env.FRESHSUCCESS_START_PAGE || 0;
+    var max_page_size = Number(process.env.FRESHSUCCESS_MAX_ACCOUNTS_PER_PAGE) || 1000;
+    var current_page = Number(process.env.FRESHSUCCESS_START_PAGE) || 0;
     var records_on_current_page = 0;
 
     do
@@ -156,13 +159,13 @@ async function _getAccounts(account)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Error fetching accounts data from Freshsuccess: " + e.message);
+            common.statusMessage(fn, "Error fetching accounts data from Freshsuccess: " + e.message);
             return -1;
         }
             
     }while(records_on_current_page >= max_page_size);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched total accounts: " + account.num_accounts);
+    common.statusMessage(fn, "Successfully fetched total accounts: " + account.num_accounts);
         
     return 0;
 }
@@ -176,13 +179,15 @@ Output: index of the org if found, -1 if not found
 */
 function _locateOrg(account, org_id)
 {
+    const fn = _locateOrg.name;
+    
     var i;
     var ret = -1;
 
     // Sanity check
     if(account.num_accounts == 0)
     {
-        common.statusMessage(arguments.callee.name, "No account entries, possibly Freshsuccess getAccounts() needs to be called ?");
+        common.statusMessage(fn, "No account entries, possibly Freshsuccess getAccounts() needs to be called ?");
         return -1;
     }
 
@@ -209,6 +214,7 @@ Output: Billing data. Returns 0 on success, -1 on failure
 */
 async function _getBillingData(account)
 {
+    const fn = _getBillingData.name;
     await readLast3MonthsBillingData(account);
     return 0;
 }
@@ -223,6 +229,7 @@ Output: List of metrics for "product_db.num_invited_users". Returns 0 on success
 */
 async function _getInvitedUsersMetrics(account)
 {
+    const fn = _getInvitedUsersMetrics.name;
     // Metric name
     const metric_name = "product_db.num_invited_users";
     return await getUserMetrics(account, metric_name, "m3_invited_users", "m2_invited_users", "m1_invited_users");
@@ -237,6 +244,7 @@ Output: List of metrics for "product_db.num_verified_users". Returns 0 on succes
 */
 async function _getVerifiedUsersMetrics(account)
 {
+    const fn = _getVerifiedUsersMetrics.name;
     // Metric name
     const metric_name = "product_db.num_verified_users";
     return await getUserMetrics(account, metric_name, "m3_verified_users", "m2_verified_users", "m1_verified_users");
@@ -251,6 +259,7 @@ Output: List of contacts for the account. Returns 0 on success, -1 on failure
 */
 async function _getContacts(account)
 {
+    const fn = _getContacts.name;
     return await getFSContacts(account);
 }
 
@@ -264,6 +273,8 @@ Output: 0 on success, -1 on failure
 */
 async function postRecordsToFS(record_container)
 {
+    const fn = postRecordsToFS.name;
+    
     // API endpoint and query params
     var url_path = "accounts";
 
@@ -276,11 +287,11 @@ async function postRecordsToFS(record_container)
     }
     catch (e)
     {
-        common.statusMessage(arguments.callee.name, "Error posting account records to Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error posting account records to Freshsuccess - " + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Account records posted to Freshsuccess successfully !!!");
+    common.statusMessage(fn, "Account records posted to Freshsuccess successfully !!!");
 
     return 0;
 }
@@ -295,6 +306,8 @@ Output: 0 on success, -1 on failure
 */
 async function removeCSMMappingfromFS(account_id, csm_email)
 {
+    const fn = removeCSMMappingfromFS.name;
+    
     const url_path = "accounts/"+account_id+"/assigned_csms/"+encodeURIComponent(csm_email);
 
     try
@@ -303,11 +316,11 @@ async function removeCSMMappingfromFS(account_id, csm_email)
     }
     catch (e)
     {
-        common.statusMessage(arguments.callee.name, "Error deleting CSM mapping from Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error deleting CSM mapping from Freshsuccess - " + e.message);
         return -1;    
     }
 
-    common.statusMessage(arguments.callee.name, "Mapping for CSM " + csm_email + " deleted from account: " + account_id + " on Freshsuccess successfully !!!");
+    common.statusMessage(fn, "Mapping for CSM " + csm_email + " deleted from account: " + account_id + " on Freshsuccess successfully !!!");
 
     return 0;
 }

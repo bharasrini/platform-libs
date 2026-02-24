@@ -36,6 +36,8 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleAuth(fyle_auth, fyle_acc)
 {
+    const fn = _initFyleAuth.name;
+
     // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
     fyle_auth.fyle_acc = fyle_acc;
 
@@ -80,6 +82,8 @@ Output: 0 on success, -1 on failure
 */
 async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refresh_token_str)
 {
+    const fn = _getAccessToken.name;
+    
     var i = 0;
     var fyle_acc = fyle_auth.fyle_acc;
 
@@ -88,7 +92,7 @@ async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refr
     var url_path = process.env.FYLE_OAUTH_TOKEN_PATH;
 
     const url = new URL(`https://${host}${url_path}`);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     try
     {
@@ -124,11 +128,11 @@ async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refr
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get access token. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get access token. Error:" + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Access token retrieval successful !!!");
+    common.statusMessage(fn, "Access token retrieval successful !!!");
 
     return 0;
 
@@ -145,6 +149,8 @@ Output: 0 on success, -1 on failure
 */
 async function _getClusterEndpoint(fyle_auth)
 {
+    const fn = _getClusterEndpoint.name;
+
     var fyle_acc = fyle_auth.fyle_acc;
 
     // URL path for authentication
@@ -153,7 +159,7 @@ async function _getClusterEndpoint(fyle_auth)
     var access_token = null;
 
     const url = new URL(`https://${host}${url_path}`);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     try
     {
@@ -175,17 +181,17 @@ async function _getClusterEndpoint(fyle_auth)
         fyle_acc.access_params.cluster_domain = (fyle_acc.access_params.cluster_domain   ?? "").toString().trim();
         if(!fyle_acc.access_params.cluster_domain)
         {
-            common.statusMessage(arguments.callee.name, "Failed to locate cluster_domain");
+            common.statusMessage(fn, "Failed to locate cluster_domain");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get cluster endpoint. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get cluster endpoint. Error:" + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Cluster endpoint retrieval successful : " + fyle_acc.access_params.cluster_domain);
+    common.statusMessage(fn, "Cluster endpoint retrieval successful : " + fyle_acc.access_params.cluster_domain);
 
     return 0;
 
@@ -202,12 +208,14 @@ Output: 0 on success, -1 on failure
 */
 async function _validateClusterEndpoint(fyle_auth)
 {
+    const fn = _validateClusterEndpoint.name;
+    
     var fyle_acc = fyle_auth.fyle_acc;
 
     var host = fyle_acc.access_params.cluster_domain;
     var url_path = process.env.FYLE_MY_PROFILE_PATH;
     const url = new URL(`${host}${url_path}`);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     try
     {
@@ -236,11 +244,11 @@ async function _validateClusterEndpoint(fyle_auth)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to get profile details. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get profile details. Error:" + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully validated cluster endpoint and retrieved user and org details !!!");
+    common.statusMessage(fn, "Successfully validated cluster endpoint and retrieved user and org details !!!");
 
     return 0;
 

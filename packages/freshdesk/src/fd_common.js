@@ -20,6 +20,8 @@ async function fetchFreshdeskData
   include,
 }) 
 {
+    const fn = fetchFreshdeskData.name;
+
     // Read environment variables
     var api_key_orig = process.env.FRESHDESK_API_KEY;
     var this_host = process.env.FRESHDESK_HOST;
@@ -32,7 +34,7 @@ async function fetchFreshdeskData
     if(updated_since) url.searchParams.append("updated_since", updated_since);
     if(include) url.searchParams.append("include", include);
 
-    console.log("Freshdesk URL =", url.toString());
+    common.statusMessage(fn, "Freshdesk URL = " + url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -45,7 +47,6 @@ async function fetchFreshdeskData
                 Authorization: `Basic ${api_key_base64}`,
                 "Content-Type": "application/json",
             },
-            "muteHttpExceptions": true
         });
 
         if (!res.ok)
@@ -74,6 +75,8 @@ async function sendFreshdeskData
   data_load
 }) 
 {
+    const fn = sendFreshdeskData.name;
+
     // Read environment variables
     var api_key_orig = process.env.FRESHDESK_API_KEY;
     var this_host = process.env.FRESHDESK_HOST;
@@ -81,7 +84,7 @@ async function sendFreshdeskData
     const url = new URL(`https://${this_host}/api/v2/${url_path}`);
     const api_key_base64 = Buffer.from(`${api_key_orig}:X`).toString("base64");
 
-    console.log("Freshdesk URL =", url.toString());
+    common.statusMessage(fn, "Freshdesk URL = " + url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -95,7 +98,6 @@ async function sendFreshdeskData
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(data_load),
-            "muteHttpExceptions": true
         });
 
         if (!res.ok)
@@ -126,6 +128,7 @@ async function postFreshdeskData
   data_load
 }) 
 {
+    const fn = postFreshdeskData.name;
     return await sendFreshdeskData({url_path, method: "POST", data_load});
 }
 
@@ -144,6 +147,7 @@ async function putFreshdeskData
   data_load
 }) 
 {
+    const fn = putFreshdeskData.name;
     return await sendFreshdeskData({url_path, method: "PUT", data_load});
 }
 

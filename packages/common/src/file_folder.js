@@ -23,6 +23,8 @@ Output: 0 if the folder is created successfully, error message otherwise
 */
 async function createFolder(full_folder_path)
 {
+    const fn = createFolder.name;
+
     const output_dir = full_folder_path;
     
     try
@@ -31,7 +33,7 @@ async function createFolder(full_folder_path)
     }
     catch (e)
     {
-        statusMessage(arguments.callee.name, "Failed to create folder: " + output_dir + ". Error: " + e.message);
+        statusMessage(fn, "Failed to create folder: " + output_dir + ". Error: " + e.message);
     }
 
     return 0;
@@ -46,6 +48,8 @@ Output: 0 if the file is created successfully, error message otherwise
 */
 async function createFile(output_dir, file_name, file_ext, file_content)
 {
+    const fn = createFile.name;
+    
     const has_ext = hasExtension(file_name, "." + file_ext);
     const file_name_with_ext = (has_ext == false) ? file_name + "." + file_ext : file_name;
     const full_file_name = path.join(output_dir, file_name_with_ext);
@@ -56,7 +60,7 @@ async function createFile(output_dir, file_name, file_ext, file_content)
     }
     catch (e)
     {
-        statusMessage(arguments.callee.name, "Failed to write file: " + full_file_name + ". Error: " + e.message);
+        statusMessage(fn, "Failed to write file: " + full_file_name + ". Error: " + e.message);
     }
 
     return 0;

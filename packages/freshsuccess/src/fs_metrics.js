@@ -24,6 +24,8 @@ Output: list of metrics in this_metric {} on success, null otherwise
 */
 async function readMetricsSheet(metric_name)
 {
+    const fn = readMetricsSheet.name;
+    
     var i = 0;
     var sheet_name = "";
 
@@ -39,7 +41,7 @@ async function readMetricsSheet(metric_name)
 
     if(sheet_name == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate sheet for metric: " + metric_name);
+        common.statusMessage(fn, "Failed to locate sheet for metric: " + metric_name);
         return null;
     }
 
@@ -64,7 +66,7 @@ async function readMetricsSheet(metric_name)
     const start_row = 1;
     var data_start_row = 2;
     const start_col = 1;
-    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data);
+    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data.values);
 
     // Some column definitions
     i = 1;
@@ -183,7 +185,7 @@ async function readMetricsSheet(metric_name)
 
     }
 
-    common.statusMessage(arguments.callee.name, "Finished reading entries to the metrics table");
+    common.statusMessage(fn, "Finished reading entries to the metrics table");
 
     return this_metric;
 }
@@ -199,6 +201,8 @@ Output: true if it needs to be read in from the Freshsuccess Metrics Sheet, fals
 */
 async function getMetricsSource()
 {
+    const fn = getMetricsSource.name;
+
     // Get authentication and sheets instance
     const auth = common.createGoogleAuth();
     const sheets = google.sheets({ version: "v4", auth });
@@ -212,7 +216,8 @@ async function getMetricsSource()
     const sheet_name = process.env.FRESHSUCCESS_API_SHEET_NAME;
 
     // Get all values from the sheet
-    const res = await sheets.spreadsheets.values.get({
+    const res = await sheets.spreadsheets.values.get
+    ({
         spreadsheetId: sheet_id,
         range: `${sheet_name}`,
     });
@@ -220,7 +225,7 @@ async function getMetricsSource()
     // Initialize variables to read the config settings
     const start_row = 1;
     const start_col = 1;
-    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data);
+    const {lastRow: num_rows, lastColumn: num_cols} = common.getLastRowAndCol(res.data.values);
 
     // Some row and column definitions
     const settings_row = 7;
@@ -242,6 +247,8 @@ Output: List of metrics for metric_name. Returns 0 on success, -1 on failure
 */
 async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_name, m_1_metric_name)
 {
+    const fn = getUserMetrics.name;
+    
     var i = 0, j = 0, k = 0;
     var metric_offset = -1;
 
@@ -254,10 +261,10 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
         var this_metric = await readMetricsSheet(metric_name); 
         if(this_metric == null)
         {
-            common.statusMessage(arguments.callee.name, "Failed to read metrics from sheet for metric: " + metric_name);
+            common.statusMessage(fn, "Failed to read metrics from sheet for metric: " + metric_name);
             return -1;
         }
-        else common.statusMessage(arguments.callee.name, "Successfully read metrics from sheet for metric: " + metric_name);
+        else common.statusMessage(fn, "Successfully read metrics from sheet for metric: " + metric_name);
 
         // Push this metric to the metric array
         account.metrics.push(this_metric);
@@ -272,12 +279,12 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
         // Get the metrics from FS
         if(account.getFSMetrics(metric_name) < 0)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get metrics from Freshsuccess for metric: " + metric_name);
+            common.statusMessage(fn, "Failed to get metrics from Freshsuccess for metric: " + metric_name);
             return -1;
         }
-        else common.statusMessage(arguments.callee.name, "Successfully read metrics from Freshsuccess for metric: " + metric_name);
+        else common.statusMessage(fn, "Successfully read metrics from Freshsuccess for metric: " + metric_name);
         */
-        common.statusMessage(arguments.callee.name, "Reading metrics from Freshsuccess API is currently not implemented, going to read from sheet instead for metric: " + metric_name);
+        common.statusMessage(fn, "Reading metrics from Freshsuccess API is currently not implemented, going to read from sheet instead for metric: " + metric_name);
         var this_metric = await readMetricsSheet(metric_name);
     }
 
@@ -293,34 +300,34 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
 
     if(metric_offset < 0)
     {
-        common.statusMessage(arguments.callee.name, "Failed to find metric: " + metric_name + " in list of account metrices");
+        common.statusMessage(fn, "Failed to find metric: " + metric_name + " in list of account metrices");
         return -1;
     }
 
 
     // Now that we have the metrics, map them to the respective accounts 
-    common.statusMessage(arguments.callee.name, "Finished getting all metric values for: " + metric_name + ", going to map them to the account next");
+    common.statusMessage(fn, "Finished getting all metric values for: " + metric_name + ", going to map them to the account next");
 
-    var this_metric = account.metrics[metric_offset];
+    var metric = account.metrics[metric_offset];
 
-    for(i = 0; i < this_metric.num_orgs; i++)
+    for(i = 0; i < metric.num_orgs; i++)
     {
-        var this_org_id = this_metric.metric_arr[i]["id"]["org_id"];
+        var this_org_id = metric.metric_arr[i]["id"]["org_id"];
 
         for(j = 0; j < account.num_accounts; j++)
         {
             if(account.account_list[j]["id"]["org_id"] == this_org_id)
             {
                 // Found a match, update the metrics
-                account.account_list[j].metrics["m_3"][m_3_metric_name] = Number(this_metric.metric_arr[i]["m_3_end"]["matched_metric"]);
-                account.account_list[j].metrics["m_2"][m_2_metric_name] = Number(this_metric.metric_arr[i]["m_2_end"]["matched_metric"]);
-                account.account_list[j].metrics["m_1"][m_1_metric_name] = Number(this_metric.metric_arr[i]["m_1_end"]["matched_metric"]);
+                account.account_list[j].metrics["m_3"][m_3_metric_name] = Number(metric.metric_arr[i]["m_3_end"]["matched_metric"]);
+                account.account_list[j].metrics["m_2"][m_2_metric_name] = Number(metric.metric_arr[i]["m_2_end"]["matched_metric"]);
+                account.account_list[j].metrics["m_1"][m_1_metric_name] = Number(metric.metric_arr[i]["m_1_end"]["matched_metric"]);
                 break;
             }
         }
     }
 
-    common.statusMessage(arguments.callee.name, "Finished mapping all metric values for: " + metric_name + " to the account");
+    common.statusMessage(fn, "Finished mapping all metric values for: " + metric_name + " to the account");
     return 0;
 }
 

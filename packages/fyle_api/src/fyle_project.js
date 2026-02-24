@@ -27,6 +27,8 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleProject(fyle_project, fyle_acc)
 {
+    const fn = _initFyleProject.name;
+
     // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
     fyle_project.fyle_acc = fyle_acc;
 
@@ -49,12 +51,14 @@ Output: 0 on success, -1 on failure
 */
 async function _getProjects(fyle_project)
 {
+    const fn = _getProjects.name;
+    
     var fyle_acc = fyle_project.fyle_acc;
 
     const url_path = "/platform/v1/admin/projects";
 
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(arguments.callee.name, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " + url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -72,7 +76,7 @@ async function _getProjects(fyle_project)
                 access_token: fyle_acc.access_params.access_token,
                 offset: offset,
                 limit: limit,
-                other: null
+                include: null
             });
 
             // Save the overall number of projects we need to read in
@@ -90,7 +94,7 @@ async function _getProjects(fyle_project)
                 fyle_acc.projects.num_projects++;
             }
 
-            common.statusMessage(arguments.callee.name, "Finished processing " + this_count + " projects on page " + page + ", total projects processed = " + fyle_acc.projects.num_projects);
+            common.statusMessage(fn, "Finished processing " + this_count + " projects on page " + page + ", total projects processed = " + fyle_acc.projects.num_projects);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -101,13 +105,13 @@ async function _getProjects(fyle_project)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get projects. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get projects. Error:" + e.message);
             return -1;
         }
 
     } while(fyle_acc.projects.num_projects < total_count);
 
-    common.statusMessage(arguments.callee.name, "Successfully retrieved projects. Total projects retrieved = " + fyle_acc.projects.num_projects);
+    common.statusMessage(fn, "Successfully retrieved projects. Total projects retrieved = " + fyle_acc.projects.num_projects);
 
     return 0;
     

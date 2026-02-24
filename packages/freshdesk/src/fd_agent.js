@@ -42,6 +42,8 @@ Output: 0 on success, -1 on failure
 */
 function _initAgent(agent)
 {
+    const fn = _initAgent.name;
+
     // Initialize an array to store the agent list
     agent.agent_list = [];
 
@@ -62,12 +64,14 @@ Output: List of agents stored in agent.agent_list[]. Returns 0 on success, -1 on
 */
 async function _getAgents(agent)
 {
+    const fn = _getAgents.name;
+
     // URL path for fetching agents
-    var url_path = "agents";
+    const url_path = "agents";
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    const per_page = process.env.FRESHDESK_MAX_AGENTS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    const per_page = Number(process.env.FRESHDESK_MAX_AGENTS_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -79,7 +83,9 @@ async function _getAgents(agent)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -112,7 +118,7 @@ async function _getAgents(agent)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(arguments.callee.name, "Processing page: " + page + ", agents processed: " + agent.num_agents);
+                common.statusMessage(fn, "Processing page: " + page + ", agents processed: " + agent.num_agents);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -120,13 +126,13 @@ async function _getAgents(agent)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of agents. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of agents. Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched agents. Number of agents = "+ agent.num_agents);
+    common.statusMessage(fn, "Successfully fetched agents. Number of agents = "+ agent.num_agents);
 
     return 0;
 }
@@ -141,13 +147,15 @@ Output: agent name (string)
 */
 function _getAgentName(agent, agent_id)
 {
+    const fn = _getAgentName.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(agent.num_agents == 0)
     {
-        common.statusMessage(arguments.callee.name, "No agents to read, possibly getAgents() not called ?");
+        common.statusMessage(fn, "No agents to read, possibly getAgents() not called ?");
         return ret;
     }
 
@@ -174,13 +182,15 @@ Output: agent email (string)
 */
 function _getAgentEmail(agent, agent_id)
 {
+    const fn = _getAgentEmail.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(agent.num_agents == 0)
     {
-        common.statusMessage(arguments.callee.name, "No agents to read, possibly getAgents() not called ?");
+        common.statusMessage(fn, "No agents to read, possibly getAgents() not called ?");
         return ret;
     }
 
@@ -207,13 +217,15 @@ Output: agent email (string)
 */
 function _getAgentId(agent, agent_email)
 {
+    const fn = _getAgentId.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(agent.num_agents == 0)
     {
-        common.statusMessage(arguments.callee.name, "No agents to read, possibly getAgents() not called ?");
+        common.statusMessage(fn, "No agents to read, possibly getAgents() not called ?");
         return ret;
     }
 

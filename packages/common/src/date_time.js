@@ -2,6 +2,7 @@ const { subMonths } = require("date-fns");
 const { formatInTimeZone } = require("date-fns-tz");
 const util = require("util");
 
+
 /* 
 Function: returnPrevious3MonthsPeriodMarkers
 Purpose: Returns Date markers in the last 3 months (first and last date of the last 3 months)
@@ -197,14 +198,14 @@ function convertTimeMinutesToString(time_mins)
 
     if(time_mins < 60)
     {
-        ret_str = util.format("%2d",time_mins) + " minutes";
+        ret_str = `${String(time_mins).padStart(2, '0')} minutes`;
     }
     else if(time_mins < (60*24))
     {
         var num_hours = parseInt((time_mins / 60));
         var num_mins = parseInt(time_mins - (num_hours*60));
 
-        ret_str = util.format("%2d", num_hours) + " hours, " + util.format("%2d", num_mins) + " minutes";
+        ret_str = `${String(num_hours).padStart(2, '0')} hours, ${String(num_mins).padStart(2, '0')} minutes`;
     }
     else
     {
@@ -212,7 +213,7 @@ function convertTimeMinutesToString(time_mins)
         var num_hours = parseInt((time_mins / 60) - (num_days*24));
         var num_mins = parseInt(time_mins - (num_days*24*60) - (num_hours*60));
 
-        ret_str = util.format("%2d", num_days) + " days, " + util.format("%2d", num_hours) + " hours, " + util.format("%2d", num_mins) + " minutes";
+        ret_str = `${String(num_days).padStart(2, '0')} days, ${String(num_hours).padStart(2, '0')} hours, ${String(num_mins).padStart(2, '0')} minutes`;
     }
 
     return ret_str;
@@ -250,7 +251,7 @@ function getSinceString(interval)
 
 
 /* 
-Function: getOneMonthAgo
+Function: getNMonthsAgo
 Purpose: Returns a date that is 'n' months less than the date passed in
 Inputs: date, n (number of months)
 Output: date that is 'n' months less than the date passed in

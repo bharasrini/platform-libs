@@ -26,6 +26,8 @@ Output: 0 on success, -1 on failure
 */
 function _initRatings(ratings)
 {
+    const fn = _initRatings.name;
+
     // Initialize an array to store the ratings list
     ratings.ratings_list = [];
 
@@ -46,6 +48,8 @@ Output: Rating string
 */
 function getRatingString(rating_val)
 {
+    const fn = getRatingString.name;
+
     var rating_string = "";
 
     switch(Number(rating_val))
@@ -97,12 +101,14 @@ Output: List of ratings stored in ratings.ratings_list[]. Returns 0 on success, 
 */
 async function _getRatings(ratings, created_since)
 {
+    const fn = _getRatings.name;
+
     // URL path for fetching ratings
     var url_path = "surveys/satisfaction_ratings?created_since="+created_since;
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    const per_page = process.env.FRESHDESK_MAX_RATINGS_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    const per_page = Number(process.env.FRESHDESK_MAX_RATINGS_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -114,7 +120,9 @@ async function _getRatings(ratings, created_since)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -158,7 +166,7 @@ async function _getRatings(ratings, created_since)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(arguments.callee.name, "Processing page: " + page + ", ratings processed: " + ratings.num_ratings);
+                common.statusMessage(fn, "Processing page: " + page + ", ratings processed: " + ratings.num_ratings);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -166,13 +174,13 @@ async function _getRatings(ratings, created_since)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of ratings. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of ratings. Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched ratings. Number of ratings = "+ ratings.num_ratings);
+    common.statusMessage(fn, "Successfully fetched ratings. Number of ratings = "+ ratings.num_ratings);
 
     return 0;
 }

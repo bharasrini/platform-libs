@@ -12,6 +12,8 @@ Output: List of contacts for the account. Returns 0 on success, -1 on failure
 */
 async function getFSContacts(account)
 {
+    const fn = getFSContacts.name;
+
     // API endpoint and query params
     var url_path = "account_contacts";
 
@@ -26,8 +28,8 @@ async function getFSContacts(account)
     var i = 0, j = 0;  
 
     // Initialize the page and record count
-    var max_page_size = process.env.FRESHSUCCESS_MAX_CONTACTS_PER_PAGE || 1000;
-    var current_page = process.env.FRESHSUCCESS_START_PAGE || 0;
+    var max_page_size = Number(process.env.FRESHSUCCESS_MAX_CONTACTS_PER_PAGE) || 1000;
+    var current_page = Number(process.env.FRESHSUCCESS_START_PAGE) || 0;
     var records_on_current_page = 0;
 
     do
@@ -120,13 +122,13 @@ async function getFSContacts(account)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Error fetching contacts data from Freshsuccess: " + e.message);
+            common.statusMessage(fn, "Error fetching contacts data from Freshsuccess: " + e.message);
             return -1;
         }
             
     }while(records_on_current_page >= max_page_size);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched total contacts: " + account.num_contacts);
+    common.statusMessage(fn, "Successfully fetched total contacts: " + account.num_contacts);
         
     return 0;
 }
@@ -140,6 +142,8 @@ Output: 0 on success, -1 on failure
 */
 async function postContactsToFS(record_container)
 {
+    const fn = postContactsToFS.name;
+    
     // API endpoint and query params
     var url_path = "account_contacts";
 
@@ -152,11 +156,11 @@ async function postContactsToFS(record_container)
     }
     catch (e)
     {
-        common.statusMessage(arguments.callee.name, "Error posting contacts to Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error posting contacts to Freshsuccess - " + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Contact records posted to Freshsuccess successfully !!!");
+    common.statusMessage(fn, "Contact records posted to Freshsuccess successfully !!!");
 
     return 0;
 

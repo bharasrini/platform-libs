@@ -22,6 +22,8 @@ async function fetchFreshsuccessData
     include
 }) 
 {
+    const fn = fetchFreshsuccessData.name;
+
     // Read environment variables
     var api_key_orig = process.env.FRESHSUCCESS_API_KEY;
     var this_host = process.env.FRESHSUCCESS_HOST;
@@ -79,6 +81,8 @@ async function sendFreshsuccessData
     data_load
 }) 
 {
+    const fn = sendFreshsuccessData.name;
+    
     // Read environment variables
     var api_key_orig = process.env.FRESHSUCCESS_API_KEY;
     var this_host = process.env.FRESHSUCCESS_HOST;
@@ -136,8 +140,8 @@ async function sendFreshsuccessData
                 }
 
                 // Log the error details
-                common.statusMessage(arguments.callee.name, status_detail);
-                common.statusMessage(arguments.callee.name, "Fatal error posting contacts to FS, exiting");
+                common.statusMessage(fn, status_detail);
+                common.statusMessage(fn, "Fatal error posting data to FS, exiting");
             }
 
             throw new Error("Error in response from Freshsuccess API, status_is_ok is false");
@@ -161,6 +165,8 @@ async function postFreshsuccessData
     data_load
 })
 {
+    const fn = postFreshsuccessData.name;
+
     return await sendFreshsuccessData
     ({
         url_path: url_path,
@@ -184,6 +190,8 @@ async function putFreshsuccessData
     data_load
 })
 {
+    const fn = putFreshsuccessData.name;
+    
     return await sendFreshsuccessData
     ({
         url_path: url_path,
@@ -205,6 +213,8 @@ async function deleteFreshsuccessData
     url_path,
 })
 {
+    const fn = deleteFreshsuccessData.name;
+
     return await sendFreshsuccessData
     ({
         url_path: url_path,

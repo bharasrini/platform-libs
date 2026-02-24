@@ -97,6 +97,8 @@ Output: 0 on success, -1 on failure
 */
 function _initCompany(company)
 {
+    const fn = _initCompany.name;
+
     // Initialize an array to store the company list
     company.company_list = [];
 
@@ -117,12 +119,14 @@ Output: List of companies stored in company.company_list[]. Returns 0 on success
 */
 async function _getCompanies(company)
 {
+    const fn = _getCompanies.name;
+
     // URL path for fetching companies
     var url_path = "companies";
 
     // Initialize the page and record count
-    var page = process.env.FRESHDESK_START_PAGE || 1;
-    const per_page = process.env.FRESHDESK_MAX_COMPANIES_PER_PAGE || 100;
+    var page = Number(process.env.FRESHDESK_START_PAGE) || 1;
+    const per_page = Number(process.env.FRESHDESK_MAX_COMPANIES_PER_PAGE) || 100;
     var link = "";
 
     do
@@ -134,7 +138,9 @@ async function _getCompanies(company)
             ({
                 url_path: url_path,
                 current_page: page,
-                per_page: per_page
+                per_page: per_page,
+                updated_since: null,
+                include: null
             });
 
             // Check if we have a link header for pagination
@@ -159,7 +165,6 @@ async function _getCompanies(company)
                     "domains": data[i]["domains"] ? data[i]["domains"] : "",
                     "org_id": data[i]["custom_fields"] && data[i]["custom_fields"]["org_id"] ? data[i]["custom_fields"]["org_id"] : "",
                     "account_tier": data[i]["account_tier"] ? data[i]["account_tier"] : "",
-                    "arr": data[i]["custom_fields"] && data[i]["custom_fields"]["arrrevenue"] ? data[i]["custom_fields"]["arrrevenue"] : "",
                     "source": data[i]["custom_fields"] && data[i]["custom_fields"]["source"] ? data[i]["custom_fields"]["source"] : "",
                     "partner": data[i]["custom_fields"] && data[i]["custom_fields"]["partner"] ? data[i]["custom_fields"]["partner"] : "",
                 };
@@ -177,7 +182,7 @@ async function _getCompanies(company)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(arguments.callee.name, "Processing page: " + page + ", companies processed: " + company.num_companies);
+                common.statusMessage(fn, "Processing page: " + page + ", companies processed: " + company.num_companies);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -185,13 +190,13 @@ async function _getCompanies(company)
         }
         catch(e)
         {
-            common.statusMessage(arguments.callee.name, "Failed to get list of companies. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of companies. Error:" + e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(arguments.callee.name, "Successfully fetched companies. Number of companies = "+ company.num_companies);
+    common.statusMessage(fn, "Successfully fetched companies. Number of companies = "+ company.num_companies);
 
     return 0;
 }
@@ -207,13 +212,15 @@ Output: company name (string)
 */
 function _getCompanyName(company, comp_id)
 {
+    const fn = _getCompanyName.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -240,13 +247,15 @@ Output: CSM (string)
 */
 function _getCSM(company, comp_id)
 {
+    const fn = _getCSM.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -273,13 +282,15 @@ Output: company name (string)
 */
 function _getFDCompanyID(company, org_id)
 {
+    const fn = _getFDCompanyID.name;
+
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -307,13 +318,15 @@ Output: Org name (string)
 */
 function _getFDOrgID(company, comp_id)
 {
+    const fn = _getFDOrgID.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -340,13 +353,15 @@ Output: Tier (string)
 */
 function _getFDTier(company, comp_id)
 {
+    const fn = _getFDTier.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -373,13 +388,15 @@ Output: Source (string)
 */
 function _getFDSource(company, comp_id)
 {
+    const fn = _getFDSource.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -406,13 +423,15 @@ Output: Source (string)
 */
 function _getFDPartner(company, comp_id)
 {
+    const fn = _getFDPartner.name;
+    
     var i = 0;
     var ret = "";
 
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return ret;
     }
 
@@ -442,10 +461,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateAccountName(company, org_id, account_name)
 {
+    const fn = _updateAccountName.name;
+
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -453,7 +474,7 @@ async function _updateAccountName(company, org_id, account_name)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -477,17 +498,17 @@ async function _updateAccountName(company, org_id, account_name)
         // check if the account name is updated
         if(data.name != account_name)
         {
-            common.statusMessage(arguments.callee.name, "New name: " + data.name + " does not match " + account_name + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New name: " + data.name + " does not match " + account_name + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new name: " + account_name + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new name: " + account_name + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new name: " + account_name + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new name: " + account_name + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -503,10 +524,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateCSM(company, org_id, new_csm)
 {
+    const fn = _updateCSM.name;
+
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -514,7 +537,7 @@ async function _updateCSM(company, org_id, new_csm)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -541,17 +564,17 @@ async function _updateCSM(company, org_id, new_csm)
         // check if the CSM is updated
         if(data.custom_fields.csm != new_csm)
         {
-            common.statusMessage(arguments.callee.name, "New CSM: " + data.custom_fields.csm + " does not match " + new_csm + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New CSM: " + data.custom_fields.csm + " does not match " + new_csm + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new CSM: " + new_csm + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new CSM: " + new_csm + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new CSM: " + new_csm + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new CSM: " + new_csm + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -567,10 +590,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateAccountTier(company, org_id, account_tier)
 {
+    const fn = _updateAccountTier.name;
+    
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -578,7 +603,7 @@ async function _updateAccountTier(company, org_id, account_tier)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -602,17 +627,17 @@ async function _updateAccountTier(company, org_id, account_tier)
         // check if the account tier is updated
         if(data.account_tier != account_tier)
         {
-            common.statusMessage(arguments.callee.name, "New account tier: " + data.account_tier + " does not match " + account_tier + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New account tier: " + data.account_tier + " does not match " + account_tier + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new account tier: " + account_tier + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new account tier: " + account_tier + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new account tier: " + account_tier + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new account tier: " + account_tier + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -627,10 +652,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateAccountDomains(company, org_id, account_domains)
 {
+    const fn = _updateAccountDomains.name;
+
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -638,7 +665,7 @@ async function _updateAccountDomains(company, org_id, account_domains)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -662,7 +689,7 @@ async function _updateAccountDomains(company, org_id, account_domains)
         // check if the account domain is updated
         if(data.domains.length != account_domains.length)
         {
-            common.statusMessage(arguments.callee.name, "New account domain length: " + data.domains.length + " does not match account_domains length: " + account_domains.length + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New account domain length: " + data.domains.length + " does not match account_domains length: " + account_domains.length + " for company org ID: " + org_id + ".");
             return -1;
         }
 
@@ -671,18 +698,18 @@ async function _updateAccountDomains(company, org_id, account_domains)
         {
             if(data.domains[i] != account_domains[i])
             {
-                common.statusMessage(arguments.callee.name, "[" + i + "] New account domain: " + data.domains[i] + " does not match " + account_domains[i] + " for company org ID: " + org_id + ".");
+                common.statusMessage(fn, "[" + i + "] New account domain: " + data.domains[i] + " does not match " + account_domains[i] + " for company org ID: " + org_id + ".");
                 return -1;
             }
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new account domains: " + account_domains + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new account domains: " + account_domains + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new account domains: " + account_domains + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new account domains: " + account_domains + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -698,10 +725,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateARR(company, org_id, new_arr)
 {
+    const fn = _updateARR.name;
+
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -709,7 +738,7 @@ async function _updateARR(company, org_id, new_arr)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -736,17 +765,17 @@ async function _updateARR(company, org_id, new_arr)
         // check if the ARR is updated
         if(data.custom_fields.arrrevenue != Number(new_arr))
         {
-            common.statusMessage(arguments.callee.name, "New ARR: " + data.custom_fields.arrrevenue + " does not match " + new_arr + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New ARR: " + data.custom_fields.arrrevenue + " does not match " + new_arr + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new ARR: " + new_arr + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new ARR: " + new_arr + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new ARR: " + new_arr + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new ARR: " + new_arr + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -762,10 +791,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updateSource(company, org_id, new_source)
 {
+    const fn = _updateSource.name;
+
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -773,7 +804,7 @@ async function _updateSource(company, org_id, new_source)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -800,17 +831,17 @@ async function _updateSource(company, org_id, new_source)
         // check if the Source is updated
         if(data.custom_fields.source != new_source)
         {
-            common.statusMessage(arguments.callee.name, "New Source: " + data.custom_fields.source + " does not match " + new_source + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New Source: " + data.custom_fields.source + " does not match " + new_source + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new Source: " + new_source + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new Source: " + new_source + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new Source: " + new_source + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new Source: " + new_source + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -826,10 +857,12 @@ Output: 0 on success, -1 on failure
 */
 async function _updatePartner(company, org_id, new_partner)
 {
+    const fn = _updatePartner.name;
+    
     // Sanity check
     if(company.num_companies == 0)
     {
-        common.statusMessage(arguments.callee.name, "No Companies to read, possibly getCompanies() not called ?");
+        common.statusMessage(fn, "No Companies to read, possibly getCompanies() not called ?");
         return -1;
     }
 
@@ -837,7 +870,7 @@ async function _updatePartner(company, org_id, new_partner)
     const fd_company_id = company.getFDCompanyID(org_id);
     if(fd_company_id == "")
     {
-        common.statusMessage(arguments.callee.name, "Failed to locate FD ID for org ID:" + org_id);
+        common.statusMessage(fn, "Failed to locate FD ID for org ID:" + org_id);
         return -1;
     }
 
@@ -864,17 +897,17 @@ async function _updatePartner(company, org_id, new_partner)
         // check if the Partner is updated
         if(data.custom_fields.partner != new_partner)
         {
-            common.statusMessage(arguments.callee.name, "New Partner: " + data.custom_fields.partner + " does not match " + new_partner + " for company org ID: " + org_id + ".");
+            common.statusMessage(fn, "New Partner: " + data.custom_fields.partner + " does not match " + new_partner + " for company org ID: " + org_id + ".");
             return -1;
         }
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to update new Partner: " + new_partner + " for company org ID: " + org_id + "." + e.message);
+        common.statusMessage(fn, "Failed to update new Partner: " + new_partner + " for company org ID: " + org_id + "." + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully updated new Partner: " + new_partner + " for company org ID: " + org_id + ".");
+    common.statusMessage(fn, "Successfully updated new Partner: " + new_partner + " for company org ID: " + org_id + ".");
 
     return 0;
 }
@@ -894,6 +927,8 @@ Output: 0 on success, -1 on failure; also company_details.id is updated with the
 */
 async function createNewCompanyonFD(company_details)
 {
+    const fn = createNewCompanyonFD.name;
+    
     const url_path = "companies";
 
     const data_load = 
@@ -923,11 +958,11 @@ async function createNewCompanyonFD(company_details)
     }
     catch(e)
     {
-        common.statusMessage(arguments.callee.name, "Failed to create new company. Error: " + e.message);
+        common.statusMessage(fn, "Failed to create new company. Error: " + e.message);
         return -1;
     }
 
-    common.statusMessage(arguments.callee.name, "Successfully created new company with ID: " + company_details.id);
+    common.statusMessage(fn, "Successfully created new company with ID: " + company_details.id);
 
     return 0;
 }
