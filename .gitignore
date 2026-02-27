@@ -6,4 +6,4 @@ node_modules/
 
 # BUT allow the test env folder
 !apps/test/env/
-!apps/test/env/*.env
+!apps/test/env/.env.*
