@@ -3,7 +3,6 @@ node_modules/
 # Ignore all env files
 .env
 .env.*
-env/
 
 # BUT allow the test env folder
 !apps/test/env/
