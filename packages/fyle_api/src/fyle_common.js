@@ -1,5 +1,8 @@
 const common = require("@fyle-ops/common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* 
 Function: fetchFyleData
@@ -20,8 +23,11 @@ async function fetchFyleData
     include,
 }) 
 {
-    const urlObj = new URL(url);
+    // Get the function name for logging
+    const fn = fetchFyleData.name;
 
+    // Construct the URL with query parameters
+    const urlObj = new URL(url);
     if(offset) urlObj.searchParams.append("offset", String(offset));
     if(limit) urlObj.searchParams.append("limit", String(limit));
     if(include) 
@@ -34,7 +40,7 @@ async function fetchFyleData
         });
     }
 
-    console.log("Fyle URL =", urlObj.toString());
+    common.statusMessage(fn, "Fyle URL = " , urlObj.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -53,7 +59,6 @@ async function fetchFyleData
         {
             method: "GET",
             headers: headers,
-            "muteHttpExceptions": true
         });
 
         if (!res.ok)
@@ -97,7 +102,10 @@ async function sendFyleData
   data_load
 }) 
 {
-    console.log("Fyle URL =", url.toString());
+    // Get the function name for logging
+    const fn = sendFyleData.name;
+
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -117,7 +125,6 @@ async function sendFyleData
             method: method,
             headers: headers,
             body: data_load ? JSON.stringify(data_load) : null,
-            "muteHttpExceptions": true
         });
 
         if (!res.ok)
@@ -147,6 +154,9 @@ async function postFyleData
   data_load
 }) 
 {
+    // Get the function name for logging
+    const fn = postFyleData.name;
+
     return await sendFyleData({url, access_token, method: "POST", data_load});
 }
 
@@ -166,10 +176,16 @@ async function putFyleData
   data_load
 }) 
 {
+    // Get the function name for logging
+    const fn = putFyleData.name;
+    
     return await sendFyleData({url, access_token, method: "PUT", data_load});
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the function
 module.exports = 

@@ -1,23 +1,14 @@
-const { formatInTimeZone } = require("date-fns-tz");
-const path = require("path");
 const common = require("@fyle-ops/common");
 
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-async function test_exportToExcelFile()
+async function test_common_spreadsheet_exportToExcel()
 {
+    // Get function name for logging
+    const fn = test_common_spreadsheet_exportToExcel.name;
+
+    common.start_test(fn);
+
     const data_array = 
     [
         {
@@ -54,19 +45,28 @@ async function test_exportToExcelFile()
     const sheet_name = "README";
 
     await common.exportToExcelFile(data_array, process.env.DOWNLOADS_FOLDER, file_name, sheet_name);
-    console.log("Exported data to Excel file: ", file_name);
+    common.statusMessage(fn, "Exported data to Excel file: ", file_name);
+
+    common.end_test(fn);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-async function test_common()
+async function test_common_spreadsheet()
 {
+    // Get function name for logging
+    const fn = test_common_spreadsheet.name;
+
+    common.start_test_suite("Spreadsheet functions");
+
     // Spreadsheet functions
-    if(process.env.RUN_TEST_COMMON_EXPORT_TO_EXCEL_FILE === "true") await test_exportToExcelFile();
+    if(process.env.RUN_TEST_COMMON_SPREADSHEET_EXPORT_TO_EXCEL === "true") await test_common_spreadsheet_exportToExcel();
+
+    common.end_test_suite("Spreadsheet functions");
 }
 
 
 module.exports = 
 {
-    test_common
+    test_common_spreadsheet
 };

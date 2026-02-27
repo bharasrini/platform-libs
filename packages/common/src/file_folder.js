@@ -2,6 +2,10 @@ const fs = require("fs/promises");
 const path = require("path");
 const { statusMessage } = require("./logs");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* 
 Function: hasExtension
 Purpose: Checks if the provided file name has the expected extension
@@ -10,6 +14,9 @@ Output: true if the file has the expected extension, false otherwise
 */
 function hasExtension(fileName, expectedExt)
 {
+    // Get the function name for logging
+    var fn = hasExtension.name;
+
     const actualExt = path.extname(fileName).toLowerCase();
     return actualExt === expectedExt.toLowerCase();
 }
@@ -23,6 +30,7 @@ Output: 0 if the folder is created successfully, error message otherwise
 */
 async function createFolder(full_folder_path)
 {
+    // Get the function name for logging
     const fn = createFolder.name;
 
     const output_dir = full_folder_path;
@@ -33,7 +41,7 @@ async function createFolder(full_folder_path)
     }
     catch (e)
     {
-        statusMessage(fn, "Failed to create folder: " + output_dir + ". Error: " + e.message);
+        statusMessage(fn, "Failed to create folder: " , output_dir , ". Error: " , e.message);
     }
 
     return 0;
@@ -48,6 +56,7 @@ Output: 0 if the file is created successfully, error message otherwise
 */
 async function createFile(output_dir, file_name, file_ext, file_content)
 {
+    // Get the function name for logging
     const fn = createFile.name;
     
     const has_ext = hasExtension(file_name, "." + file_ext);
@@ -60,12 +69,15 @@ async function createFile(output_dir, file_name, file_ext, file_content)
     }
     catch (e)
     {
-        statusMessage(fn, "Failed to write file: " + full_file_name + ". Error: " + e.message);
+        statusMessage(fn, "Failed to write file: " , full_file_name , ". Error: " , e.message);
     }
 
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the functions

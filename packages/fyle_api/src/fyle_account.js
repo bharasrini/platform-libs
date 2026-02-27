@@ -11,10 +11,123 @@ const { fyle_expense_field } = require("./fyle_expense_field");
 const { fyle_receipt } = require("./fyle_receipt");
 const { fyle_card_transaction } = require("./fyle_card_transaction");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Class to manage Fyle Account
 class fyle_account
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Auth instance
+    auth;
+    // Structure to store the access parameters
+    access_params =
+    {
+        "refresh_token": "",
+        "access_token": "",
+        "expires_in": 0,
+        "token_timestamp": 0,
+        "token_type": "",
+        "cluster_domain": ""
+    };
+    // Structure to store the org and user details
+    org_user_details = 
+    {
+        // Org details
+        "org_id": "",
+        "org_name": "",
+        "org_domain": "",
+        "org_currency": "",
+        "org_int_id": "",
+
+        // User details
+        "user_id": "",
+        "user_email": "",
+        "user_full_name": "",
+        "user_roles": [],
+        "user_int_id": "",
+    };
+
+    // Category instance
+    category;
+    // Categories data
+    categories = 
+    {
+        category_list: [],
+        num_categories : 0
+    };
+
+    // Project instance
+    project;
+    // Projects data
+    projects = 
+    {
+        project_list: [],
+        num_projects : 0
+    };
+
+    // Employee instance
+    employee;
+    // Employees data
+    employees = 
+    {
+        employee_list: [],
+        num_employees : 0
+    };
+
+    // Department instance
+    department;
+    // Departments data
+    departments = 
+    {
+        department_list: [],
+        num_departments : 0
+    };
+
+    // Expense instance
+    expense;
+    // Expenses data
+    expenses = 
+    {
+        expense_list: [],
+        num_expenses : 0
+    };
+    
+    // Expense field instance
+    expense_field;
+    // Expense fields data
+    expense_fields = 
+    {
+        expense_field_list: [],
+        num_expense_fields : 0
+    };
+
+    // Receipt instance
+    receipt;
+    // Receipts data
+    receipts =
+    {
+        receipt_list: [],
+        num_receipts: 0
+    };
+
+    // Card Transaction instance
+    card_transaction;
+    // Card transactions data
+    card_transactions =
+    {
+        card_transaction_list: [],
+        num_card_transactions: 0
+    };
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
         _initFyleAccount(this);
@@ -32,6 +145,10 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleAccount(fyle_acc)
 {
+    // Get the function name for logging
+    const fn = _initFyleAccount.name;
+    
+    // Initialize all the modules
     fyle_acc.auth = new fyle_auth(fyle_acc);
     fyle_acc.category = new fyle_category(fyle_acc);
     fyle_acc.project = new fyle_project(fyle_acc);
@@ -45,6 +162,11 @@ function _initFyleAccount(fyle_acc)
     // Nothing else to do, return success
     return 0;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

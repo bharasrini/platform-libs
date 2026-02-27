@@ -1,6 +1,10 @@
 const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* 
 Function: fetchFreshsuccessData
 Purpose: Fetches data from the Freshsuccess API
@@ -22,6 +26,7 @@ async function fetchFreshsuccessData
     include
 }) 
 {
+    // Get the function name for logging purposes
     const fn = fetchFreshsuccessData.name;
 
     // Read environment variables
@@ -40,7 +45,7 @@ async function fetchFreshsuccessData
     if (direction) url.searchParams.append("direction", direction);
     if (include) url.searchParams.append("include", include);
 
-    console.log("Freshsuccess Url = ", url.toString());
+    common.statusMessage(fn, "Freshsuccess Url = ", url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -81,6 +86,7 @@ async function sendFreshsuccessData
     data_load
 }) 
 {
+    // Get the function name for logging purposes
     const fn = sendFreshsuccessData.name;
     
     // Read environment variables
@@ -91,7 +97,7 @@ async function sendFreshsuccessData
     const url = new URL(`https://${this_host}/api/v2/${url_path}`);
     url.searchParams.append("api_key", api_key_orig);
 
-    console.log("Freshsuccess Url = ", url.toString());
+    common.statusMessage(fn, "Freshsuccess Url = ", url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -140,8 +146,8 @@ async function sendFreshsuccessData
                 }
 
                 // Log the error details
-                common.statusMessage(fn, status_detail);
-                common.statusMessage(fn, "Fatal error posting data to FS, exiting");
+                common.statusMessage(fn, status_detail, "");
+                common.statusMessage(fn, "Fatal error posting data to FS, exiting", "");
             }
 
             throw new Error("Error in response from Freshsuccess API, status_is_ok is false");
@@ -165,6 +171,7 @@ async function postFreshsuccessData
     data_load
 })
 {
+    // Get the function name for logging purposes
     const fn = postFreshsuccessData.name;
 
     return await sendFreshsuccessData
@@ -190,6 +197,7 @@ async function putFreshsuccessData
     data_load
 })
 {
+    // Get the function name for logging purposes
     const fn = putFreshsuccessData.name;
     
     return await sendFreshsuccessData
@@ -213,6 +221,7 @@ async function deleteFreshsuccessData
     url_path,
 })
 {
+    // Get the function name for logging purposes
     const fn = deleteFreshsuccessData.name;
 
     return await sendFreshsuccessData
@@ -223,6 +232,9 @@ async function deleteFreshsuccessData
     });
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the function for use in other modules
 module.exports = 

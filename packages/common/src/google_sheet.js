@@ -5,6 +5,11 @@ const google_drive_core = require("./google_drive_core_fns");
 const google_sheet_core = require("./google_sheet_core_fns");
 const { convertNestedDatato2DArray } = require("./misc");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 Function: writeDataArrayToSheet
 Purpose: Writes the array passed in to the output_sheet in the denoted spreadsheet
@@ -13,10 +18,13 @@ Output: 0 on success, -1 otherwise
 */
 async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, sheet_name, write_header = true, freeze_header = true)
 {
+    // Get the function name for logging purposes
+    const fn = writeDataArrayToGoogleSheet.name;
+
+    // Initialize variables
     var i = 0;
     var mark_for_deletion = false;
     var sheet_id_to_delete = -1;
-    const fn = writeDataArrayToGoogleSheet.name;
 
     // Get authentication and drive / sheets instance
     const auth = createGoogleAuth();
@@ -27,7 +35,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
     const dest_folder_res = await google_drive_core.GoogleDrive_getFolder(drive, folder_id);
     if(!dest_folder_res)
     {
-        statusMessage(fn, "Error fetching destination folder with ID " + folder_id);
+        statusMessage(fn, "Error fetching destination folder with ID: " , folder_id);
         return -1;
     }
 
@@ -40,16 +48,16 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
         const created_res = await google_drive_core.GoogleDrive_createFile(drive, file_name, folder_id, "application/vnd.google-apps.spreadsheet");
         if(!created_res)
         {
-            statusMessage(fn, "Failed to create spreadsheet: " + file_name + " in folder with ID: " + folder_id);
+            statusMessage(fn, "Failed to create spreadsheet: " , file_name , " in folder with ID: " , folder_id);
             return -1;
         }
         spreadsheet_id = created_res.data.id;
-        statusMessage(fn, "Successfully created spreadsheet: " + file_name + " in folder with ID: " + folder_id);
+        statusMessage(fn, "Successfully created spreadsheet: " , file_name , " in folder with ID: " , folder_id);
     }
     else
     {
         spreadsheet_id = ss_res.data.files[0].id;
-        statusMessage(fn, "Found existing spreadsheet: " + file_name + " in folder with ID: " + folder_id);
+        statusMessage(fn, "Found existing spreadsheet: " , file_name , " in folder with ID: " , folder_id);
     }
 
     // Get the number of sheets in the spreadsheet to determine if we can delete an existing sheet or if we need to mark it for deletion
@@ -68,7 +76,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
             const del_res = await google_sheet_core.GoogleSheet_deleteSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_id);
             if(del_res < 0)
             {
-                statusMessage(fn, "Failed to delete existing sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+                statusMessage(fn, "Failed to delete existing sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
                 return -1;
             }
         }
@@ -81,7 +89,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
             const ret = await google_sheet_core.GoogleSheet_renameSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_id, new_sheet_name);
             if(ret < 0)
             {
-                statusMessage(fn, "Failed to rename existing sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+                statusMessage(fn, "Failed to rename existing sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
                 return -1;
             }
         }
@@ -91,7 +99,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
     const new_sheet_id = await google_sheet_core.GoogleSheet_createSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_name);
     if(new_sheet_id < 0)
     {
-        statusMessage(fn, "Failed to create sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+        statusMessage(fn, "Failed to create sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
         return -1;
     }
 
@@ -104,14 +112,14 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
     {
         if(await google_sheet_core.GoogleSheet_writeValuesToGoogleSheet(sheets, spreadsheet_id, sheet_name, "A1", [headers, ...rows]) < 0)
         {
-            statusMessage(fn, "Failed to write headers and data to sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+            statusMessage(fn, "Failed to write headers and data to sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
             return -1;
         }
         if(freeze_header)
         {
             if(await google_sheet_core.GoogleSheet_freezeNRowsInGoogleSheet(sheets, spreadsheet_id, new_sheet_id, 1) < 0)
             {
-                statusMessage(fn, "Failed to freeze header row in sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+                statusMessage(fn, "Failed to freeze header row in sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
                 // Minor error, ignore
             }
         }
@@ -121,7 +129,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
     {
         if(await google_sheet_core.GoogleSheet_writeValuesToGoogleSheet(sheets, spreadsheet_id, sheet_name, "A1", rows) < 0)
         {
-            statusMessage(fn, "Failed to write data to sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id);
+            statusMessage(fn, "Failed to write data to sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id);
             return -1;
         }
     }
@@ -131,7 +139,7 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
     {
         if(await google_sheet_core.GoogleSheet_deleteSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_id_to_delete) < 0)
         {
-            statusMessage(fn, "Failed to delete sheet marked for deletion with ID: " + sheet_id_to_delete + " in spreadsheet with ID: " + spreadsheet_id);
+            statusMessage(fn, "Failed to delete sheet marked for deletion with ID: " , sheet_id_to_delete , " in spreadsheet with ID: " , spreadsheet_id);
             // Minor error, ignore
             return 0;
         }
@@ -141,6 +149,9 @@ async function writeDataArrayToGoogleSheet(data_array, folder_id, file_name, she
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the functions

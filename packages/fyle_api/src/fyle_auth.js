@@ -2,9 +2,25 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Fyle authentication
 class fyle_auth
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance so that we can access it in the fyle_auth functions
+    fyle_acc = null;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleAuth(this, fyle_acc);
@@ -36,40 +52,13 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleAuth(fyle_auth, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleAuth.name;
 
-    // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
+    // Save a reference to the fyle_account instance so that we can access it in the fyle_auth functions
     fyle_auth.fyle_acc = fyle_acc;
 
-    // Initialize the access params
-    fyle_acc.access_params =
-    {
-        "refresh_token": "",
-        "access_token": "",
-        "expires_in": 0,
-        "token_timestamp": 0,
-        "token_type": "",
-        "cluster_domain": ""
-    };
-
-    // Initialize user details
-    fyle_acc.org_user_details = 
-    {
-        // Org details
-        "org_id": "",
-        "org_name": "",
-        "org_domain": "",
-        "org_currency": "",
-        "org_int_id": "",
-
-        // User details
-        "user_id": "",
-        "user_email": "",
-        "user_full_name": "",
-        "user_roles": [],
-        "user_int_id": "",
-    };
-
+    // Nothing else to do, return success
     return 0;
 }
 
@@ -82,9 +71,13 @@ Output: 0 on success, -1 on failure
 */
 async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refresh_token_str)
 {
+    // Get the function name for logging
     const fn = _getAccessToken.name;
     
+    // Initialize loop counter
     var i = 0;
+
+    // Get a reference to the fyle_account instance from fyle_auth
     var fyle_acc = fyle_auth.fyle_acc;
 
     // URL path for authentication
@@ -92,7 +85,7 @@ async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refr
     var url_path = process.env.FYLE_OAUTH_TOKEN_PATH;
 
     const url = new URL(`https://${host}${url_path}`);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     try
     {
@@ -128,7 +121,7 @@ async function _getAccessToken(fyle_auth, client_id_str, client_secret_str, refr
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get access token. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get access token. Error:" , e.message);
         return -1;
     }
 
@@ -149,8 +142,10 @@ Output: 0 on success, -1 on failure
 */
 async function _getClusterEndpoint(fyle_auth)
 {
+    // Get the function name for logging
     const fn = _getClusterEndpoint.name;
 
+    // Get a reference to the fyle_account instance from fyle_auth
     var fyle_acc = fyle_auth.fyle_acc;
 
     // URL path for authentication
@@ -159,7 +154,7 @@ async function _getClusterEndpoint(fyle_auth)
     var access_token = null;
 
     const url = new URL(`https://${host}${url_path}`);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     try
     {
@@ -187,11 +182,11 @@ async function _getClusterEndpoint(fyle_auth)
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get cluster endpoint. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get cluster endpoint. Error:" , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Cluster endpoint retrieval successful : " + fyle_acc.access_params.cluster_domain);
+    common.statusMessage(fn, "Cluster endpoint retrieval successful : " , fyle_acc.access_params.cluster_domain);
 
     return 0;
 
@@ -208,14 +203,16 @@ Output: 0 on success, -1 on failure
 */
 async function _validateClusterEndpoint(fyle_auth)
 {
+    // Get the function name for logging
     const fn = _validateClusterEndpoint.name;
     
+    // Get a reference to the fyle_account instance from fyle_auth
     var fyle_acc = fyle_auth.fyle_acc;
 
     var host = fyle_acc.access_params.cluster_domain;
     var url_path = process.env.FYLE_MY_PROFILE_PATH;
     const url = new URL(`${host}${url_path}`);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     try
     {
@@ -244,7 +241,7 @@ async function _validateClusterEndpoint(fyle_auth)
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get profile details. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get profile details. Error:" , e.message);
         return -1;
     }
 
@@ -254,6 +251,10 @@ async function _validateClusterEndpoint(fyle_auth)
 
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the fyle_auth class
 module.exports =

@@ -1,5 +1,9 @@
 const { statusMessage } = require("./logs");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /* 
 Function: sleep
@@ -9,7 +13,9 @@ Output: Promise that resolves after ms milliseconds
 */
 function sleep(ms) 
 {
+    // Get the funtion name for logging purposes
     const fn = sleep.name;
+
     return new Promise(r => setTimeout(r, ms)); 
 }
 
@@ -23,6 +29,7 @@ Source: ChatGPT
 */
 function getIdFromUrl(url) 
 {
+    // Get the funtion name for logging purposes
     const fn = getIdFromUrl.name;
     
     var id = "";
@@ -44,7 +51,7 @@ function getIdFromUrl(url)
     } else if (/view\?usp=sharing&id=(\w+)/.test(url)) {
         id = /view\?usp=sharing&id=(\w+)/.exec(url)[1];
     } else {
-        console.log("Invalid URL: " + url);
+        statusMessage(fn, "Invalid URL: " , url);
     }
     return id;
 }
@@ -72,6 +79,7 @@ const entityMap =
 
 function escapeHtml (string) 
 {
+    // Get the funtion name for logging purposes
     const fn = escapeHtml.name;
 
     return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s)
@@ -89,6 +97,7 @@ Output: true if the address is valid, false otherwise
 */
 function validateEmailAddress(email_address)
 {
+    // Get the funtion name for logging purposes
     const fn = validateEmailAddress.name;
 
     //var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -110,6 +119,7 @@ Output: none
 */
 function parseEmail(this_email, this_email_arr)
 {
+    // Get the funtion name for logging purposes
     const fn = parseEmail.name;
 
     var split_str = [];
@@ -154,6 +164,7 @@ Output: none
 */
 function getNameFromEmail(email)
 {
+    // Get the funtion name for logging purposes
     const fn = getNameFromEmail.name;
     
     var final = ""
@@ -169,14 +180,14 @@ function getNameFromEmail(email)
     var offset = email.lastIndexOf("@");
     if(offset < 0)
     {
-        statusMessage(fn, "Invalid email: " + email);
+        statusMessage(fn, "Invalid email: " , email);
         return "";
     }
 
     var name = email.substring(0, offset);
     if(name.toString().trim() == "")
     {
-        statusMessage(fn, "Failed to extract name from email: " + email);
+        statusMessage(fn, "Failed to extract name from email: " , email);
         return "";
     }
 
@@ -206,6 +217,7 @@ Output: final string in which all special characters are replaced
 */
 function replaceSpecialChars(string_to_replace, special_chars_list, char_to_replace_with)
 {
+    // Get the funtion name for logging purposes
     const fn = replaceSpecialChars.name;
 
     for(var i = 0; i < special_chars_list.length; i++)
@@ -241,7 +253,9 @@ Output: final string in which all special characters are replaced
 */
 function replaceKnownSpecialCharsWithUnderscore(string_to_replace)
 {
+    // Get the funtion name for logging purposes
     const fn = replaceKnownSpecialCharsWithUnderscore.name;
+
     const special_chars_list = [' ', ',', ':', ';', '.', '(', ')', '{', '}', '/', '\\', '"', '<', '>', '?', '&', '-'];
     const char_to_replace_with = '_';
     return replaceSpecialChars(string_to_replace, special_chars_list, char_to_replace_with);
@@ -257,6 +271,7 @@ Output: true if they are percentage distance, false otherwise
 */
 function matchWithinXPercent(num_a, num_b, perc)
 {
+    // Get the funtion name for logging purposes
     const fn = matchWithinXPercent.name;
 
     var num_a_plus_perc = num_a * (1 + perc);
@@ -282,6 +297,7 @@ Output: type of element (array, date, object, string, number)
 */
 function checkType(element) 
 {
+    // Get the funtion name for logging purposes
     const fn = checkType.name;
 
     if (Array.isArray(element)) return "array";
@@ -307,6 +323,7 @@ Source: ChatGPT
 */
 function flattenStructure(structure, parentKey = '', result = {})
 {
+    // Get the funtion name for logging purposes
     const fn = flattenStructure.name;
 
     var i = 0;
@@ -365,6 +382,7 @@ Output: 2D array with flattened headers and corresponding values
 */
 function convertNestedDatato2DArray(data_array)
 {
+    // Get the funtion name for logging purposes
     const fn = convertNestedDatato2DArray.name;
     
     // Initialize variables
@@ -439,6 +457,7 @@ Output: Object with lastRow and lastColumn properties
 */
 function getLastRowAndCol(sheet_data) 
 {
+    // Get the funtion name for logging purposes
     const fn = getLastRowAndCol.name;
 
     // Locate the last row
@@ -466,6 +485,7 @@ Source: ChatGPT
 */
 function sameStringSet(a = [], b = [])
 {
+    // Get the funtion name for logging purposes
     const fn = sameStringSet.name;
 
     if (a.length !== b.length) return false;
@@ -495,6 +515,7 @@ function sameStringSet(a = [], b = [])
  
 function LevDis(s,t)
 {
+    // Get the function name for logging purposes
     const fn = LevDis.name;
     
     // Workaround on Google Sheets rate-limit for external functions 
@@ -542,10 +563,9 @@ function LevDis(s,t)
 }
 
 
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the functions

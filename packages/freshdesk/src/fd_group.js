@@ -3,9 +3,28 @@ const common = require("@fyle-ops/common");
 const { fetchFreshdeskData } = require('./fd_common');
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 // Freshdesk Group class
 class fd_group
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the group list
+    group_list = [];
+
+    // Number of groups
+    num_groups = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
       _initGroups(this);
@@ -37,13 +56,8 @@ Output: 0 on success, -1 on failure
 */
 function _initGroups(group)
 {
+    // Get the function name for logging
     const fn = _initGroups.name;
-
-    // Initialize an array to store the group list
-    group.group_list = [];
-
-    // Initialize number of groups
-    group.num_groups = 0;
 
     // Nothing else to do, return success
     return 0;
@@ -59,6 +73,7 @@ Output: List of groups stored in group.group_list[]. Returns 0 on success, -1 on
 */
 async function _getGroups(group)
 {
+    // Get the function name for logging
     const fn = _getGroups.name;
 
     // URL path for fetching groups from Freshdesk API
@@ -90,7 +105,7 @@ async function _getGroups(group)
             // Initialize loop counters 
             var i = 0;  
 
-            // Load all accounts received in this response to the account_list []
+            // Load all groups received in this response to the group_list []
             for(i = 0; i < data.length; i++)
             {
                 var group_info = 
@@ -120,7 +135,7 @@ async function _getGroups(group)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(fn, "Processing page: " + page + ", groups processed: " + group.num_groups);
+                common.statusMessage(fn, "Processing page: ", page, ", groups processed: ", group.num_groups);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -129,13 +144,13 @@ async function _getGroups(group)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get listof groups. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of groups. Error:", e.message);
             return -1;
         }        
 
     }while(link);
 
-    common.statusMessage(fn, "Successfully fetched groups. Number of groups = "+ group.num_groups);
+    common.statusMessage(fn, "Successfully fetched groups. Number of groups = ", group.num_groups);
 
     return 0;
 }
@@ -151,6 +166,7 @@ Output: Freshdesk group name (string)
 */
 function _getGroupName(group, group_id)
 {
+    // Get the function name for logging
     const fn = _getGroupName.name;
     
     var i = 0;
@@ -184,6 +200,7 @@ Output: Freshdesk group ID
 */
 function _getGroupID(group, group_name)
 {
+    // Get the function name for logging
     const fn = _getGroupID.name;
     
     var i = 0;
@@ -209,6 +226,9 @@ function _getGroupID(group, group_name)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the class

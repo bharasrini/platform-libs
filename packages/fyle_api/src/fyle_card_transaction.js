@@ -6,10 +6,24 @@ const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Class to manage Fyle Card Transactions
 class fyle_card_transaction
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance so that we can access it in the fyle_card_transaction functions
+    fyle_acc = null;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleCardTransaction(this, fyle_acc);
@@ -53,17 +67,13 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleCardTransaction(fyle_card_transaction, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleCardTransaction.name;
 
-    // Save a reference to the fyle_account instance in fyle_card_transaction so that we can access it in the fyle_card_transaction functions
+    // Save a reference to the fyle_account instance so that we can access it in the fyle_card_transaction functions
     fyle_card_transaction.fyle_acc = fyle_acc;
 
-    fyle_acc.card_transactions =
-    {
-        card_transaction_list: [],
-        num_card_transactions: 0
-    };
-
+    // Nothing else to do, return success
     return 0;
 }
 
@@ -79,6 +89,7 @@ Output: 0 on success, -1 on failure
 */
 async function _getCardTransactions(fyle_card_transaction, event, after, before)
 {
+    // Get the function name for logging
     const fn = _getCardTransactions.name;
     
     // Loop variables
@@ -90,7 +101,7 @@ async function _getCardTransactions(fyle_card_transaction, event, after, before)
     const url_path = "/platform/v1/admin/corporate_card_transactions";
 
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -106,7 +117,7 @@ async function _getCardTransactions(fyle_card_transaction, event, after, before)
     event = (event   ?? "").toString().trim();
     if((event != "created_at") && (event != "updated_at"))
     {
-        common.statusMessage(fn, "Invalid event: " + event + ", defaulting to created_at");
+        common.statusMessage(fn, "Invalid event: " , event , ", defaulting to created_at");
         event = "created_at";
     }
     // Add the 'after' and 'before' parameters to the API call
@@ -153,7 +164,7 @@ async function _getCardTransactions(fyle_card_transaction, event, after, before)
                 fyle_acc.card_transactions.num_card_transactions++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " card transactions on page " + page + ", total card transactions processed = " + fyle_acc.card_transactions.num_card_transactions);
+            common.statusMessage(fn, "Finished processing " , this_count , " card transactions on page " , page , ", total card transactions processed = " , fyle_acc.card_transactions.num_card_transactions);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -164,13 +175,13 @@ async function _getCardTransactions(fyle_card_transaction, event, after, before)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get card transactions. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get card transactions. Error:" , e.message);
             return -1;
         }
 
     } while(fyle_acc.card_transactions.num_card_transactions < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved card transactions. Total card transactions retrieved = " + fyle_acc.card_transactions.num_card_transactions);
+    common.statusMessage(fn, "Successfully retrieved card transactions. Total card transactions retrieved = " , fyle_acc.card_transactions.num_card_transactions);
 
     // As a test, export the card transactions to an Excel file in the downloads folder
     await common.exportToExcelFile(fyle_acc.card_transactions.card_transaction_list, process.env.DOWNLOADS_FOLDER, "card_transactions.xlsx", "Card Transactions");
@@ -191,6 +202,7 @@ Output: 0 on success, -1 on failure
 */
 async function _getSelectCardTransactions(fyle_card_transaction, transaction_id_list)
 {
+    // Get the function name for logging
     const fn = _getSelectCardTransactions.name;
 
     // Loop variables
@@ -204,7 +216,7 @@ async function _getSelectCardTransactions(fyle_card_transaction, transaction_id_
     const url_path = "/platform/v1/admin/corporate_card_transactions";
 
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -225,7 +237,6 @@ async function _getSelectCardTransactions(fyle_card_transaction, transaction_id_
     // Loop to fetch all card transactions with pagination. We will keep fetching card transactions until we have fetched the total number of card transactions in the org, which is given by the 'count' field in the API response
     do
     {
-
         try
         {
             // Fetch data for the current page
@@ -250,7 +261,7 @@ async function _getSelectCardTransactions(fyle_card_transaction, transaction_id_
                 read_count++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " card transactions on page " + page + ", total card transactions processed = " + fyle_acc.card_transactions.num_card_transactions);
+            common.statusMessage(fn, "Finished processing " , this_count , " card transactions on page " , page , ", total card transactions processed = " , fyle_acc.card_transactions.num_card_transactions);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -261,12 +272,12 @@ async function _getSelectCardTransactions(fyle_card_transaction, transaction_id_
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get card transactions. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get card transactions. Error:" , e.message);
             return null;
         }
     } while(read_count < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved card transactions. Total card transactions retrieved = " + total_count);
+    common.statusMessage(fn, "Successfully retrieved card transactions. Total card transactions retrieved = " , total_count);
 
     return ret;
     
@@ -285,6 +296,7 @@ Output: 0 on success, -1 on failure
 */
 async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_list)
 {
+    // Get the function name for logging
     const fn = _ignoreCardTransactions.name;
     
     // Initialize loop variables
@@ -322,28 +334,28 @@ async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_lis
         // Only credit transactions can be marked as dismissed
         if(amount > 0)
         {
-            common.statusMessage(fn, "Not a Credit Transaction, ID: " + id + ", amount > 0: " + amount);
+            common.statusMessage(fn, "Not a Credit Transaction, ID: " , id , ", amount > 0: " , amount);
             continue;
         }
 
         // Transaction has to be approved to be dismissed
         if(is_assigned == false)
         {
-            common.statusMessage(fn, "Transaction has to be assigned to be dismissed, ID: " + id + ", is_assigned: " + is_assigned);
+            common.statusMessage(fn, "Transaction has to be assigned to be dismissed, ID: " , id , ", is_assigned: " , is_assigned);
             continue;
         }
 
         // Transaction should not be dismissed already
         if(is_dismissed == true)
         {
-            common.statusMessage(fn, "Transaction is already dismissed, ID: " + id);
+            common.statusMessage(fn, "Transaction is already dismissed, ID: " , id);
             continue;
         }
 
         // There needs to be a matched expense
         if(matched_expense_ids.length == 0)
         {
-            common.statusMessage(fn, "There are no matching transactions for the transaction to be dismissed, ID: " + id);
+            common.statusMessage(fn, "There are no matching transactions for the transaction to be dismissed, ID: " , id);
             continue;
         }
 
@@ -362,7 +374,7 @@ async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_lis
                     var this_state = matched_expenses[k].state;
                     if((this_state != "COMPLETE") && (this_state != "DRAFT"))
                     {
-                        common.statusMessage(fn, "Transaction is not COMPLETE OR DRAFT, ID: " + id + ", state = " + this_state);
+                        common.statusMessage(fn, "Transaction is not COMPLETE OR DRAFT, ID: " , id , ", state = " , this_state);
                         state_match = false;
                         break;
                     }
@@ -377,13 +389,13 @@ async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_lis
 
         if(state_match == false)
         {
-            common.statusMessage(fn, "Skipping since Transaction is not COMPLETE OR DRAFT, ID: " + id);
+            common.statusMessage(fn, "Skipping since Transaction is not COMPLETE OR DRAFT, ID: " , id);
             continue;
         }
         
         // Only include those transactions that make the cut
         var this_transaction = {"id": id};
-        common.statusMessage(fn, "Pushing Transaction ID to payload data: " + id);
+        common.statusMessage(fn, "Pushing Transaction ID to payload data: " , id);
         payload.data.push(this_transaction);
     }
 
@@ -394,7 +406,7 @@ async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_lis
         return 0;      
     }
 
-    common.statusMessage(fn, "Number of transactions in payload data: " + payload.data.length);
+    common.statusMessage(fn, "Number of transactions in payload data: " , payload.data.length);
 
     try
     {
@@ -408,11 +420,11 @@ async function _ignoreCardTransactions(fyle_card_transaction, transaction_id_lis
     }
     catch (e)
     {
-        common.statusMessage(fn, "Failed to ignore card transactions. Error:" + e.message);
+        common.statusMessage(fn, "Failed to ignore card transactions. Error:" , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Successfully ignored " + payload.data.length + " card transactions");
+    common.statusMessage(fn, "Successfully ignored " , payload.data.length , " card transactions");
 
     return 0;
     
@@ -429,6 +441,7 @@ Output: 0 on success, -1 on failure
 */
 async function _undoIgnoreCardTransactions(fyle_card_transaction, transaction_id_list)
 {
+    // Get the function name for logging
     const fn = _undoIgnoreCardTransactions.name;
     
     // Initialize loop variables
@@ -457,7 +470,7 @@ async function _undoIgnoreCardTransactions(fyle_card_transaction, transaction_id
         // Transaction should be dismissed already
         if(is_dismissed == false)
         {
-            common.statusMessage(fn, "Transaction is not dismissed, ID: " + id);
+            common.statusMessage(fn, "Transaction is not dismissed, ID: " , id);
             continue;
         }
 
@@ -479,22 +492,22 @@ async function _undoIgnoreCardTransactions(fyle_card_transaction, transaction_id
             var this_transaction = data.data;
             if(this_transaction.is_dismissed == false)
             {
-                common.statusMessage(fn, "Successfully undid ignore for transaction ID: " + id);
+                common.statusMessage(fn, "Successfully undid ignore for transaction ID: " , id);
             }
             else
             {
-                common.statusMessage(fn, "Failed to undo ignore for transaction ID: " + id);
+                common.statusMessage(fn, "Failed to undo ignore for transaction ID: " , id);
             }
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to undo ignore card transactions for transaction ID: " + transaction_data_list[i].id + ". Error:" + e.message);
+            common.statusMessage(fn, "Failed to undo ignore card transactions for transaction ID: " , transaction_data_list[i].id , ". Error:" , e.message);
             continue;
         }
 
     }
 
-    common.statusMessage(fn, "Finished undoing ignore. Number of transactions: " + transaction_data_list.length);
+    common.statusMessage(fn, "Finished undoing ignore. Number of transactions: " , transaction_data_list.length);
 
     return 0;
     
@@ -511,6 +524,7 @@ Output: 0 on success, -1 on failure
 */
 async function _createCardTransaction(fyle_card_transaction, transaction_data)
 {
+    // Get the function name for logging
     const fn = _createCardTransaction.name;
     
     // Point back to the fyle_account instance
@@ -532,11 +546,11 @@ async function _createCardTransaction(fyle_card_transaction, transaction_data)
 
         const id = data.data.id;
         transaction_data.id = id;
-        common.statusMessage(fn, "Successfully created card transaction with ID: " + id);
+        common.statusMessage(fn, "Successfully created card transaction with ID: " , id);
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to create card transaction. Error:" + e.message);
+        common.statusMessage(fn, "Failed to create card transaction. Error:" , e.message);
         return -1;
     }
 
@@ -544,6 +558,9 @@ async function _createCardTransaction(fyle_card_transaction, transaction_data)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

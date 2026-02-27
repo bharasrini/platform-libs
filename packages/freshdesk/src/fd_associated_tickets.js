@@ -2,6 +2,10 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFreshdeskData } = require("./fd_common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* 
 Function: getAssociatedTicketsList
 Purpose: Gets the list of all associated tickets from Freshdesk for the ticket whose id is passed in
@@ -10,6 +14,7 @@ Output: List of associated tickets in list[]. Returns 0 on success, -1 on failur
 */
 async function getAssociatedTicketsList(id, list)
 {
+    // Get the function name for logging
     const fn = getAssociatedTicketsList.name;
 
     // URL path for fetching associated tickets for the given ticket id
@@ -60,13 +65,13 @@ async function getAssociatedTicketsList(id, list)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get ticket list for ID: " + id + ". Error:" + e.message);
+            common.statusMessage(fn, "Failed to get ticket list for ID: ", id, ". Error:", e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(fn, "Successfully fetched associated tickets for ID: " + id + ". Total associated tickets: " + list.length);
+    common.statusMessage(fn, "Successfully fetched associated tickets for ID: ", id, ". Total associated tickets: ", list.length);
 
     return 0;
 }
@@ -80,6 +85,7 @@ Output: association type value (string)
 */
 function getAssociationType(association_type)
 {
+    // Get the function name for logging
     const fn = getAssociationType.name;
     
     var ret = "";
@@ -114,7 +120,9 @@ function getAssociationType(association_type)
     return ret;
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the function
 module.exports = 

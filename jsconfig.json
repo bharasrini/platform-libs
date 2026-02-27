@@ -1,17 +1,26 @@
 {
-  "compilerOptions": {
-    "checkJs": true,         // optional, but improves intelligence
-    "module": "commonjs",
-    "target": "es2019",
-    "moduleResolution": "node",
-    "baseUrl": "."
-  },
-  "include": [
-    "packages/**/*",
-    "apps/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/node_modules"
-  ]
+    "compilerOptions": 
+    {
+        "checkJs": true,
+        "module": "commonjs",
+        "target": "es2019",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "resolveJsonModule": true,
+        "esModuleInterop": true
+    },
+    "include": 
+    [
+        "packages/**/src/**/*",
+        "packages/**/test/**/*",
+        "packages/**/data/**/*",
+        "apps/**/src/**/*",
+        "apps/**/test/**/*",
+        "apps/**/data/**/*"
+    ],
+    "exclude":
+    [
+        "node_modules",
+        "**/node_modules"
+    ]
 }

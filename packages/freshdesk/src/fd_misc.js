@@ -1,3 +1,10 @@
+const { formatInTimeZone } = require("date-fns-tz");
+const common = require("@fyle-ops/common");
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* 
 Function: isValidTicketType
@@ -7,6 +14,9 @@ Output: true (valid type), false (invalid type)
 */
 function isValidTicketType(ticket_type)
 {
+    // Get the function name for logging
+    const fn = isValidTicketType.name;
+
     // List of Invalid Ticket Types. Add any invalid ticket types to this list 
     const invalid_ticket_types = 
     [
@@ -19,7 +29,6 @@ function isValidTicketType(ticket_type)
         "Prospect",
         "Testing"
     ];
-
 
     if(ticket_type && (ticket_type != ""))
     {
@@ -46,6 +55,8 @@ Output: true (support group), false (not a support group)
 */
 function isSupportGroup(group_name)
 {
+    // Get the function name for logging
+    const fn = isSupportGroup.name;
 
     // List of Group names that do not belong to Support. Add any other non Support groups to this list
     const non_support_groups = 
@@ -80,6 +91,9 @@ Output: true (restricted domain), false (not restricted)
 */
 function isRestrictedDomain(org_domain)
 {
+    // Get the function name for logging
+    const fn = isRestrictedDomain.name;
+    
     const restricted_domains = 
     [
         "gmail.com",
@@ -111,6 +125,9 @@ function isRestrictedDomain(org_domain)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports = 

@@ -2,6 +2,10 @@ const { google } = require('googleapis');
 const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Mapping of metric names to sheet names
 const metric_sheet_mapping = 
 [
@@ -24,6 +28,7 @@ Output: list of metrics in this_metric {} on success, null otherwise
 */
 async function readMetricsSheet(metric_name)
 {
+    // Get the function name for logging
     const fn = readMetricsSheet.name;
     
     var i = 0;
@@ -41,7 +46,7 @@ async function readMetricsSheet(metric_name)
 
     if(sheet_name == "")
     {
-        common.statusMessage(fn, "Failed to locate sheet for metric: " + metric_name);
+        common.statusMessage(fn, "Failed to locate sheet for metric: " , metric_name);
         return null;
     }
 
@@ -185,7 +190,7 @@ async function readMetricsSheet(metric_name)
 
     }
 
-    common.statusMessage(fn, "Finished reading entries to the metrics table");
+    common.statusMessage(fn, "Finished reading entries to the metrics table", "", "Total orgs with metric entries: " + this_metric.num_orgs);
 
     return this_metric;
 }
@@ -201,6 +206,7 @@ Output: true if it needs to be read in from the Freshsuccess Metrics Sheet, fals
 */
 async function getMetricsSource()
 {
+    // Get the function name for logging purposes
     const fn = getMetricsSource.name;
 
     // Get authentication and sheets instance
@@ -247,6 +253,7 @@ Output: List of metrics for metric_name. Returns 0 on success, -1 on failure
 */
 async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_name, m_1_metric_name)
 {
+    // Get the function name for logging purposes
     const fn = getUserMetrics.name;
     
     var i = 0, j = 0, k = 0;
@@ -261,10 +268,10 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
         var this_metric = await readMetricsSheet(metric_name); 
         if(this_metric == null)
         {
-            common.statusMessage(fn, "Failed to read metrics from sheet for metric: " + metric_name);
+            common.statusMessage(fn, "Failed to read metrics from sheet for metric: " , metric_name);
             return -1;
         }
-        else common.statusMessage(fn, "Successfully read metrics from sheet for metric: " + metric_name);
+        else common.statusMessage(fn, "Successfully read metrics from sheet for metric: " , metric_name);
 
         // Push this metric to the metric array
         account.metrics.push(this_metric);
@@ -279,12 +286,12 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
         // Get the metrics from FS
         if(account.getFSMetrics(metric_name) < 0)
         {
-            common.statusMessage(fn, "Failed to get metrics from Freshsuccess for metric: " + metric_name);
+            common.statusMessage(fn, "Failed to get metrics from Freshsuccess for metric: " , metric_name);
             return -1;
         }
-        else common.statusMessage(fn, "Successfully read metrics from Freshsuccess for metric: " + metric_name);
+        else common.statusMessage(fn, "Successfully read metrics from Freshsuccess for metric: " , metric_name);
         */
-        common.statusMessage(fn, "Reading metrics from Freshsuccess API is currently not implemented, going to read from sheet instead for metric: " + metric_name);
+        common.statusMessage(fn, "Reading metrics from Freshsuccess API is currently not implemented, going to read from sheet instead for metric: " , metric_name);
         var this_metric = await readMetricsSheet(metric_name);
     }
 
@@ -300,13 +307,13 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
 
     if(metric_offset < 0)
     {
-        common.statusMessage(fn, "Failed to find metric: " + metric_name + " in list of account metrices");
+        common.statusMessage(fn, "Failed to find metric: " , metric_name + " in list of account metrices");
         return -1;
     }
 
 
     // Now that we have the metrics, map them to the respective accounts 
-    common.statusMessage(fn, "Finished getting all metric values for: " + metric_name + ", going to map them to the account next");
+    common.statusMessage(fn, "Finished getting all metric values for: " , metric_name + ", going to map them to the account next");
 
     var metric = account.metrics[metric_offset];
 
@@ -327,12 +334,15 @@ async function getUserMetrics(account, metric_name, m_3_metric_name, m_2_metric_
         }
     }
 
-    common.statusMessage(fn, "Finished mapping all metric values for: " + metric_name + " to the account");
+    common.statusMessage(fn, "Finished mapping all metric values for: " , metric_name + " to the account");
     return 0;
 }
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports = 

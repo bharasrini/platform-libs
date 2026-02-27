@@ -3,9 +3,14 @@
 const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Importing the Freshdesk timezone mapping from fd_timezones.json
 const FRESHDESK_TO_IANA_TZ = require("../data/fd_timezones.json");
+
 
 // Construct a reverse mapping from IANA timezone identifiers to Freshdesk timezone labels
 const IANA_TO_FRESHDESK_TZ = {};
@@ -19,41 +24,92 @@ for (const [label, iana] of Object.entries(FRESHDESK_TO_IANA_TZ))
     IANA_TO_FRESHDESK_TZ[iana].push(label);
 }
 
-// Function to convert Freshdesk timezone label to IANA timezone identifier
+/* 
+Function: freshdeskToIana
+Purpose: Converts a Freshdesk timezone label to an IANA timezone identifier
+Inputs: label - Freshdesk timezone label
+Output: IANA timezone identifier or null if not found
+*/
 function freshdeskToIana(label)
 {
+    // Get the function name for logging
+    const fn = freshdeskToIana.name;
+
     if (!label) return null;
     return FRESHDESK_TO_IANA_TZ[String(label).trim()] || null;
 }
 
-// Function to convert IANA timezone identifier to Freshdesk timezone label(s)
+
+/* 
+Function: ianaToFreshdesk
+Purpose: Converts an IANA timezone identifier to a Freshdesk timezone label
+Inputs: ianaId - IANA timezone identifier
+        all - boolean flag to return all matching labels or just the first one (default: false)
+Output: Freshdesk timezone label(s) or null if not found
+*/
 function ianaToFreshdesk(ianaId, { all = false } = {})
 {
+    // Get the function name for logging
+    const fn = ianaToFreshdesk.name;
+
     if (!ianaId) return null;
     const list = IANA_TO_FRESHDESK_TZ[String(ianaId).trim()] || null;
     if (!list) return null;
     return all ? list : list[0]; // first label as canonical
 }
 
-// Functions to get the Freshdesk to IANA mappings
+
+/* 
+Function: getFreshdeskMap
+Purpose: Returns the Freshdesk to IANA mapping object
+Inputs: None
+Output: Freshdesk to IANA mapping object
+*/
 function getFreshdeskMap()
 {
+    // Get the function name for logging
+    const fn = getFreshdeskMap.name;
+
     return FRESHDESK_TO_IANA_TZ;
 }
 
-// Functions to get the IANA to Freshdesk mappings
+
+/* 
+Function: getIanaMap
+Purpose: Returns the IANA to Freshdesk mapping object
+Inputs: None
+Output: IANA to Freshdesk mapping object
+*/
 function getIanaMap()
 {
+    // Get the function name for logging
+    const fn = getIanaMap.name;
+
     return IANA_TO_FRESHDESK_TZ;
 }
 
 
-// Convert a time string in Freshdesk timezone to UTC
+/* 
+Function: convertTimeToUTC
+Purpose: Converts a time string in a Freshdesk timezone to UTC
+Inputs: timeStr - time string in "hh:mm[:ss] AM/PM" format
+        fdLabel - Freshdesk timezone label
+        dateStr - date string in "yyyy-mm-dd" format
+Output: UTC time string in "yyyy-MM-dd HH:mm:ss" format
+*/
 function convertTimeToUTC(timeStr, fdLabel, dateStr) 
 {
+    // Get the function name for logging
+    const fn = convertTimeToUTC.name;
+
+    // Validate inputs
+    if (!timeStr) throw new Error("timeStr is required");
+    if (!fdLabel) throw new Error("fdLabel is required");
+    if (!dateStr) throw new Error("dateStr is required");
+
+    // Get the IANA timezone for the given Freshdesk label
     const tz = FRESHDESK_TO_IANA_TZ[fdLabel];
     if (!tz) throw new Error("Unknown Freshdesk timezone: " + fdLabel);
-    if (!dateStr) throw new Error("dateStr is required (DST differs by date)");
 
     // Parse "hh:mm[:ss] AM/PM"
     const m = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/i);
@@ -92,14 +148,18 @@ function convertTimeToUTC(timeStr, fdLabel, dateStr)
     [, ly, lM, lD, lhh, lmm, lss] = localStr.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/).map(Number);
     localMinutes = lhh * 60 + lmm;
     deltaMin = desiredMinutes - localMinutes;
-    if (deltaMin !== 0) {
-      utcGuess += deltaMin * 60 * 1000;
+    if (deltaMin !== 0) 
+    {
+        utcGuess += deltaMin * 60 * 1000;
     }
 
     // Final UTC
     return formatInTimeZone(new Date(utcGuess), "UTC", "yyyy-MM-dd HH:mm:ss");
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports =

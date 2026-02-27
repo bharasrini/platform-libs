@@ -3,6 +3,9 @@ const common = require("@fyle-ops/common");
 const { fetchFreshsuccessData, postFreshsuccessData, putFreshsuccessData } = require('./fs_common');
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* 
 Function: getFSContacts
@@ -12,6 +15,7 @@ Output: List of contacts for the account. Returns 0 on success, -1 on failure
 */
 async function getFSContacts(account)
 {
+    // Get the function name for logging purposes
     const fn = getFSContacts.name;
 
     // API endpoint and query params
@@ -122,13 +126,13 @@ async function getFSContacts(account)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Error fetching contacts data from Freshsuccess: " + e.message);
+            common.statusMessage(fn, "Error fetching contacts data from Freshsuccess: " , e.message);
             return -1;
         }
             
     }while(records_on_current_page >= max_page_size);
 
-    common.statusMessage(fn, "Successfully fetched total contacts: " + account.num_contacts);
+    common.statusMessage(fn, "Successfully fetched total contacts: " , account.num_contacts);
         
     return 0;
 }
@@ -142,6 +146,7 @@ Output: 0 on success, -1 on failure
 */
 async function postContactsToFS(record_container)
 {
+    // Get the function name for logging purposes
     const fn = postContactsToFS.name;
     
     // API endpoint and query params
@@ -156,16 +161,18 @@ async function postContactsToFS(record_container)
     }
     catch (e)
     {
-        common.statusMessage(fn, "Error posting contacts to Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error posting contacts to Freshsuccess - " , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Contact records posted to Freshsuccess successfully !!!");
-
+    common.statusMessage(fn, "Contact records posted to Freshsuccess successfully !!!", "");
     return 0;
 
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports = 

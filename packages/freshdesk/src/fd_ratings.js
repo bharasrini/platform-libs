@@ -2,9 +2,27 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFreshdeskData, postFreshdeskData, putFreshdeskData } = require('./fd_common');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Freshdesk ratings
 class fd_ratings
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the ratings list
+    ratings_list = [];
+
+    // Number of ratings
+    num_ratings = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
       _initRatings(this);
@@ -26,13 +44,8 @@ Output: 0 on success, -1 on failure
 */
 function _initRatings(ratings)
 {
+    // Get the function name for logging
     const fn = _initRatings.name;
-
-    // Initialize an array to store the ratings list
-    ratings.ratings_list = [];
-
-    // Initialize number of ratings
-    ratings.num_ratings = 0;
 
     // Nothing else to do, return success
     return 0;
@@ -48,6 +61,7 @@ Output: Rating string
 */
 function getRatingString(rating_val)
 {
+    // Get the function name for logging
     const fn = getRatingString.name;
 
     var rating_string = "";
@@ -101,6 +115,7 @@ Output: List of ratings stored in ratings.ratings_list[]. Returns 0 on success, 
 */
 async function _getRatings(ratings, created_since)
 {
+    // Get the function name for logging
     const fn = _getRatings.name;
 
     // URL path for fetching ratings
@@ -166,7 +181,7 @@ async function _getRatings(ratings, created_since)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(fn, "Processing page: " + page + ", ratings processed: " + ratings.num_ratings);
+                common.statusMessage(fn, "Processing page: ", page, ", ratings processed: ", ratings.num_ratings);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -174,18 +189,21 @@ async function _getRatings(ratings, created_since)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get list of ratings. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of ratings. Error:", e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(fn, "Successfully fetched ratings. Number of ratings = "+ ratings.num_ratings);
+    common.statusMessage(fn, "Successfully fetched ratings. Number of ratings = ", ratings.num_ratings);
 
     return 0;
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports =
 {

@@ -2,9 +2,26 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Fyle categories
 class fyle_category
 {
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance so that we can access it in the fyle_category functions
+    fyle_acc = null;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleCategory(this, fyle_acc);
@@ -27,16 +44,11 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleCategory(fyle_category, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleCategory.name;
 
-    // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
+    // Save a reference to the fyle_account instance so that we can access it in the fyle_category functions
     fyle_category.fyle_acc = fyle_acc;
-
-    fyle_acc.categories = 
-    {
-        category_list: [],
-        num_categories : 0
-    };
 
     return 0;
 }
@@ -46,19 +58,21 @@ function _initFyleCategory(fyle_category, fyle_acc)
 Function: _getCategories
 Purpose: Gets the list of categories in the fyle org and stores it in the fyle_account.categories structure. 
 Pre-requisite: getAccessToken() and getClusterEndpoint() to be invoked prior
-Inputs: fyle_account instance
+Inputs: fyle_category instance
 Output: 0 on success, -1 on failure
 */
 async function _getCategories(fyle_category)
 {
+    // Get the function name for logging
     const fn = _getCategories.name;
     
+    // Point back to fyle_account instance 
     var fyle_acc = fyle_category.fyle_acc;
 
+    // API endpoint to get categories
     const url_path = "/platform/v1/admin/categories";
-
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -94,7 +108,7 @@ async function _getCategories(fyle_category)
                 fyle_acc.categories.num_categories++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " categories on page " + page + ", total categories processed = " + fyle_acc.categories.num_categories);
+            common.statusMessage(fn, "Finished processing " , this_count + " categories on page " + page + ", total categories processed = " + fyle_acc.categories.num_categories);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -105,19 +119,22 @@ async function _getCategories(fyle_category)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get categories. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get categories. Error:" , e.message);
             return -1;
         }
 
     } while(fyle_acc.categories.num_categories < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved categories. Total categories retrieved = " + fyle_acc.categories.num_categories);
+    common.statusMessage(fn, "Successfully retrieved categories. Total categories retrieved = " , fyle_acc.categories.num_categories);
 
     return 0;
     
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

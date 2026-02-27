@@ -3,6 +3,11 @@ const common = require("@fyle-ops/common");
 const { fetchFreshdeskData } = require('./fd_common');
 const { convertTimeToUTC } = require('./fd_timezones');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// List of US Holidays for 2025 & 2026. We will use this list to check if a given date is a holiday or not. If it is a holiday, then we will consider it as non-business hours
 const holiday_list = 
 [
     {date:"01-Jan-2025", holiday: "New Year's Day"},
@@ -38,6 +43,20 @@ const holiday_list =
 // Freshdesk Business Hours class
 class fd_business_hours
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the business hours list
+    business_hours_list = [];
+
+    // Number of business hours
+    num_business_hours = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
       _initBusinessHours(this);
@@ -64,13 +83,8 @@ Output: 0 on success, -1 on failure
 */
 function _initBusinessHours(business_hours)
 {
+    // Get the function name for logging
     const fn = _initBusinessHours.name;
-
-    // Initialize an array to store the business hours list
-    business_hours.business_hours_list = [];
-
-    // Initialize number of business_hours
-    business_hours.num_business_hours = 0;
 
     // Nothing else to do, return success
     return 0;
@@ -86,6 +100,7 @@ Output: List of business hours in business_hours.business_hours_list[]. Returns 
 */
 async function _getBusinessHours(business_hours)
 {
+    // Get the function name for logging
     const fn = _getBusinessHours.name;
 
     // URL path for fetching business hours
@@ -179,7 +194,7 @@ async function _getBusinessHours(business_hours)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(fn, "Processing page: " + page + ", business hours processed: " + business_hours.num_business_hours);
+                common.statusMessage(fn, "Processing page: ", page, ", business hours processed: ", business_hours.num_business_hours);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -188,13 +203,13 @@ async function _getBusinessHours(business_hours)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get list of business hours. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of business hours. Error:", e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(fn, "Successfully fetched business hours. Number of business hours = "+ business_hours.num_business_hours);
+    common.statusMessage(fn, "Successfully fetched business hours. Number of business hours = ", business_hours.num_business_hours);
 
     return 0;
 }
@@ -210,6 +225,7 @@ Output: 0 on success, -1 on failure
 */
 function _checkIfWithinBusinessHours(business_hours, support_group, time_instance)
 {
+    // Get the function name for logging
     const fn = _checkIfWithinBusinessHours.name;
     
     var i = 0;
@@ -242,7 +258,7 @@ function _checkIfWithinBusinessHours(business_hours, support_group, time_instanc
     // Check if we got a holiday
     if(is_holiday)
     {
-        //common.statusMessage(fn, "Provided date: " + time_instance + " falls on a holiday");
+        //common.statusMessage(fn, "Provided date: ", time_instance, " falls on a holiday");
         ret = false;
         return ret;
     }
@@ -269,17 +285,19 @@ function _checkIfWithinBusinessHours(business_hours, support_group, time_instanc
                 default: day_of_week = "monday"; break;
             }
 
+            // Get the start and end time for the identified support group and day of week
             var start_time = business_hours.business_hours_list[i].business_hours[day_of_week].start;
             var end_time = business_hours.business_hours_list[i].business_hours[day_of_week].end;
 
             if(start_time == "" || end_time == "")
             {
                 // This is a weekend ticket
-                //common.statusMessage(fn, "Provided date: " + time_instance + " is a weekend ticket");
+                //common.statusMessage(fn, "Provided date: ", time_instance, " is a weekend ticket");
                 ret = false;
                 break;
             }
 
+            // Convert the start and end time to UTC time using the time zone of the support group
             var time_zone = business_hours.business_hours_list[i].time_zone;
             var start_date_time = convertTimeToUTC(start_time, time_zone, dateStr);
             var end_date_time = convertTimeToUTC(end_time, time_zone, dateStr);
@@ -300,6 +318,9 @@ function _checkIfWithinBusinessHours(business_hours, support_group, time_instanc
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports =

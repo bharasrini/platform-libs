@@ -1,7 +1,11 @@
 const { subMonths } = require("date-fns");
 const { formatInTimeZone } = require("date-fns-tz");
 const util = require("util");
+const { statusMessage } = require("./logs");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* 
 Function: returnPrevious3MonthsPeriodMarkers
@@ -11,6 +15,9 @@ Output: Structure with Date Markers in last 3 months denoted by "m_1_start", "m_
 */
 function returnPrevious3MonthsPeriodMarkers()
 {
+    // Get the function name for logging
+    var fn = returnPrevious3MonthsPeriodMarkers.name;
+
     // Get the current date
     var todayDateObj = new Date();
 
@@ -26,20 +33,20 @@ function returnPrevious3MonthsPeriodMarkers()
     var m1_year = (month == 0) ? year - 1: year;
     var m1_month = (month == 0) ? 11: month-1;
     var m1_date = 1;
-    var m1DateObj_start = new Date(m1_year, m1_month, m1_date);
-    var m1DateObj_end = new Date(m0_year, m0_month, 0, 23, 59, 59);
+    var m1DateObj_start = new Date(Date.UTC(m1_year, m1_month, m1_date));
+    var m1DateObj_end = new Date(Date.UTC(m0_year, m0_month, 0, 23, 59, 59));
 
     var m2_year = (m1_month == 0) ? m1_year - 1: m1_year;
     var m2_month = (m1_month == 0) ? 11: m1_month-1;
     var m2_date = 1;
-    var m2DateObj_start = new Date(m2_year, m2_month, m2_date);
-    var m2DateObj_end = new Date(m1_year, m1_month, 0, 23, 59, 59);
+    var m2DateObj_start = new Date(Date.UTC(m2_year, m2_month, m2_date));
+    var m2DateObj_end = new Date(Date.UTC(m1_year, m1_month, 0, 23, 59, 59));
 
     var m3_year = (m2_month == 0) ? m2_year - 1: m2_year;
     var m3_month = (m2_month == 0) ? 11: m2_month-1;
     var m3_date = 1;
-    var m3DateObj_start = new Date(m3_year, m3_month, m3_date);
-    var m3DateObj_end = new Date(m2_year, m2_month, 0, 23, 59, 59);
+    var m3DateObj_start = new Date(Date.UTC(m3_year, m3_month, m3_date));
+    var m3DateObj_end = new Date(Date.UTC(m2_year, m2_month, 0, 23, 59, 59));
 
     // Load these date objects into the structure
     var threeMonthPeriodMarkers = 
@@ -88,16 +95,21 @@ Output: Structure with Date Markers for start and end of the months denoted by "
 */
 function getMonthMarkers(period)
 {
+    // Get the function name for logging
+    var fn = getMonthMarkers.name;
+
+    // Get the month and year of the period
     var year = period.getFullYear();
     var month = period.getMonth();
 
+    // Calculate the month and year for the next month to get the last date of the current month
     var next_year = (month == 11) ? year + 1: year;
     var next_month = (month == 11) ? 0: month + 1;
 
     // First day of the month at 00:00:00 and last day of the month at 23:59:59
-    var mDateObj_start = new Date(year, month, 1);
+    var mDateObj_start = new Date(Date.UTC(year, month, 1));
     // Day 0 is last day of previous month
-    var mDateObj_end = new Date(next_year, next_month, 0, 23, 59, 59);
+    var mDateObj_end = new Date(Date.UTC(next_year, next_month, 0, 23, 59, 59));
 
     var monthMarkers = 
     {
@@ -125,14 +137,17 @@ Output: Date
 */
 function getEndOfMonth(month_offset) 
 {
+    // Get the function name for logging
+    var fn = getEndOfMonth.name;
+
     // Get the current date
     var end_of_month = new Date();
 
     // Set the date to the first day of the (month_offset + 1) month
-    end_of_month.setMonth(end_of_month.getMonth() + month_offset + 1, 1);
+    end_of_month.setUTCMonth(end_of_month.getUTCMonth() + month_offset + 1, 1);
 
     // Subtract one day to get the last day of the (month_offset) month
-    end_of_month.setDate(end_of_month.getDate() - 1);
+    end_of_month.setUTCDate(end_of_month.getUTCDate() - 1);
 
     return end_of_month;
 }
@@ -147,6 +162,9 @@ Output: True if the new timestamp is closer, false otherwise
 */
 function isNewTimestampCloser(base_timestamp, new_timestamp, current_timestamp, max_interval)
 {
+    // Get the function name for logging
+    var fn = isNewTimestampCloser.name;
+
     // Compute the acceptable time interval
     var interval_timestamp = 0;
     
@@ -194,6 +212,10 @@ Output: String representation of Time
 */
 function convertTimeMinutesToString(time_mins)
 {
+    // Get the function name for logging
+    var fn = convertTimeMinutesToString.name;
+
+    // Initialize the return string
     var ret_str = "";
 
     if(time_mins < 60)
@@ -202,16 +224,16 @@ function convertTimeMinutesToString(time_mins)
     }
     else if(time_mins < (60*24))
     {
-        var num_hours = parseInt((time_mins / 60));
-        var num_mins = parseInt(time_mins - (num_hours*60));
+        var num_hours = parseInt(String(time_mins / 60));
+        var num_mins = parseInt(String(time_mins - (num_hours*60)));
 
         ret_str = `${String(num_hours).padStart(2, '0')} hours, ${String(num_mins).padStart(2, '0')} minutes`;
     }
     else
     {
-        var num_days = parseInt(time_mins / (24*60));
-        var num_hours = parseInt((time_mins / 60) - (num_days*24));
-        var num_mins = parseInt(time_mins - (num_days*24*60) - (num_hours*60));
+        var num_days = parseInt(String(time_mins / (24*60)));
+        var num_hours = parseInt(String((time_mins / 60) - (num_days*24)));
+        var num_mins = parseInt(String(time_mins - (num_days*24*60) - (num_hours*60)));
 
         ret_str = `${String(num_days).padStart(2, '0')} days, ${String(num_hours).padStart(2, '0')} hours, ${String(num_mins).padStart(2, '0')} minutes`;
     }
@@ -229,6 +251,9 @@ Output: true if valid, false otherwise
 */
 function isValidDate(dateString) 
 {
+    // Get the function name for logging
+    var fn = isValidDate.name;
+
     var timestamp = Date.parse(dateString);
     return isNaN(timestamp) == false;
 }
@@ -243,6 +268,9 @@ Output: String
 */
 function getSinceString(interval)
 {
+    // Get the function name for logging
+    var fn = getSinceString.name;
+    
     var now = new Date();
     var since = new Date(now.getTime() - (interval * 60 * 60 * 1000));
     var since_str = formatInTimeZone(since, "GMT", "yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -258,10 +286,16 @@ Output: date that is 'n' months less than the date passed in
 */
 function getNMonthsAgo(date,n)
 {
+    // Get the function name for logging
+    var fn = getNMonthsAgo.name;
+
     var n_month_ago = subMonths(date, n);
     return n_month_ago;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the functions
 module.exports = 

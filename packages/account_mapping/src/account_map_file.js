@@ -1,7 +1,9 @@
 const { google } = require('googleapis');
 const common = require("@fyle-ops/common");
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* 
 Function: readAccountMapDataFromFile
@@ -11,6 +13,7 @@ Output: 0 on success, -1 on failure
 */
 async function readAccountMapDataFromFile(account_map)
 {
+    // Get the function name for logging
     const fn = readAccountMapDataFromFile.name;
     
     // Read the Account Mapping sheet
@@ -41,7 +44,7 @@ async function readAccountMapDataFromFile(account_map)
     }
     catch (e)
     {
-        common.statusMessage(fn, "Error getting account mapping data: " + e.message);
+        common.statusMessage(fn, "Error getting account mapping data: ", e.message);
         return -1;
     }
 
@@ -57,6 +60,7 @@ Output: 0 on success, -1 on failure
 */
 async function flushAccountMapDataToFile(account_map)
 {
+    // Get the function name for logging
     const fn = flushAccountMapDataToFile.name;
     
     try
@@ -87,12 +91,17 @@ async function flushAccountMapDataToFile(account_map)
     }
     catch(e)
     {
-        common.statusMessage(fn, "Error flushing account map data to the account mapping sheet: " + e.message);
+        common.statusMessage(fn, "Error flushing account map data to the account mapping sheet: ", e.message);
         return -1;
     }
 
     return 0;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting functions to be used in other files

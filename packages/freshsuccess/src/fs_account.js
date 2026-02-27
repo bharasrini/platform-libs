@@ -7,10 +7,41 @@ const { getUserMetrics } = require('./fs_metrics');
 const { getFSContacts, postContactsToFS } = require('./fs_contact');
 const { readLast3MonthsBillingData } = require('./fs_billing');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Freshsuccess Account Class
 class fs_account 
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the account list
+    account_list = [];
+
+    // Number of accounts
+    num_accounts = 0;
+
+    // Array for metrics
+    metrics = [];
+
+    // Number of metrics
+    num_metrics = 0;
+
+    // Array for contacts
+    contact_list = [];
+
+    // Number of contacts
+    num_contacts = 0;
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor() 
     {
         _initAccounts(this);
@@ -56,23 +87,8 @@ Output: 0 on success, -1 on failure
 */
 function _initAccounts(account) 
 {
+    // Get the function name for logging
     const fn = _initAccounts.name;
-
-    // Initialize an array to store the account list
-    account.account_list = [];
-
-    // Initialize number of accounts
-    account.num_accounts = 0;
-
-    // Initialize array for metrics
-    account.metrics = [];
-    account.num_metrics = 0;
-
-    // Initialize array for contacts
-    account.contact_list = [];
-
-    // Initialize number of contacts
-    account.num_contacts = 0;
 
     // Nothing else to do, return success
     return 0;
@@ -87,6 +103,7 @@ Output: List of accounts stored in account.account_list[]. Returns 0 on success,
 */
 async function _getAccounts(account)
 {
+    // Get the function name for logging
     const fn = _getAccounts.name;
 
     // API endpoint and query params
@@ -159,13 +176,13 @@ async function _getAccounts(account)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Error fetching accounts data from Freshsuccess: " + e.message);
+            common.statusMessage(fn, "Error fetching accounts data from Freshsuccess: " , e.message);
             return -1;
         }
             
     }while(records_on_current_page >= max_page_size);
 
-    common.statusMessage(fn, "Successfully fetched total accounts: " + account.num_accounts);
+    common.statusMessage(fn, "Successfully fetched total accounts: " , account.num_accounts);
         
     return 0;
 }
@@ -179,6 +196,7 @@ Output: index of the org if found, -1 if not found
 */
 function _locateOrg(account, org_id)
 {
+    // Get the function name for logging
     const fn = _locateOrg.name;
     
     var i;
@@ -214,7 +232,9 @@ Output: Billing data. Returns 0 on success, -1 on failure
 */
 async function _getBillingData(account)
 {
+    // Get the function name for logging
     const fn = _getBillingData.name;
+
     await readLast3MonthsBillingData(account);
     return 0;
 }
@@ -229,7 +249,9 @@ Output: List of metrics for "product_db.num_invited_users". Returns 0 on success
 */
 async function _getInvitedUsersMetrics(account)
 {
+    // Get the function name for logging
     const fn = _getInvitedUsersMetrics.name;
+
     // Metric name
     const metric_name = "product_db.num_invited_users";
     return await getUserMetrics(account, metric_name, "m3_invited_users", "m2_invited_users", "m1_invited_users");
@@ -244,7 +266,9 @@ Output: List of metrics for "product_db.num_verified_users". Returns 0 on succes
 */
 async function _getVerifiedUsersMetrics(account)
 {
+    // Get the function name for logging
     const fn = _getVerifiedUsersMetrics.name;
+
     // Metric name
     const metric_name = "product_db.num_verified_users";
     return await getUserMetrics(account, metric_name, "m3_verified_users", "m2_verified_users", "m1_verified_users");
@@ -259,7 +283,9 @@ Output: List of contacts for the account. Returns 0 on success, -1 on failure
 */
 async function _getContacts(account)
 {
+    // Get the function name for logging
     const fn = _getContacts.name;
+
     return await getFSContacts(account);
 }
 
@@ -273,6 +299,7 @@ Output: 0 on success, -1 on failure
 */
 async function postRecordsToFS(record_container)
 {
+    // Get the function name for logging
     const fn = postRecordsToFS.name;
     
     // API endpoint and query params
@@ -287,12 +314,11 @@ async function postRecordsToFS(record_container)
     }
     catch (e)
     {
-        common.statusMessage(fn, "Error posting account records to Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error posting account records to Freshsuccess - " , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Account records posted to Freshsuccess successfully !!!");
-
+    common.statusMessage(fn, "Account records posted to Freshsuccess successfully !!!", "");
     return 0;
 }
 
@@ -306,6 +332,7 @@ Output: 0 on success, -1 on failure
 */
 async function removeCSMMappingfromFS(account_id, csm_email)
 {
+    // Get the function name for logging
     const fn = removeCSMMappingfromFS.name;
     
     const url_path = "accounts/"+account_id+"/assigned_csms/"+encodeURIComponent(csm_email);
@@ -316,16 +343,19 @@ async function removeCSMMappingfromFS(account_id, csm_email)
     }
     catch (e)
     {
-        common.statusMessage(fn, "Error deleting CSM mapping from Freshsuccess - " + e.message);
+        common.statusMessage(fn, "Error deleting CSM mapping from Freshsuccess - " , e.message);
         return -1;    
     }
 
-    common.statusMessage(fn, "Mapping for CSM " + csm_email + " deleted from account: " + account_id + " on Freshsuccess successfully !!!");
+    common.statusMessage(fn, "Mapping for CSM " + csm_email + " deleted from account: " + account_id + " on Freshsuccess successfully !!!", "");
 
     return 0;
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the class

@@ -2,9 +2,25 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Fyle employees
 class fyle_employee
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance so that we can access it in the fyle_employee functions
+    fyle_acc = null;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleEmployee(this, fyle_acc);
@@ -39,15 +55,10 @@ function _initFyleEmployee(fyle_employee, fyle_acc)
 {
     const fn = _initFyleEmployee.name;
 
-    // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
+    // Save a reference to the fyle_account instance so that we can access it in the fyle_employee functions
     fyle_employee.fyle_acc = fyle_acc;
 
-    fyle_acc.employees = 
-    {
-        employee_list: [],
-        num_employees : 0
-    };
-
+    // Nothing else to do, return success
     return 0;
 }
 
@@ -61,14 +72,16 @@ Output: 0 on success, -1 on failure
 */
 async function _getEmployees(fyle_employee)
 {
+    // Get the function name for logging
     const fn = _getEmployees.name;
     
+    // Point back to fyle_account instance
     var fyle_acc = fyle_employee.fyle_acc;
 
+    // API endpoint to get employees
     const url_path = "/platform/v1/admin/employees";
-
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
@@ -104,7 +117,7 @@ async function _getEmployees(fyle_employee)
                 fyle_acc.employees.num_employees++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " employees on page " + page + ", total employees processed = " + fyle_acc.employees.num_employees);
+            common.statusMessage(fn, "Finished processing " , this_count + " employees on page " + page + ", total employees processed = " + fyle_acc.employees.num_employees);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -115,13 +128,13 @@ async function _getEmployees(fyle_employee)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get employees. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get employees. Error:" , e.message);
             return -1;
         }
 
     } while(fyle_acc.employees.num_employees < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved employees. Total employees retrieved = " + fyle_acc.employees.num_employees);
+    common.statusMessage(fn, "Successfully retrieved employees. Total employees retrieved = " , fyle_acc.employees.num_employees);
 
     return 0;
     
@@ -138,6 +151,7 @@ Output: user name on success, blank otherwise
 */
 function _getEmployeeName(fyle_acc, user_id)
 {
+    // Get the function name for logging
     const fn = _getEmployeeName.name;
 
     var i;
@@ -166,6 +180,7 @@ Output: user email on success, blank otherwise
 */
 function _getEmployeeEmail(fyle_acc, user_id)
 {
+    // Get the function name for logging
     const fn = _getEmployeeEmail.name;
     
     var i;
@@ -185,6 +200,9 @@ function _getEmployeeEmail(fyle_acc, user_id)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

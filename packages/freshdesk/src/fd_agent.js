@@ -2,10 +2,29 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFreshdeskData } = require('./fd_common');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Freshdesk Agent class
 class fd_agent
 {
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the agent list
+    agent_list = [];
+
+    // Number of agents
+    num_agents = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
       _initAgent(this);
@@ -42,14 +61,9 @@ Output: 0 on success, -1 on failure
 */
 function _initAgent(agent)
 {
+    // Get the function name for logging
     const fn = _initAgent.name;
 
-    // Initialize an array to store the agent list
-    agent.agent_list = [];
-
-    // Initialize number of agents
-    agent.num_agents = 0;
-    
     // Nothing else to do, return success
     return 0;
 }
@@ -64,6 +78,7 @@ Output: List of agents stored in agent.agent_list[]. Returns 0 on success, -1 on
 */
 async function _getAgents(agent)
 {
+    // Get the function name for logging
     const fn = _getAgents.name;
 
     // URL path for fetching agents
@@ -118,7 +133,7 @@ async function _getAgents(agent)
     /*
             if((page % 5) == 0)
             {
-                common.statusMessage(fn, "Processing page: " + page + ", agents processed: " + agent.num_agents);
+                common.statusMessage(fn, "Processing page: " , page + ", agents processed: " , agent.num_agents);
             }
     */
             // set a sleep here for 100 ms so that we don't exceed the throttle
@@ -126,13 +141,13 @@ async function _getAgents(agent)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get list of agents. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get list of agents. Error: ", e.message);
             return -1;
         }
 
     }while(link);
 
-    common.statusMessage(fn, "Successfully fetched agents. Number of agents = "+ agent.num_agents);
+    common.statusMessage(fn, "Successfully fetched agents. Number of agents = ", agent.num_agents);
 
     return 0;
 }
@@ -147,6 +162,7 @@ Output: agent name (string)
 */
 function _getAgentName(agent, agent_id)
 {
+    // Get the function name for logging
     const fn = _getAgentName.name;
     
     var i = 0;
@@ -182,6 +198,7 @@ Output: agent email (string)
 */
 function _getAgentEmail(agent, agent_id)
 {
+    // Get the function name for logging
     const fn = _getAgentEmail.name;
     
     var i = 0;
@@ -217,6 +234,7 @@ Output: agent email (string)
 */
 function _getAgentId(agent, agent_email)
 {
+    // Get the function name for logging
     const fn = _getAgentId.name;
     
     var i = 0;
@@ -243,6 +261,9 @@ function _getAgentId(agent, agent_email)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the class
 module.exports = 

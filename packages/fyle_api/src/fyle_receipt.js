@@ -5,10 +5,24 @@ const path = require("path");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Class to manage Fyle Receipts
 class fyle_receipt
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance
+    fyle_acc;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleReceipt(this, fyle_acc);
@@ -47,17 +61,13 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleReceipt(fyle_receipt, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleReceipt.name;
 
     // Save a reference to the fyle_account instance in fyle_receipt so that we can access it in the fyle_receipt functions
     fyle_receipt.fyle_acc = fyle_acc;
 
-    fyle_acc.receipts =
-    {
-        receipt_list: [],
-        num_receipts: 0
-    };
-
+    // Nothing else to do, return success
     return 0;
 }
 
@@ -72,6 +82,7 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptList(fyle_receipt)
 {
+    // Get the function name for logging
     const fn = _getReceiptList.name;
     
     // Loop variables
@@ -80,6 +91,7 @@ async function _getReceiptList(fyle_receipt)
     // Get a reference to the fyle_acc instance
     var fyle_acc = fyle_receipt.fyle_acc;
 
+    // If there were no expenses found in the fyle_acc instance, let's try to fetch the expenses for the last 1 month and then proceed to fetch the receipts
     if(fyle_acc.expenses.num_expenses == 0)
     {
         common.statusMessage(fn, "No expenses found in fyle_acc instance. Invoking getExpenses() for all expenses created in the last 1 month.");
@@ -136,7 +148,7 @@ async function _getReceiptList(fyle_receipt)
         
     }
 
-    common.statusMessage(fn, "Finished retrieving receipt list for all expenses. Total receipts found : " + fyle_acc.receipts.num_receipts);
+    common.statusMessage(fn, "Finished retrieving receipt list for all expenses. Total receipts found : " , fyle_acc.receipts.num_receipts);
 
      // As a test, export the receipts to an Excel file in the downloads folder
     await common.exportToExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipts.xlsx", "Receipts");
@@ -156,10 +168,13 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptLinks(fyle_receipt)
 {
+    // Get the function name for logging
     const fn = _getReceiptLinks.name;
 
+    // Point back to the fyle_acc instance
     var fyle_acc = fyle_receipt.fyle_acc;
 
+    // Initialize loop variables and constants
     var i = 0, j = 0;
     var processed = 0;
     const limit = 200;
@@ -232,17 +247,17 @@ async function _getReceiptLinks(fyle_receipt)
 
             // Increment the number of receipts processed
             processed += num_receipts_this_time;
-            common.statusMessage(fn, "Retrieved links for " + processed + " receipts so far");
+            common.statusMessage(fn, "Retrieved links for " , processed , " receipts so far");
         }
         catch(e)
         {
-            common.statusMessage(fn, "Error while retrieving receipt links for receipts from " + processed + " to " + (processed + num_receipts_this_time) + ". Error: " + e.message);
+            common.statusMessage(fn, "Error while retrieving receipt links for receipts from " , processed , " to " , (processed + num_receipts_this_time) , ". Error: " , e.message);
             return -1;
         }
 
     }while(processed < total_count);
 
-    common.statusMessage(fn, "Finished retrieving links for all receipts. Total receipt links : " + total_count);
+    common.statusMessage(fn, "Finished retrieving links for all receipts. Total receipt links : " , total_count);
 
     // As a test, export the receipts to an Excel file in the downloads folder
     await common.exportToExcelFile(fyle_acc.receipts.receipt_list, process.env.DOWNLOADS_FOLDER, "receipt links.xlsx", "Receipt Links");
@@ -261,6 +276,7 @@ Output: receipt object on success, null on failure
 */
 function _getReceiptObject(fyle_receipt, receipt_id)
 {
+    // Get the function name for logging
     const fn = _getReceiptObject.name;
 
     var i = 0;
@@ -286,25 +302,27 @@ Output: 0 on success, -1 on failure
 */
 async function _getReceiptFile(fyle_receipt, receipt_id)
 {
+    // Get the function name for logging
     const fn = _getReceiptFile.name;
     
     // Loop variables
     var i = 0;
 
+    // Point back to the fyle_acc instance
     var fyle_acc = fyle_receipt.fyle_acc;
 
     // Get the receipt object for the given receipt_id
     var receipt_obj = fyle_receipt.getReceiptObject(receipt_id);
     if(receipt_obj == null)
     {
-        common.statusMessage(fn, "Receipt not found for receipt_id: " + receipt_id);
+        common.statusMessage(fn, "Receipt not found for receipt_id: " , receipt_id);
         return -1;
     }
 
     // Path to dowload the receipt file
     const url_path = "/platform/v1/admin/files/download";
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
     // Build the 'include' parameter for the API call based on the input parameters
     var include = [{"id": receipt_id}];
@@ -326,7 +344,7 @@ async function _getReceiptFile(fyle_receipt, receipt_id)
         if (contentType.includes("application/json"))
         {
             // It's a JSON response, just ignore it as we are expecting a blob for the receipt
-            common.statusMessage(fn, "This is a JSON response: " + data);
+            common.statusMessage(fn, "This is a JSON response: " , data);
         }
         else
         {
@@ -340,22 +358,25 @@ async function _getReceiptFile(fyle_receipt, receipt_id)
 
             const file_ext = mime.extension(receipt_obj.content_type) || "bin";
             await common.createFile(output_dir, receipt_obj.name, file_ext, receipt_obj.blob);
-            console.log("Wrote blob to file: " + receipt_obj.name);
+            common.statusMessage(fn, "Wrote blob to file: " , receipt_obj.name);
         }
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get receipt for receipt_id: " + receipt_id + ". Error:" + e.message);
+        common.statusMessage(fn, "Failed to get receipt for receipt_id: " , receipt_id , ". Error:" , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Successfully retrieved receipt for receipt_id: " + receipt_id);
+    common.statusMessage(fn, "Successfully retrieved receipt for receipt_id: " , receipt_id);
 
     return 0;
     
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

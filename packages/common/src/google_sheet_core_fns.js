@@ -4,7 +4,10 @@ const { statusMessage } = require("./logs");
 const { GoogleDrive_getFolder } = require("./google_drive_core_fns");
 const { GoogleDrive_createFile } = require("./google_drive_core_fns"); 
 
-/***************** Google Sheet related Core functions *****************/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 Function: GoogleSheet_createGoogleSpreadsheet
@@ -14,6 +17,7 @@ Output: spreadsheet handle on success, null otherwise
 */
 async function GoogleSheet_createGoogleSpreadsheet(folder_id, file_name)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_createGoogleSpreadsheet.name;
     
     // Get authentication and drive / sheets instance
@@ -24,19 +28,19 @@ async function GoogleSheet_createGoogleSpreadsheet(folder_id, file_name)
     const dest_res = await GoogleDrive_getFolder(drive, folder_id);
     if (!dest_res)
     {
-        statusMessage(fn, "Failed to get destination folder with ID: " + folder_id);
+        statusMessage(fn, "Failed to get destination folder with ID: " , folder_id);
         return null;
     }
 
     const file_res = await GoogleDrive_createFile(drive, file_name, folder_id, "application/vnd.google-apps.spreadsheet");
     if(!file_res)
     {
-        statusMessage(fn, "Failed to create spreadsheet: " + file_name + " in folder with ID: " + folder_id);
+        statusMessage(fn, "Failed to create spreadsheet: " , file_name , " in folder with ID: " , folder_id);
         return null;
     }
 
     const spreadsheet_id = file_res.data.id;
-    statusMessage(fn, "Successfully created spreadsheet: " + file_name + " with ID: " + spreadsheet_id + " in folder with ID: " + folder_id);    
+    statusMessage(fn, "Successfully created spreadsheet: " , file_name , " with ID: " , spreadsheet_id , " in folder with ID: " , folder_id);    
     return spreadsheet_id;
 
 }
@@ -50,6 +54,7 @@ Output: Number of sheets on success, -1 otherwise
 */
 async function GoogleSheet_getNumberOfSheetsInGoogleSpreadsheet(sheets, spreadsheet_id)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_getNumberOfSheetsInGoogleSpreadsheet.name;
     
     try
@@ -63,7 +68,7 @@ async function GoogleSheet_getNumberOfSheetsInGoogleSpreadsheet(sheets, spreadsh
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to get number of sheets for spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to get number of sheets for spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
     }
 }
@@ -77,6 +82,7 @@ Output: Sheet object on success, null otherwise
 */
 async function GoogleSheet_findSheetByNameInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_name)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_findSheetByNameInGoogleSpreadsheet.name;
 
     var i = 0;
@@ -99,7 +105,7 @@ async function GoogleSheet_findSheetByNameInGoogleSpreadsheet(sheets, spreadshee
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to get sheets for spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to get sheets for spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return null;
      }
 }
@@ -112,6 +118,7 @@ Output: 0 on success, -1 otherwise
 */
 async function GoogleSheet_deleteSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_id)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_deleteSheetInGoogleSpreadsheet.name;
     
     var i = 0;
@@ -139,7 +146,7 @@ async function GoogleSheet_deleteSheetInGoogleSpreadsheet(sheets, spreadsheet_id
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to delete sheet with ID: " + sheet_id + " in spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to delete sheet with ID: " , sheet_id , " in spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
      }
 }
@@ -153,6 +160,7 @@ Output: 0 on success, -1 otherwise
 */
 async function GoogleSheet_renameSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_id, new_sheet_name)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_renameSheetInGoogleSpreadsheet.name;
     
     var i = 0;
@@ -183,7 +191,7 @@ async function GoogleSheet_renameSheetInGoogleSpreadsheet(sheets, spreadsheet_id
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to rename sheet with ID: " + sheet_id + " in spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to rename sheet with ID: " , sheet_id , " in spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
      }
 }
@@ -198,6 +206,7 @@ Output: sheet_id on success, -1 otherwise
 */
 async function GoogleSheet_createSheetInGoogleSpreadsheet(sheets, spreadsheet_id, sheet_name)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_createSheetInGoogleSpreadsheet.name;
 
     var i = 0;
@@ -225,17 +234,17 @@ async function GoogleSheet_createSheetInGoogleSpreadsheet(sheets, spreadsheet_id
         const resp = res.data.replies[0];
         if(!resp || !resp.addSheet || !resp.addSheet.properties || !resp.addSheet.properties.title || resp.addSheet.properties.title != sheet_name)
         {
-            statusMessage(fn, "Failed to create sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id + ". Unexpected response: " + JSON.stringify(res.data));
+            statusMessage(fn, "Failed to create sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id , ". Unexpected response: " , JSON.stringify(res.data));
             return -1;
         }
 
         const sheet_id = res.data.replies[0].addSheet.properties.sheetId;
-        statusMessage(fn, "Successfully created sheet with name: " + sheet_name + " and ID: " + sheet_id + " in spreadsheet with ID: " + spreadsheet_id);
+        statusMessage(fn, "Successfully created sheet with name: " , sheet_name , " and ID: " , sheet_id , " in spreadsheet with ID: " , spreadsheet_id);
         return sheet_id;
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to create sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to create sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
      }
 }
@@ -249,6 +258,7 @@ Output: 0 on success, -1 otherwise
 */
 async function GoogleSheet_writeValuesToGoogleSheet(sheets, spreadsheet_id, sheet_name, coordinates, values)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_writeValuesToGoogleSheet.name;
     
     try
@@ -266,7 +276,7 @@ async function GoogleSheet_writeValuesToGoogleSheet(sheets, spreadsheet_id, shee
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to write values to sheet with name: " + sheet_name + " in spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to write values to sheet with name: " , sheet_name , " in spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
     }
 
@@ -282,6 +292,7 @@ Output: 0 on success, -1 otherwise
 */
 async function GoogleSheet_freezeNRowsInGoogleSheet(sheets, spreadsheet_id, sheet_id, num_rows_to_freeze)
 {
+    // Get the function name for logging purposes
     const fn = GoogleSheet_freezeNRowsInGoogleSheet.name;
     
     try
@@ -313,13 +324,16 @@ async function GoogleSheet_freezeNRowsInGoogleSheet(sheets, spreadsheet_id, shee
     }
     catch(e)
     {
-        statusMessage(fn, "Failed to freeze top " + num_rows_to_freeze + " rows in sheet with ID: " + sheet_id + " in spreadsheet with ID: " + spreadsheet_id + ". Error: " + e.message);
+        statusMessage(fn, "Failed to freeze top " , num_rows_to_freeze , " rows in sheet with ID: " , sheet_id , " in spreadsheet with ID: " , spreadsheet_id , ". Error: " , e.message);
         return -1;
      }
 
      return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports =
 {

@@ -1,6 +1,10 @@
 const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /* 
 Function: fetchFreshdeskData
 Purpose: Fetches data from the Freshdesk API
@@ -20,6 +24,7 @@ async function fetchFreshdeskData
   include,
 }) 
 {
+    // Get the function name for logging
     const fn = fetchFreshdeskData.name;
 
     // Read environment variables
@@ -34,7 +39,7 @@ async function fetchFreshdeskData
     if(updated_since) url.searchParams.append("updated_since", updated_since);
     if(include) url.searchParams.append("include", include);
 
-    common.statusMessage(fn, "Freshdesk URL = " + url.toString());
+    common.statusMessage(fn, "Freshdesk URL = ", url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -75,6 +80,7 @@ async function sendFreshdeskData
   data_load
 }) 
 {
+    // Get the function name for logging
     const fn = sendFreshdeskData.name;
 
     // Read environment variables
@@ -84,7 +90,7 @@ async function sendFreshdeskData
     const url = new URL(`https://${this_host}/api/v2/${url_path}`);
     const api_key_base64 = Buffer.from(`${api_key_orig}:X`).toString("base64");
 
-    common.statusMessage(fn, "Freshdesk URL = " + url.toString());
+    common.statusMessage(fn, "Freshdesk URL = ", url.toString());
 
     // Fetch data with retry logic
     return common.withRetry(async () => 
@@ -128,7 +134,9 @@ async function postFreshdeskData
   data_load
 }) 
 {
+    // Get the function name for logging
     const fn = postFreshdeskData.name;
+
     return await sendFreshdeskData({url_path, method: "POST", data_load});
 }
 
@@ -147,11 +155,16 @@ async function putFreshdeskData
   data_load
 }) 
 {
+    // Get the function name for logging
     const fn = putFreshdeskData.name;
+    
     return await sendFreshdeskData({url_path, method: "PUT", data_load});
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the function
 module.exports = 

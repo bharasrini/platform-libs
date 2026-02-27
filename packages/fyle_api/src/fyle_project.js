@@ -2,9 +2,24 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Fyle projects
 class fyle_project
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance
+    fyle_acc;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleProject(this, fyle_acc);
@@ -27,16 +42,11 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleProject(fyle_project, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleProject.name;
 
-    // Save a reference to the fyle_account instance in fyle_auth so that we can access it in the fyle_auth functions
+    // Save a reference to the fyle_account instance in fyle_project so that we can access it in the fyle_project functions
     fyle_project.fyle_acc = fyle_acc;
-
-    fyle_acc.projects = 
-    {
-        project_list: [],
-        num_projects : 0
-    };
 
     return 0;
 }
@@ -51,15 +61,18 @@ Output: 0 on success, -1 on failure
 */
 async function _getProjects(fyle_project)
 {
+    // Get the function name for logging
     const fn = _getProjects.name;
     
+    // Point to the fyle_account instance
     var fyle_acc = fyle_project.fyle_acc;
 
+    // API endpoint for fetching projects
     const url_path = "/platform/v1/admin/projects";
-
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
+    // Pagination parameters
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
     var total_count = 0;
@@ -94,7 +107,7 @@ async function _getProjects(fyle_project)
                 fyle_acc.projects.num_projects++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " projects on page " + page + ", total projects processed = " + fyle_acc.projects.num_projects);
+            common.statusMessage(fn, "Finished processing " , this_count , " projects on page " , page , ", total projects processed = " , fyle_acc.projects.num_projects);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -105,19 +118,22 @@ async function _getProjects(fyle_project)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get projects. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get projects. Error: " , e.message);
             return -1;
         }
 
     } while(fyle_acc.projects.num_projects < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved projects. Total projects retrieved = " + fyle_acc.projects.num_projects);
+    common.statusMessage(fn, "Successfully retrieved projects. Total projects retrieved = " , fyle_acc.projects.num_projects);
 
     return 0;
     
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

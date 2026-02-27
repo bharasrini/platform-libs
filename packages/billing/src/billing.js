@@ -2,9 +2,72 @@ const { google } = require('googleapis');
 const common = require("@fyle-ops/common");
 const { account_mapping } = require("@fyle-ops/account_mapping");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 // Billing class to read and process billing data from the billing files
 class billing_data
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // Array to store the billing links and associated data
+    billing_links = [];
+
+    // Number of billing links
+    num_billing_links = 0;
+
+    // Index of selected billing period
+    selected_period = -1;
+
+    // Raw billing data from the billing file
+    raw_billing_entries =
+    {
+        // Initialize an array to store the raw billing entries
+        raw_billing_entry_list: [],
+
+        // Initialize number of raw billing entries
+        num_raw_billing_entries: 0,
+    };
+
+    // Billing data consolidated by org
+    billing_by_org =
+    {
+        // Initialize an array to store the billing data by org
+        billing_by_org_list: [],
+
+        // Initialize number of billing entries by org
+        num_org_billing_entries: 0,
+    };
+
+    // Billing data consolidated by account
+    billing_by_account = 
+    {
+        // Initialize an array to store the billing data by account
+        billing_by_account_list: [],
+
+        // Initialize number of billing entries by org
+        num_account_billing_entries: 0,
+    };
+
+    // List of active users
+    active_users = 
+    {
+        // Initialize an array to store the active user list
+        active_user_list: [],
+
+        // Initialize number of active users
+        num_active_users: 0,
+    };
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
       _initBilling(this);
@@ -35,56 +98,8 @@ Output: 0 on success, -1 on failure
 */
 function _initBilling(billing)
 {
+    // Get the function name for logging purposes
     const fn = _initBilling.name;
-
-    // Initialize array to store the billing links and associated data
-    billing.billing_links = [];
-
-    // Initialize number of billing links
-    billing.num_billing_links = 0;
-
-    // Index of selected billing period
-    billing.selected_period = -1;
-
-    // Raw billing data from the billing file
-    billing.raw_billing_entries =
-    {
-        // Initialize an array to store the raw billing entries
-        raw_billing_entry_list: [],
-
-        // Initialize number of raw billing entries
-        num_raw_billing_entries: 0,
-    };
-
-    // Billing data consolidated by org
-    billing.billing_by_org =
-    {
-        // Initialize an array to store the billing data by org
-        billing_by_org_list: [],
-
-        // Initialize number of billing entries by org
-        num_org_billing_entries: 0,
-    };
-
-    // Billing data consolidated by account
-    billing.billing_by_account = 
-    {
-        // Initialize an array to store the billing data by account
-        billing_by_account_list: [],
-
-        // Initialize number of billing entries by org
-        num_account_billing_entries: 0,
-    };
-
-    // List of active users
-    billing.active_users = 
-    {
-        // Initialize an array to store the active user list
-        active_user_list: [],
-
-        // Initialize number of active users
-        num_active_users: 0,
-    };
 
     // Nothing else to do, return success
     return 0;
@@ -100,6 +115,7 @@ Output: List of billing links in billing.billing_links[]. Returns 0 on success, 
 */
 async function _getBillingLinks(billing)
 {
+    // Get the function name for logging purposes
     const fn = _getBillingLinks.name;
     
     // Get authentication and sheets instance
@@ -170,7 +186,7 @@ async function _getBillingLinks(billing)
         billing.num_billing_links++;
     }
 
-    common.statusMessage(fn, "Finished processing billing links sheet: " + billing.num_billing_links + " billing entries processed.");
+    common.statusMessage(fn, "Finished processing billing links sheet: " , billing.num_billing_links , " billing entries processed.");
 
     return 0;
 }
@@ -184,8 +200,10 @@ Output: Billing entries in billing.billing_links[].raw_billing_entries[], billin
 */
 async function _getBillingData(billing, period)
 {
+    // Get the function name for logging purposes
     const fn = _getBillingData.name;
     
+    // Initialize variables to read the billing links sheet
     var i = 0, j = 0;
     var period_time = new Date(period).getTime();
     var selected_billing_entry = -1;
@@ -208,18 +226,18 @@ async function _getBillingData(billing, period)
     // Check if we were able to get the billing entry
     if(selected_billing_entry < 0)
     {
-        common.statusMessage(fn, "Failed to get the correct billing entry corresponding to period: " + period);
+        common.statusMessage(fn, "Failed to get the correct billing entry corresponding to period: " , period);
         return -1;
     }
 
     // Store the index of the billing period
     billing.selected_period = selected_billing_entry;
 
-    common.statusMessage(fn, "Billing entry index corresponding to period: " + period + " = " + selected_billing_entry);
-    common.statusMessage(fn, "Billing Period start: " + billing.billing_links[selected_billing_entry].billing_period_start);
-    common.statusMessage(fn, "Billing Period end: " + billing.billing_links[selected_billing_entry].billing_period_end);
-    common.statusMessage(fn, "Billing File Link: " + billing.billing_links[selected_billing_entry].billing_link);
-    common.statusMessage(fn, "Billing File ID: " + billing.billing_links[selected_billing_entry].billing_file_id);
+    common.statusMessage(fn, "Billing entry index corresponding to period: " , period , " = " , selected_billing_entry);
+    common.statusMessage(fn, "Billing Period start: " , billing.billing_links[selected_billing_entry].billing_period_start);
+    common.statusMessage(fn, "Billing Period end: " , billing.billing_links[selected_billing_entry].billing_period_end);
+    common.statusMessage(fn, "Billing File Link: " , billing.billing_links[selected_billing_entry].billing_link);
+    common.statusMessage(fn, "Billing File ID: " , billing.billing_links[selected_billing_entry].billing_file_id);
 
     // Get authentication and sheets instance
     const auth = common.createGoogleAuth();
@@ -279,7 +297,7 @@ async function _getBillingData(billing, period)
         // "org_name" is the only optional key
         if((billing_usage_cols[key] == -1) && (key != "org_name"))
         {
-            common.statusMessage(fn, "Failed to locate column for key: " + key);
+            common.statusMessage(fn, "Failed to locate column for key: " , key);
             return -1;
         }
     }
@@ -427,7 +445,7 @@ async function _getBillingData(billing, period)
 
         if((i % 1000) == 0)
         {
-            common.statusMessage(fn, "Processing billing entry: " + i + ", total entries: " + billing.raw_billing_entries.num_raw_billing_entries);
+            common.statusMessage(fn, "Processing billing entry: " , i , ", total entries: " , billing.raw_billing_entries.num_raw_billing_entries);
         }
     }
 
@@ -503,9 +521,9 @@ async function _getBillingData(billing, period)
     }
 
 
-    common.statusMessage(fn, "Processed " + billing.raw_billing_entries.num_raw_billing_entries + " raw billing entries from usage file");
-    common.statusMessage(fn, "Processed " + billing.billing_by_org.num_org_billing_entries + " org billing entries from usage file");
-    common.statusMessage(fn, "Processed " + billing.billing_by_account.num_account_billing_entries + " account billing entries from usage file");
+    common.statusMessage(fn, "Processed " , billing.raw_billing_entries.num_raw_billing_entries , " raw billing entries from usage file");
+    common.statusMessage(fn, "Processed " , billing.billing_by_org.num_org_billing_entries , " org billing entries from usage file");
+    common.statusMessage(fn, "Processed " , billing.billing_by_account.num_account_billing_entries , " account billing entries from usage file");
 
     return 0;
 
@@ -521,11 +539,11 @@ Output: Billing details for org (0 for the values if not found)
 */
 function _getBillingDetailsForOrg(billing, org_id)
 {
+    // Get the function name for logging purposes
     const fn = _getBillingDetailsForOrg.name;
     
     // Initialize the billing details to be returned
     var i = 0;
-
     var billing_details = {"num_expenses": 0, "num_reports": 0, "active_users": 0}
 
     // Sanity checks to ensure we have valid org_id and billing data structure
@@ -564,6 +582,9 @@ function _getBillingDetailsForOrg(billing, org_id)
     return billing_details;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Export the billing_data class

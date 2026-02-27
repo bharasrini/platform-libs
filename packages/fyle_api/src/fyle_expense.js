@@ -2,9 +2,24 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Class to manage Fyle Expenses
 class fyle_expense
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Reference to the fyle_account instance so that we can access it in the fyle_expense functions
+    fyle_acc = null;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor(fyle_acc)
     {
       _initFyleExpense(this, fyle_acc);
@@ -28,17 +43,13 @@ Output: 0 on success, -1 on failure
 */
 function _initFyleExpense(fyle_expense, fyle_acc)
 {
+    // Get the function name for logging
     const fn = _initFyleExpense.name;
 
     // Save a reference to the fyle_account instance in fyle_expense so that we can access it in the fyle_expense functions
     fyle_expense.fyle_acc = fyle_acc;
 
-    fyle_acc.expenses = 
-    {
-        expense_list: [],
-        num_expenses : 0
-    };
-
+    // Nothing else to do, return success
     return 0;
 }
 
@@ -52,18 +63,21 @@ Output: 0 on success, -1 on failure
 */
 async function _getExpenses(fyle_expense, users, state, event, after, before)
 {
+    // Get the function name for logging
     const fn = _getExpenses.name;
     
     // Loop variables
     var i = 0;
 
+    // Point back to the fyle_account instance
     var fyle_acc = fyle_expense.fyle_acc;
 
+    // API endpoint to fetch expenses
     const url_path = "/platform/v1/admin/expenses";
-
     var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
-    common.statusMessage(fn, "Fyle URL = " + url.toString());
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
 
+    // Pagination variables
     var offset = process.env.FYLE_API_START_OFFSET;
     var limit = process.env.FYLE_API_MAX_ITEMS;
     var total_count = 0;
@@ -107,7 +121,8 @@ async function _getExpenses(fyle_expense, users, state, event, after, before)
     if(event)
     {
         // Make sure that we are able to find the event passed in
-        const events = [
+        const events = 
+        [
             "created_at",
             "updated_at",
             "spent_at",
@@ -128,7 +143,7 @@ async function _getExpenses(fyle_expense, users, state, event, after, before)
         }
         if(found_event == false)
         {
-            common.statusMessage(fn, "Failed to find event: " + event + ", defaulting to created_at");
+            common.statusMessage(fn, "Failed to find event: " , event , ", defaulting to created_at");
             event = "created_at";
         }
 
@@ -178,7 +193,7 @@ async function _getExpenses(fyle_expense, users, state, event, after, before)
                 fyle_acc.expenses.num_expenses++;
             }
 
-            common.statusMessage(fn, "Finished processing " + this_count + " expenses on page " + page + ", total expenses processed = " + fyle_acc.expenses.num_expenses);
+            common.statusMessage(fn, "Finished processing " , this_count , " expenses on page " , page , ", total expenses processed = " , fyle_acc.expenses.num_expenses);
 
             // If records on the current page were greater or equal to the limit, then increment the offset
             if(this_count >= limit)
@@ -189,13 +204,13 @@ async function _getExpenses(fyle_expense, users, state, event, after, before)
         }
         catch(e)
         {
-            common.statusMessage(fn, "Failed to get expenses. Error:" + e.message);
+            common.statusMessage(fn, "Failed to get expenses. Error: " , e.message);
             return -1;
         }
 
     } while(fyle_acc.expenses.num_expenses < total_count);
 
-    common.statusMessage(fn, "Successfully retrieved expenses. Total expenses retrieved = " + fyle_acc.expenses.num_expenses);
+    common.statusMessage(fn, "Successfully retrieved expenses. Total expenses retrieved = " , fyle_acc.expenses.num_expenses);
 
     // As a test, export the expenses to an Excel file in the downloads folder
     await common.exportToExcelFile(fyle_acc.expenses.expense_list, process.env.DOWNLOADS_FOLDER, "expenses.xlsx", "Expenses");
@@ -205,6 +220,9 @@ async function _getExpenses(fyle_expense, users, state, event, after, before)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Export the class
 module.exports =

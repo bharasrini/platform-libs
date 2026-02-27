@@ -1,5 +1,10 @@
-const { google } = require('googleapis');
 const common = require("@fyle-ops/common");
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /* 
 Function: initializeAccountMapCols
@@ -9,6 +14,7 @@ Output: 0 if successful, -1 if any required column is not found
 */
 function initializeAccountMapCols(account_map)
 {
+    // Get the function name for logging
     const fn = initializeAccountMapCols.name;
 
     // Initialize variables
@@ -48,7 +54,7 @@ function initializeAccountMapCols(account_map)
     {
         if(account_map.cols[key] == -1)
         {
-            common.statusMessage(fn, "Failed to locate column for key: " + key);
+            common.statusMessage(fn, "Failed to locate column for key: ", key);
             return -1;
         }
     }
@@ -67,11 +73,13 @@ Output: Offset (number). -1 returned if not found
 */
 function getOrgOffset(account_map, org_id)
 {
+    // Get the function name for logging
     const fn = getOrgOffset.name;
+
+    // return value initialization
     var ret = -1;
 
     // Sanity check
-
     if(account_map.num_maps == 0)
     {
         common.statusMessage(fn, "No Account Map entries, possibly getAccountMappingData() needs to be invoked");
@@ -102,7 +110,10 @@ Output: Field value (string), "" is returned as the default if a match is not fo
 */
 function getFieldValueFromAccountMap(account_map, org_id, field_name)
 {
+    // Get the function name for logging
     const fn = getFieldValueFromAccountMap.name;
+
+    // Initialize return value
     var ret = "";
 
     // Sanity check
@@ -140,6 +151,7 @@ Output: 0 on success, -1 on failure
 */
 function updateAccountMap(account_map, account_data, key_to_update)
 {
+    // Get the function name for logging
     const fn = updateAccountMap.name;
 
     // Initialize variables
@@ -169,7 +181,7 @@ function updateAccountMap(account_map, account_data, key_to_update)
         var val_to_update = account_data[i][key_to_update];
         if(val_to_update.toString().trim() == "")
         {
-            common.statusMessage(fn, "Invalid value for " + key_to_update);
+            common.statusMessage(fn, "Invalid value for ", key_to_update);
             continue;
         }
 
@@ -178,11 +190,11 @@ function updateAccountMap(account_map, account_data, key_to_update)
         // Check if the org exists
         if((offset = account_map.getOrgOffset(org_id)) < 0)
         {
-            common.statusMessage(fn, "Failed to locate org with ID: " + org_id + ", will not be changing account name");
+            common.statusMessage(fn, "Failed to locate org with ID: ", org_id, ", will not be changing account name");
             continue;
         }
 
-        common.statusMessage(fn, "[" + (i+1) + "]. Updating value: " + val_to_update + " for org ID: " + org_id + " at row: " + (offset + 2));
+        common.statusMessage(fn, "[" + (i+1) + "]. Updating value: ", val_to_update, " for org ID: ", org_id, " at row: ", (offset + 2));
         
         // Load the required field into the data []
         // Add 1 to the offset to factor in the header row
@@ -198,6 +210,10 @@ function updateAccountMap(account_map, account_data, key_to_update)
     return num_accounts_to_edit;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Exporting the functions in this file to be used in other files

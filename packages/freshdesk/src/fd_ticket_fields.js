@@ -2,8 +2,27 @@ const { formatInTimeZone } = require("date-fns-tz");
 const common = require("@fyle-ops/common");
 const { fetchFreshdeskData } = require("./fd_common");
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// FUNCTIONS ////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Class to manage the Freshdesk ticket fields. 
 class fd_ticket_fields
 {
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS VARIABLES ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Array to store the list of ticket fields
+    ticket_fields_list = [];
+
+    // Number of ticket fields
+    num_ticket_fields = 0;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     constructor()
     {
         _initTicketFields(this);
@@ -55,13 +74,8 @@ Output: 0 on success, -1 on failure
 */
 function _initTicketFields(ticket_fields)
 {
+    // Get the function name for logging
     const fn = _initTicketFields.name;
-
-    // Initialize an array to store the ticket fields list
-    ticket_fields.ticket_fields_list = [];
-
-    // Initialize number of ticket fields
-    ticket_fields.num_ticket_fields = 0;
 
     // Nothing else to do, return success
     return 0;
@@ -76,6 +90,7 @@ Output: Returns 0 on success, -1 on failure
 */
 async function _getTicketFields(ticket_fields)
 {
+    // Get the function name for logging
     const fn = _getTicketFields.name;
 
     // URL path for the API endpoint to get the list of ticket fields
@@ -108,11 +123,11 @@ async function _getTicketFields(ticket_fields)
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get list of Ticket Fields. Error:" + e.message);
+        common.statusMessage(fn, "Failed to get list of Ticket Fields. Error:" , e.message);
         return -1;
     }
 
-    common.statusMessage(fn, "Successfully fetched ticket fields. Number of ticket fields = " + ticket_fields.num_ticket_fields);
+    common.statusMessage(fn, "Successfully fetched ticket fields. Number of ticket fields = " , ticket_fields.num_ticket_fields);
     
     return 0;
 }
@@ -129,6 +144,7 @@ Output: Returns 0 on success, -1 on failure
 */
 async function getTicketFieldData(ticket_fields, field_name, field_data)
 {
+    // Get the function name for logging
     const fn = getTicketFieldData.name;
     
     var i = 0;
@@ -156,7 +172,7 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     // If we don't have a matching field, return an error
     if(field_id < 0)
     {
-        common.statusMessage(fn, "Failed to get the id for ticket field: " + field_name);
+        common.statusMessage(fn, "Failed to get the id for ticket field: " , field_name);
         return -1;
     }
 
@@ -186,11 +202,11 @@ async function getTicketFieldData(ticket_fields, field_name, field_data)
     }
     catch(e)
     {
-        common.statusMessage(fn, "Failed to get ticket fields for: " + field_name + ". Error:" + e.message);
+        common.statusMessage(fn, "Failed to get ticket fields for: " , field_name , ". Error:" , e.message);
         return -1;
     }
     
-    common.statusMessage(fn, "Successfully retrieved field data for " + field_name);
+    common.statusMessage(fn, "Successfully retrieved field data for " , field_name);
     
     return 0;
 }
@@ -207,6 +223,7 @@ Output: Returns 0 on success, -1 on failure
 */
 async function getTicketFieldOptions(ticket_fields, field_name, options)
 {
+    // Get the function name for logging
     const fn = getTicketFieldOptions.name;
     
     var i = 0;
@@ -215,7 +232,7 @@ async function getTicketFieldOptions(ticket_fields, field_name, options)
     // Get the field data for the field that we are interested in
     if(await getTicketFieldData(ticket_fields, field_name, field_data) < 0)
     {
-        common.statusMessage(fn, "Failed to get ticket field data for: " + field_name);
+        common.statusMessage(fn, "Failed to get ticket field data for: " , field_name);
         return -1;
     }
 
@@ -223,7 +240,7 @@ async function getTicketFieldOptions(ticket_fields, field_name, options)
     var this_field_data = field_data[0];
     if(!this_field_data.choices)
     {
-        common.statusMessage(fn, "Failed to locate choices in field data for: " + field_name);
+        common.statusMessage(fn, "Failed to locate choices in field data for: " , field_name);
         return -1;
     }
 
@@ -252,6 +269,7 @@ Output: None (populates the global ticket_status_options array)
 */
 async function getStatusOptions(ticket_fields)
 {
+    // Get the function name for logging
     const fn = getStatusOptions.name;
 
     // Get the options for the status field and populate the ticket_status_options array
@@ -268,6 +286,7 @@ Output: status value (string)
 */
 async function _getTicketStatusVal(ticket_fields, code)
 {
+    // Get the function name for logging
     const fn = _getTicketStatusVal.name;
     
     var i = 0;
@@ -282,7 +301,7 @@ async function _getTicketStatusVal(ticket_fields, code)
     // Loop through the options list and return the value for the code sent in
     for(i = 0; i < ticket_status_options.length; i++)
     {
-        if(ticket_status_options[i].value == code) return ticket_status_options[i].label;
+        if(ticket_status_options[i].id == code) return ticket_status_options[i].label;
     }
 
     // If we don't find a match, return the value for the default status which is "Open"
@@ -299,6 +318,7 @@ Output: status code (number)
 */
 async function _getTicketStatusCode(ticket_fields, label)
 {
+    // Get the function name for logging
     const fn = _getTicketStatusCode.name;
     
     var i = 0;
@@ -313,7 +333,7 @@ async function _getTicketStatusCode(ticket_fields, label)
     // Loop through the options list and return the value for the label sent in
     for(i = 0; i < ticket_status_options.length; i++)
     {
-        if(ticket_status_options[i].label == label) return ticket_status_options[i].value;
+        if(ticket_status_options[i].label == label) return ticket_status_options[i].id;
     }
 
     // If we don't find a match, return the code for the default status which is "Open"
@@ -336,7 +356,9 @@ Output: None (populates the global ticket_source_options array)
 */
 async function getSourceOptions(ticket_fields)
 {
+    // Get the function name for logging
     const fn = getSourceOptions.name;
+
     await getTicketFieldOptions(ticket_fields, "source", ticket_source_options);
     return;
 }
@@ -351,7 +373,10 @@ Output: source value (string)
 */
 async function _getTicketSourceVal(ticket_fields, code)
 {
+    // Get the function name for logging
     const fn = _getTicketSourceVal.name;
+
+    // Initialize loop counter
     var i = 0;
 
     // If we don't have the options list built, build it first
@@ -364,7 +389,7 @@ async function _getTicketSourceVal(ticket_fields, code)
     // Loop through the options list and return the value for the code sent in
     for(i = 0; i < ticket_source_options.length; i++)
     {
-        if(ticket_source_options[i].value == code) return ticket_source_options[i].label;
+        if(ticket_source_options[i].id == code) return ticket_source_options[i].label;
     }
 
     // If we don't find a match, return the value for the default source which is "Email"
@@ -381,21 +406,23 @@ Output: source code (number)
 */
 async function _getTicketSourceCode(ticket_fields, label)
 {
-    var i = 0;
-
+    // Get the function name for logging
     const fn = _getTicketSourceCode.name;
+
+    // Initialize loop counter
+    var i = 0;
 
     // If we don't have the options list built, build it first
     if(ticket_source_options.length == 0)
     {
         common.statusMessage(fn, "Source Options List is empty, let's build this");
-        await getSourceOptions();
+        await getSourceOptions(ticket_fields);
     }
 
     // Loop through the options list and return the code for the label sent in
     for(i = 0; i < ticket_source_options.length; i++)
     {
-        if(ticket_source_options[i].label == label) return ticket_source_options[i].value;
+        if(ticket_source_options[i].label == label) return ticket_source_options[i].id;
     }
 
     return 1; // "Email"
@@ -418,7 +445,9 @@ Output: None (populates the global ticket_priority_options array)
 */
 async function getPriorityOptions(ticket_fields)
 {
+    // Get the function name for logging
     const fn = getPriorityOptions.name;
+    
     await getTicketFieldOptions(ticket_fields, "priority", ticket_priority_options);
     return;
 }
@@ -433,7 +462,10 @@ Output: value (string)
 */
 async function _getTicketPriorityVal(ticket_fields, code)
 {
+    // Get the function name for logging
     const fn = _getTicketPriorityVal.name;
+
+    // Initialize loop counter
     var i = 0;
 
     // If we don't have the options list built, build it first
@@ -463,8 +495,10 @@ Output: code (number)
 */
 async function _getTicketPriorityCode(ticket_fields, label)
 {
+    // Get the function name for logging
     const fn = _getTicketPriorityCode.name;
     
+    // Initialize loop counter
     var i = 0;
 
     // If we don't have the options list built, build it first
@@ -484,9 +518,9 @@ async function _getTicketPriorityCode(ticket_fields, label)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Exporting the class and other functions
 module.exports = 
