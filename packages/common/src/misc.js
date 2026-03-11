@@ -513,6 +513,13 @@ function sameStringSet(a = [], b = [])
 // calls (you'll have much faster response times).
 //
  
+/*
+Function: LevDis
+Purpose: Calculates the Levenshtein Distance (or Edit Distance) between two strings
+Inputs: Two strings s and t
+Output: The Levenshtein Distance between the two strings
+Source: Manoel Lemos / manoel@lemos.net / http://manoellemos.com
+*/
 function LevDis(s,t)
 {
     // Get the function name for logging purposes
@@ -563,6 +570,81 @@ function LevDis(s,t)
 }
 
 
+/*
+Function: mergeObjects
+Purpose: Merges the properties of the source object into the target object
+Inputs: target object and source object
+Output: target object with merged properties
+*/
+function mergeObjects(target, source)
+{
+    for (const key in source)
+    {
+        target[key] = source[key];
+    }
+}
+
+
+/*
+Function: getByPath
+Purpose: Retrieves the value at a given path within an object
+Inputs: object and path string (dot-separated)
+Output: value at the specified path or undefined if not found
+*/
+function getByPath(obj, path)
+{
+    const parts = path.split(".");
+    var current = obj;
+
+    for (const part of parts)
+    {
+        if (current == null) return undefined;
+        current = current[part];
+    }
+
+    return current;
+}
+
+
+/*
+Function: combineObjects
+Purpose: Combines multiple objects from an array into a single object
+Inputs: array of objects and keys to combine
+Output: array of combined objects
+*/
+function combineObjects(array, keys)
+{
+    var i = 0, j = 0;    
+    var output_array = [];
+
+    for(i = 0; i < array.length; i++)
+    {
+        var arr = array[i];
+        const combined = {};
+
+        if(keys)
+        {
+            for(j = 0; j < keys.length; j++)
+            {
+                const key = keys[j];
+                const obj = getByPath(arr, key);
+                if (!obj) continue; // skip null/undefined
+
+                mergeObjects(combined, obj);
+            }
+        }
+        else
+        {
+            mergeObjects(combined, arr);
+        }
+
+        output_array.push(combined);
+    }
+
+    return output_array;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -586,5 +668,8 @@ module.exports =
     getLastRowAndCol,
     sameStringSet,
     LevDis,
+    mergeObjects,
+    getByPath,
+    combineObjects
 };
 

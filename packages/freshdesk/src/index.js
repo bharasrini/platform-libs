@@ -9,6 +9,7 @@ const { fd_tickets } = require("./fd_tickets");
 const { setTicketField } = require("./fd_set_ticket_data");
 const { fd_contacts, addContact, updateContact } = require("./fd_contact");
 const { fd_ratings } = require("./fd_ratings");
+const { fd_email_config } = require("./fd_email_config");
 
 module.exports = 
 {
@@ -20,5 +21,6 @@ module.exports =
     fd_tickets,
     setTicketField,
     fd_contacts, addContact, updateContact,
-    fd_ratings
+    fd_ratings,
+    fd_email_config
 };

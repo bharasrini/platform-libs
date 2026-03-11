@@ -11,6 +11,26 @@
 
             "console": "integratedTerminal",
             "skipFiles": ["<node_internals>/**"],
+        },
+        {
+            "name": "Debug: daily_freshsuccess_backup app",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/apps/freshsuccess/daily_freshsuccess_backup/src/index.js",
+            "cwd": "${workspaceFolder}",
+
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"],
+        },
+        {
+            "name": "Debug: daily_freshdesk_backup app",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/apps/freshdesk/daily_freshdesk_backup/src/index.js",
+            "cwd": "${workspaceFolder}",
+
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"],
         }
     ]
 }

@@ -1,11 +1,11 @@
 {
-    "name": "@fyle-ops/freshsuccess",
-    "version": "0.1.0",
-    "main": "src/index.js",
+    "name": "daily_freshsuccess_backup",
+    "private": true,
     "type": "commonjs",
     "dependencies": 
     {
         "@fyle-ops/common": "0.1.0",
+        "@fyle-ops/freshsuccess": "0.1.0",
         "@fyle-ops/billing": "0.1.0",
         "@fyle-ops/account_mapping": "0.1.0",
         "@fyle-ops/freshdesk": "0.1.0"

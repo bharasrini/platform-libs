@@ -24,6 +24,9 @@ class billing_data
     // Index of selected billing period
     selected_period = -1;
 
+    // Whether we were able to successfully process the billing data for the selected period
+    billing_data_processed = false;
+
     // Raw billing data from the billing file
     raw_billing_entries =
     {
@@ -520,6 +523,8 @@ async function _getBillingData(billing, period)
 
     }
 
+    // If we are here, we have successfully processed the billing data for the selected period
+    billing.billing_data_processed = true;
 
     common.statusMessage(fn, "Processed " , billing.raw_billing_entries.num_raw_billing_entries , " raw billing entries from usage file");
     common.statusMessage(fn, "Processed " , billing.billing_by_org.num_org_billing_entries , " org billing entries from usage file");
@@ -550,6 +555,13 @@ function _getBillingDetailsForOrg(billing, org_id)
     if(org_id.toString().trim() == "")
     {
         common.statusMessage(fn, "Blank / invalid org id");
+        return billing_details;
+    }
+
+    // Check if billing data has been processed for the selected period; if not, return 0
+    if(billing.billing_data_processed === false)
+    {
+        common.statusMessage(fn, "Billing data has not been processed for the selected period");
         return billing_details;
     }
 

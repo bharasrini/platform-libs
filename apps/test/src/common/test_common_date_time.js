@@ -151,7 +151,7 @@ function test_getNMonthsAgo()
     var n_months = 3;
     var dateObj = new Date(date);
     const n_months_ago = common.getNMonthsAgo(dateObj, n_months);
-    common.statusMessage(fn, n_months, " months ago from ", date, " is: ", formatInTimeZone(n_months_ago, "GMT", "yyyy-MM-dd"));
+    common.statusMessage(fn, n_months, " months ago from ", date, " is: ", formatInTimeZone(n_months_ago, "UTC", "yyyy-MM-dd"));
 
     common.end_test(fn);
 }

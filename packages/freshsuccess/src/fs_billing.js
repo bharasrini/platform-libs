@@ -21,7 +21,7 @@ async function readLast3MonthsBillingData(account)
 
     // Get period markers for the last 3 months
     var last3MonthsDateMarkers = common.returnPrevious3MonthsPeriodMarkers();
-    
+
     // Get billing data for current month - 1
     var billingM1 = new billing_data();
     await billingM1.getBillingLinks();
@@ -43,21 +43,29 @@ async function readLast3MonthsBillingData(account)
     {
         var org_id = account.account_list[i].id["org_id"];
 
-        var billing_details_M1 = billingM1.getBillingDetailsForOrg(org_id);
-        var billing_details_M2 = billingM2.getBillingDetailsForOrg(org_id);
-        var billing_details_M3 = billingM3.getBillingDetailsForOrg(org_id);
+        if(billingM3.billing_data_processed === true)
+        {
+            var billing_details_M3 = billingM3.getBillingDetailsForOrg(org_id);
+            account.account_list[i].metrics["m_3"]["m3_num_expenses"] = billing_details_M3.num_expenses;
+            account.account_list[i].metrics["m_3"]["m3_num_reports"] = billing_details_M3.num_reports;
+            account.account_list[i].metrics["m_3"]["m3_active_users"] = billing_details_M3.active_users;
+        }
 
-        account.account_list[i].metrics["m_3"]["m3_num_expenses"] = billing_details_M3.num_expenses;
-        account.account_list[i].metrics["m_3"]["m3_num_reports"] = billing_details_M3.num_reports;
-        account.account_list[i].metrics["m_3"]["m3_active_users"] = billing_details_M3.active_users;
+        if(billingM2.billing_data_processed === true)
+        {
+            var billing_details_M2 = billingM2.getBillingDetailsForOrg(org_id);
+            account.account_list[i].metrics["m_2"]["m2_num_expenses"] = billing_details_M2.num_expenses;
+            account.account_list[i].metrics["m_2"]["m2_num_reports"] = billing_details_M2.num_reports;
+            account.account_list[i].metrics["m_2"]["m2_active_users"] = billing_details_M2.active_users;
+        }
 
-        account.account_list[i].metrics["m_2"]["m2_num_expenses"] = billing_details_M2.num_expenses;
-        account.account_list[i].metrics["m_2"]["m2_num_reports"] = billing_details_M2.num_reports;
-        account.account_list[i].metrics["m_2"]["m2_active_users"] = billing_details_M2.active_users;
-
-        account.account_list[i].metrics["m_1"]["m1_num_expenses"] = billing_details_M1.num_expenses;
-        account.account_list[i].metrics["m_1"]["m1_num_reports"] = billing_details_M1.num_reports;
-        account.account_list[i].metrics["m_1"]["m1_active_users"] = billing_details_M1.active_users;
+        if(billingM1.billing_data_processed === true)
+        {
+            var billing_details_M1 = billingM1.getBillingDetailsForOrg(org_id);
+            account.account_list[i].metrics["m_1"]["m1_num_expenses"] = billing_details_M1.num_expenses;
+            account.account_list[i].metrics["m_1"]["m1_num_reports"] = billing_details_M1.num_reports;
+            account.account_list[i].metrics["m_1"]["m1_active_users"] = billing_details_M1.active_users;
+        }
     }
 
     return 0;
