@@ -326,7 +326,14 @@ function flattenStructure(structure, parentKey = '', result = {})
     // Get the funtion name for logging purposes
     const fn = flattenStructure.name;
 
+    // Loop counter
     var i = 0;
+
+    // Sanity check
+    if (structure === null || structure === undefined)
+    {
+        return result;
+    }
 
     for (const [key, value] of Object.entries(structure))
     {
@@ -346,9 +353,13 @@ function flattenStructure(structure, parentKey = '', result = {})
                 const arrayItemKey = `${newKey}[${i}]`;
 
                 // Nested object inside array
-                if(typeof arrayItem === 'object')
+                if(arrayItem !== null && typeof arrayItem === 'object')
                 {                    
                     flattenStructure(arrayItem, arrayItemKey, result);
+                }
+                else if(arrayItem === null || arrayItem === undefined)
+                {
+                    result[arrayItemKey] = "";
                 }
                 // Primitive value inside array
                 else
@@ -358,7 +369,7 @@ function flattenStructure(structure, parentKey = '', result = {})
             }
         }
         // If it's an object, we want to flatten its properties
-        else if(typeof value === 'object')
+        else if(value !== null && typeof value === 'object')
         {            
             flattenStructure(value, newKey, result);
         }

@@ -13,5 +13,6 @@ module.exports =
     ...require("./logs"),
     ...require("./spreadsheet"),
     ...require("./file_folder"),
+    ...require("./platform"),
 };
 

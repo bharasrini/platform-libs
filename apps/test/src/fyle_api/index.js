@@ -14,7 +14,9 @@ const { test_fyle_api_employees } = require("./test_fyle_api_employees");
 const { test_fyle_api_expenses } = require("./test_fyle_api_expenses");
 const { test_fyle_api_expense_fields } = require("./test_fyle_api_expense_fields");
 const { test_fyle_api_projects } = require("./test_fyle_api_projects");
+const { test_fyle_api_project_category_mapping } = require("./test_fyle_api_project_category_mapping");
 const { test_fyle_api_receipts } = require("./test_fyle_api_receipts");
+const { test_fyle_api_feature_config } = require("./test_fyle_api_feature_config");
 
 (async () => 
 {
@@ -27,5 +29,7 @@ const { test_fyle_api_receipts } = require("./test_fyle_api_receipts");
     if (process.env.RUN_FYLE_API_EXPENSES_TEST === "true") await test_fyle_api_expenses();
     if (process.env.RUN_FYLE_API_EXPENSE_FIELDS_TEST === "true") await test_fyle_api_expense_fields();
     if (process.env.RUN_FYLE_API_PROJECTS_TEST === "true") await test_fyle_api_projects();
+    if (process.env.RUN_FYLE_API_PROJECT_CATEGORY_MAPPING_TEST === "true") await test_fyle_api_project_category_mapping();
     if (process.env.RUN_FYLE_API_RECEIPTS_TEST === "true") await test_fyle_api_receipts();
+    if (process.env.RUN_FYLE_API_FEATURE_CONFIG_TEST === "true") await test_fyle_api_feature_config();
 })();

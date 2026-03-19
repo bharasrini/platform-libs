@@ -29,6 +29,16 @@ class fyle_project
     {
         return await _getProjects(this);
     }
+
+    async addProjects(projects_list)
+    {
+        return await _addProjects(this, projects_list);
+    }
+
+    getProjectId(project_name)
+    {
+        return _getProjectId(this, project_name)
+    }
 }
 
 
@@ -130,6 +140,106 @@ async function _getProjects(fyle_project)
     
 }
 
+
+
+/* 
+Function: _addProjects
+Purpose: Adds new projects to the fyle org and updates the fyle_account.projects structure. 
+Pre-requisite: getAccessToken() and getClusterEndpoint() to be invoked prior
+Inputs: fyle_account instance, list of projects to be added (each project should have the following structure: {project_name: "name of the project", is_enabled: true/false})
+Output: 0 on success, -1 on failure
+*/
+async function _addProjects(fyle_project, projects_list)
+{
+    // Get the function name for logging
+    const fn = _addProjects.name;
+    
+    // Initialize counters
+    var i = 0;
+
+    // Point to the fyle_account instance
+    var fyle_acc = fyle_project.fyle_acc;
+
+    // API endpoint for adding projects
+    const url_path = "/platform/v1/admin/projects/bulk";
+    var url = new URL(fyle_acc.access_params.cluster_domain + url_path);
+    common.statusMessage(fn, "Fyle URL = " , url.toString());
+
+    // Setup the data load
+    var data_load = 
+    {
+        "data": []
+    };
+
+    for(i = 0; i < projects_list.length; i++)
+    {
+        var this_project =
+        {
+              "name": projects_list[i].name,
+              "is_enabled": projects_list[i].is_enabled,
+              "category_ids": null, // associate all categories for the project
+        };
+
+        // Push this map into data.data[]
+        data_load.data.push(this_project);
+    }    
+
+    try
+    {
+        // Fetch data for the current page
+        const {headers,data} = await postFyleData
+        ({
+            url: url.toString(),
+            access_token: fyle_acc.access_params.access_token,
+            data_load: data_load,
+        });
+    }
+    catch(e)
+    {
+        common.statusMessage(fn, "Failed to create projects. Error: " , e.message);
+        return -1;
+    }
+
+    common.statusMessage(fn, "Successfully created projects. Total projects created = " , projects_list.length);
+
+    return 0;
+    
+}
+
+
+/* 
+Function: _getProjectId
+Purpose: Gets the project ID for the project name passed in
+Pre-requisite: getProjects() to be invoked prior
+Inputs: fyle_project instance, project name
+Output: Project ID or -1 on failure
+*/
+function _getProjectId(fyle_project, project_name)
+{
+    // Get the function name for logging
+    const fn = _getProjectId.name;
+
+    // Loop counters
+    var i = 0;
+
+    // Lets get the project ID for the given project name from fyle_acc.projects.project_list
+    var project_id = -1;
+
+    // Point to the fyle_account instance
+    var fyle_acc = fyle_project.fyle_acc;
+
+    for(i = 0; i < fyle_acc.projects.num_projects; i++)
+    {
+        var this_project_name = fyle_acc.projects.project_list[i].name;
+        if(this_project_name === project_name)
+        {
+            project_id = fyle_acc.projects.project_list[i].id;
+            break;
+        }
+    }
+
+    return project_id;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////// EXPORTS /////////////////////////////////////////////////////////////////

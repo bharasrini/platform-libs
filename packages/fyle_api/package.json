@@ -5,10 +5,12 @@
     "type": "commonjs",
     "dependencies": 
     {
-        "@fyle-ops/common": "0.1.0",
-        "@fyle-ops/billing": "0.1.0",
-        "@fyle-ops/account_mapping": "0.1.0",
-        "@fyle-ops/freshdesk": "0.1.0"
+        "@fyle-ops/common": "workspace:*",
+        "@fyle-ops/billing": "workspace:*",
+        "@fyle-ops/account_mapping": "workspace:*",
+        "@fyle-ops/csm_mapping": "workspace:*",
+        "@fyle-ops/freshdesk": "workspace:*",
+        "@fyle-ops/freshsuccess": "workspace:*"
     }
 }
 

@@ -3,6 +3,7 @@ const common = require("@fyle-ops/common");
 const { fetchFyleData, postFyleData, putFyleData } = require("./fyle_common");
 const { fyle_auth } = require("./fyle_auth");
 const { fyle_category } = require("./fyle_category");
+const { fyle_feature_config } = require("./fyle_feature_config");
 const { fyle_project } = require("./fyle_project");
 const { fyle_employee } = require("./fyle_employee");
 const { fyle_department } = require("./fyle_department");
@@ -124,6 +125,15 @@ class fyle_account
         num_card_transactions: 0
     };
 
+    // Feature Config instance
+    feature_config;
+    // Feature Config data
+    feature_configs =
+    {
+        feature_config_list: [],
+        num_feature_configs: 0
+    };
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////// CLASS FUNCTIONS ///////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +168,7 @@ function _initFyleAccount(fyle_acc)
     fyle_acc.expense_field = new fyle_expense_field(fyle_acc);
     fyle_acc.receipt = new fyle_receipt(fyle_acc);
     fyle_acc.card_transaction = new fyle_card_transaction(fyle_acc);
+    fyle_acc.feature_config = new fyle_feature_config(fyle_acc);
 
     // Nothing else to do, return success
     return 0;

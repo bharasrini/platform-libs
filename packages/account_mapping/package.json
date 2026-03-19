@@ -5,7 +5,7 @@
     "type": "commonjs",
     "dependencies": 
     {
-        "@fyle-ops/common": "0.1.0"
+        "@fyle-ops/common": "workspace:*"
     }
 }
 
